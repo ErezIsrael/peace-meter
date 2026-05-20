@@ -43,21 +43,56 @@ peace-meter/                    ← repo root
 ├── functions/                  ← Pages Functions (MUST be at repo root)
 │   └── data.json.js           ← /data.json endpoint (live RSS + mock signals)
 ├── app/                        ← build output (deployed content)
-│   ├── index.html
-│   ├── app.js
-│   ├── lang.js                ← EN/HE translations + RTL
-│   ├── styles.css
-│   ├── _routes.json           ← routes /data.json to functions
-│   └── wrangler.toml
+│   ├── index.html              ← main page
+│   ├── app.js                  ← frontend logic
+│   ├── lang.js                 ← EN/HE translations + i18n
+│   ├── styles.css              ← dark theme, RTL
+│   ├── data.json               ← fallback mock data
+│   ├── _routes.json            ← routes /data.json to function
+│   └── wrangler.toml           ← Cloudflare config
 ├── README_DEPLOY.md
 └── LEGAL.md
 ```
 
 ## Live Data Pipeline
 
-The `data.json` endpoint fetches from 3 RSS feeds:
-- **Mitvim** (`mitvim.org.il/en/feed/`) — Israeli think tank
-- **ICT** (`ict.org.il/feed/`) — Counter-terrorism research  
-- **ReliefWeb** (`reliefweb.int/rss/news.xml`) — Humanitarian news
+The `data.json` endpoint fetches from **6 RSS feeds** (reachable from Cloudflare edge):
 
-Articles are filtered for Middle East relevance and auto-classified (peace/war/neutral).
+| Source | URL | Type | Cap |
+|--------|-----|------|-----|
+| Mitvim | `mitvim.org.il/en/feed/` | thinktank | 4 |
+| EcoPeace ME | `ecopeaceme.org/feed/` | thinktank | 3 |
+| BBC Middle East | `feeds.bbci.co.uk/news/world/middle_east/rss.xml` | me-news | 3 |
+| Al Monitor | `www.al-monitor.com/rss` | me-news | 3 |
+| JNS | `www.jns.org/feed/` | media (peace only) | 2 |
+| Times of Israel | `www.timesofisrael.com/feed/` | media (peace only) | 2 |
+
+**Feed types:**
+- `thinktank` — always included, higher cap (ME-focused analysis)
+- `me-news` — always included, moderate cap (inherently Middle East feed)
+- `media` — only included if sentiment is "peace" (general media, peace-sentiment filter)
+
+**Freshness filter:** Only publications from the last 30 days are shown.
+
+Articles are filtered for Middle East relevance using a two-tier keyword system (primary conflict/peace terms, secondary place names) and auto-classified (peace / war / neutral).
+
+## RSS Feeds That Don't Work on Cloudflare Edge
+
+These were tested but return errors, HTML, or stale content:
+
+| Source | Issue |
+|--------|-------|
+| ICT | 403 Forbidden |
+| ReliefWeb | 404 Not Found |
+| Forward | 403 Forbidden |
+| Jerusalem Post | 404 |
+| Haaretz | 404 |
+| Ynet | 404 / Redirect |
+| Israel National News | Returns HTML, not RSS |
+| i24 News | Returns HTML, not RSS |
+| Middle East Eye | Returns HTML/JSON, not RSS |
+| ALLMEP | RSS stale (2021-2024 content) |
+| FMEP | RSS stale (2021-2024 content) |
+| P4P | RSS works but stale (July 2024) |
+| INSS | RSS broken (1 post from 2017) |
+| ROPES | No RSS feed |

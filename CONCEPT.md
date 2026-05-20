@@ -259,16 +259,24 @@ The v3 design philosophy, shaped by the institute representative's feedback:
 
 | Signal | Source | Access Method | Update Frequency |
 |--------|--------|---------------|-----------------|
-| Political Tone | BBC + Al Jazeera RSS + X/Twitter | RSS + Twitter API | Every 30 min |
-| Diplomatic News | BBC + Al Jazeera RSS | RSS parsing | Every 30 min |
+| Political Tone | BBC RSS, Al Monitor RSS, X/Twitter | RSS + Twitter API | Every 30 min |
+| Diplomatic News | BBC RSS, Al Monitor RSS | RSS parsing | Every 30 min |
 | Aviation | OpenSky Network + airline RSS | API + RSS | Every 30 min |
 | Prediction Markets | Polymarket | API | Every hour |
 | Credit Ratings | Trading Economics, CountryRisk.io | API / scraping | Weekly |
 | Travel Advisories | US State Dept, UK FCDO, Canada, Israel NSC | Scraping / RSS | Daily |
-| Shipping | BBC + Al Jazeera RSS | RSS keyword filter | Every 30 min |
-| Think Tank | Mitvim, INSS, JISS, ICT RSS | RSS parsing | Every 30 min |
+| Shipping | BBC RSS, Al Monitor RSS | RSS keyword filter | Every 30 min |
+| Think Tank | Mitvim RSS, EcoPeace ME RSS | RSS parsing | Every 30 min |
 | VIEWS | HDX / viewsforecasting.org | CSV download | Monthly |
 | Humanitarian | UN OCHA, ReliefWeb RSS | RSS parsing | Daily |
+
+**Active RSS feeds (reachable from Cloudflare edge):**
+- Mitvim (`mitvim.org.il/en/feed/`) — think tank
+- EcoPeace ME (`ecopeaceme.org/feed/`) — think tank
+- BBC Middle East (`feeds.bbci.co.uk/.../middle_east/rss.xml`) — ME news
+- Al Monitor (`al-monitor.com/rss`) — ME news
+- JNS (`jns.org/feed/`) — general media (peace-sentiment filter)
+- Times of Israel (`timesofisrael.com/feed/`) — general media (peace-sentiment filter)
 
 ---
 
@@ -276,15 +284,12 @@ The v3 design philosophy, shaped by the institute representative's feedback:
 
 | Layer       | Technology                        |
 |-------------|-----------------------------------|
-| Frontend    | Vanilla JS + HTML + CSS, inline SVG charts |
+| Frontend    | Vanilla JS + HTML + CSS, inline SVG charts (zero dependencies) |
 | Backend     | Cloudflare Pages Functions (edge-computed) |
-| RSS Parser  | `rss-parser` (Node.js) |
-| NLP         | HuggingFace sentiment API or lightweight classifier |
-| Credit Data | Trading Economics API or CountryRisk.io API |
-| Travel Advisories | Scraping from foreign ministry sites or TravelAdvisory.io |
-| OpenSky     | Public API for flight tracking |
-| Polymarket  | Polymarket API for prediction market odds |
+| RSS Parser  | Built-in XML parser (Cloudflare Workers) |
+| i18n        | Client-side translation (EN / HE with RTL) |
 | Hosting     | Cloudflare Pages (free tier) |
+| Error Handling | 3-attempt retry, localStorage cache, error banner |
 
 ---
 
@@ -305,10 +310,10 @@ The v3 design philosophy, shaped by the institute representative's feedback:
 
 ## Future Extensions
 
+- **Arabic localization:** Arabic language support (Hebrew already implemented)
 - **Per-conflict breakdown:** Israel-Gaza, Israel-Lebanon, Israel-Iran, Saudi-Iran, Red Sea
 - **"Peace Streak" counter:** Consecutive days above threshold — "14 days 🌱"
 - **Peace archive:** Historical peace score with annotations of major events
 - **Telegram alerts:** "Peace score crossed 70 🌱"
 - **Shareable cards:** Social media images with current score
 - **Public API:** REST endpoint for other projects
-- **Arabic/Hebrew localization:** Mirror site for ME audiences

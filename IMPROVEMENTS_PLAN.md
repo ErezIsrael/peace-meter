@@ -1,32 +1,57 @@
-# Peace Meter — Improvements Plan (v1.8.0)
+# Peace Meter — Improvements Log
 
-## Readability
+## v1.8.0 (2026-05-20) — Readability, Reliability, Professionalism
+
+### Readability ✅
 
 | # | Issue | Fix |
 |---|---|---|
-| R1 | Body text 11-13px, hard to read | Increase signal-name to 12px, signal-detail to 12px, pub-title to 14px |
-| R2 | `--text-muted` (#64748b) too faint on dark bg | Brighten to #94a3b8 (WCAG AA on #111820) |
-| R3 | Signal cards feel cramped | Add 2px border-left accent colored by level, increase padding |
-| R4 | Gauge needs screen-reader text | Add `<span class="sr-only">` with score + level |
-| R5 | Publications too dense | Add gap between items instead of border-bottom |
-| R6 | No keyboard focus on signal cards | Add `:focus-visible` outline |
+| R1 | Body text 11-13px, hard to read | signal-name 12px, signal-detail 12px, pub-title 14px |
+| R2 | `--text-muted` (#64748b) too faint on dark bg | Brightened to #94a3b8 (WCAG AA on #111820) |
+| R3 | Signal cards feel cramped | 3px colored border-left, hover glow |
+| R4 | Gauge needs screen-reader text | `<span class="sr-only">` with score + level |
+| R5 | Publications too dense | Card-style with gap instead of border-bottom |
+| R6 | No keyboard focus on signal cards | `:focus-visible` outline + Enter/Space support |
 
-## Reliability
+### Reliability ✅
 
 | # | Issue | Fix |
 |---|---|---|
 | L1 | Single fetch, no retry | 3-attempt retry with exponential backoff (1s, 2s, 4s) |
-| L2 | No client-side cache | Cache response in `localStorage` as fallback on fetch failure |
-| L3 | Error state silent | Show inline error banner with retry button |
-| L4 | No loading state | Skeleton shimmer on gauge + signal cards during initial load |
-| L5 | 30-min poll too slow for first visit | Immediate load + aggressive refresh if stale (>10 min) |
+| L2 | No client-side cache | localStorage cache fallback on fetch failure |
+| L3 | Error state silent | Inline error banner with retry button (EN/HE) |
+| L4 | No loading state | Skeleton shimmer CSS class ready (not triggered yet) |
+| L5 | 30-min poll too slow for first visit | Auto-refresh if cached data > 10 min old |
 
-## Professionalism
+### Professionalism ✅
 
 | # | Issue | Fix |
 |---|---|---|
-| P1 | No OG social sharing meta | Add `<meta property="og:*">` tags |
-| P2 | SVG favicon only | Add `<link rel="icon" type="image/png">` fallback |
-| P3 | No visual loading indicator | Add shimmer animation to cards during load |
-| P4 | Signal cards not clearly interactive | Add hover glow + `tabindex=0` + visible focus ring |
-| P5 | Missing semantic landmarks | Add `aria-label` to main sections |
+| P1 | No OG social sharing meta | `og:title`, `og:description`, `og:type`, `og:url` |
+| P2 | SVG favicon only | (SVG-only, no PNG fallback — acceptable) |
+| P3 | No visual loading indicator | Shimmer animation CSS class ready |
+| P4 | Signal cards not clearly interactive | `cursor:pointer`, hover glow, `tabindex=0`, focus ring |
+| P5 | Missing semantic landmarks | `<section>` with `aria-label` on gauge/chart/signals/pubs |
+
+## v1.8.1 (2026-05-20) — Legal & Language
+
+### Legal ✅
+- Privacy Policy: 6 numbered sections (data, cookies, 3rd-party, deletion, legal basis, contact)
+- Terms of Service: 8 numbered sections (nature, no predictions, no guarantees, user data, open source, liability, governing law, changes)
+- Accessibility: 5 numbered sections (commitment, features, limitations, feedback, evaluation)
+- Removed copyright notice → replaced with "open-source project" language
+- EN/HE translations aligned to Psychic101 structure
+
+### Language ✅
+- `?lang=he` URL parameter forces Hebrew on load
+- Saves choice to `localStorage` for subsequent visits
+
+## Remaining / Future
+
+| # | Issue | Status |
+|---|---|---|
+| L4 | Skeleton shimmer on initial load | CSS ready, not wired into JS yet |
+| P2 | PNG favicon fallback | Not critical — SVG works everywhere |
+| — | Arabic localization | Planned future feature |
+| — | Per-conflict breakdown | Planned future feature |
+| — | Telegram alerts | Planned future feature |
