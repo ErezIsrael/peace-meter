@@ -342,7 +342,16 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
 };
 
 /* ── Language manager ──────────────────────────────────── */
-let currentLang = localStorage.getItem('pm-lang') || 'en';
+let currentLang = (() => {
+  // Check URL parameter first (?lang=he)
+  const params = new URLSearchParams(window.location.search);
+  const urlLang = params.get('lang');
+  if (urlLang && LANG[urlLang]) {
+    localStorage.setItem('pm-lang', urlLang);
+    return urlLang;
+  }
+  return localStorage.getItem('pm-lang') || 'en';
+})();
 
 function t(key) {
   const keys = key.split('.');
