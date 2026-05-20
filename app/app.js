@@ -255,18 +255,17 @@ function updateTimestamps(data) {
   const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const shortTz = tzName.split('/').pop().replace(/_/g, ' ');
 
-  const timeStr = ts.toLocaleTimeString(currentLang === 'he' ? 'he-IL' : 'en-US', {
+  const fmtOpts = {
+    timeZone: tzName,
     hour: '2-digit', minute: '2-digit', hour12: false
-  });
+  };
+  const locale = currentLang === 'he' ? 'he-IL' : 'en-US';
 
-  document.getElementById('lastUpdate').textContent = timeStr;
+  document.getElementById('lastUpdate').textContent = ts.toLocaleTimeString(locale, fmtOpts);
   document.getElementById('timezone').textContent = shortTz;
 
   const next = new Date(ts.getTime() + UPDATE_INTERVAL);
-  const nextStr = next.toLocaleTimeString(currentLang === 'he' ? 'he-IL' : 'en-US', {
-    hour: '2-digit', minute: '2-digit', hour12: false
-  });
-  document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + nextStr;
+  document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + next.toLocaleTimeString(locale, fmtOpts);
 }
 
 /* ── Modal ────────────────────────────────────────────── */
