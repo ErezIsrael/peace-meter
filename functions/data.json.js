@@ -55,52 +55,66 @@ const EXCLUDE_KEYWORDS = [
 
 /* ── GDELT 2.0 Event Database fetcher ──────────────────── */
 /* Free, anonymous API. Monitors 250k+ news stories/day.
- * Columns (0-indexed):
- *   7  = Actor1CountryCode  (3-char CAMEO)
- *   16 = Actor2CountryCode
- *   26 = EventRootCode      (2-digit root category)
- *   28 = GoldsteinScale     (-10 to +10 per event)
- *   34 = AvgTone            (-100 to +100 for document)
+ * Data files: YYYYMMDDHHMMSS.export.CSV.zip
+ *   → contains tab-delimited .CSV file (no header row)
+ * Columns (0-indexed, tab-separated):
+ *   17 = Actor1CountryCode (3-char CAMEO: ISR, IRN, etc.)
+ *   19 = Actor2CountryCode
+ *   26 = EventCode         (3-digit CAMEO code)
+ *   28 = EventRootCode     (2-digit root category)
+ *   30 = GoldsteinScale    (-10 to +10 per event)
  */
 const GDELT_COUNTRIES = ['ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','USA'];
 // CAMEO root codes for diplomatic events
 const CAMEO_DIPLOMATIC_ROOTS = ['13','22','23','24','26','27','40','41','42','43','45','52','58','59'];
 
+/* ZIP decompressor using fflate library.
+ * GDELT export files are ZIP with one deflated .CSV inside. */
+import { unzipSync } from 'fflate';
+
+function unzipSingle(buffer) {
+  try {
+    const entries = unzipSync(new Uint8Array(buffer));
+    const firstKey = Object.keys(entries)[0];
+    return new TextDecoder('utf-8').decode(entries[firstKey]);
+  } catch {
+    return null;
+  }
+}
+
 async function fetchGDELT() {
   const now = new Date();
 
-  // Try current hour and previous 4 hours (GDELT updates every 15 min, may lag)
-  const hoursToTry = [];
-  for (let offset = 0; offset < 5; offset++) {
-    const h = new Date(now.getTime() - offset * 3600000);
-    hoursToTry.push(h.toISOString().slice(0,10).replace(/-/g,'') + h.toISOString().slice(11,13));
+  // GDELT updates every 15 min. Try recent timestamps.
+  // File format: YYYYMMDDHHMMSS.export.CSV.zip
+  const timestampsToTry = [];
+  for (let offsetMin = 0; offsetMin < 60; offsetMin += 15) {
+    const h = new Date(now.getTime() - offsetMin * 60000);
+    const ts = h.toISOString().replace(/[-T:Z]/g, '').slice(0, 12);
+    timestampsToTry.push(ts);
   }
 
-  for (const dateHour of hoursToTry) {
-    const urls = [
-      `https://data.gdeltproject.org/gdeltv2/${dateHour}000.COUNTRY.csv`,
-      `https://data.gdeltproject.org/gdeltv2/${dateHour}000.COUNTRY.CSV.gz`,
-    ];
-
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-        if (!res.ok) continue;
-        const text = await res.text();
-        const parsed = parseGDELT(text);
-        if (parsed && parsed.eventCount > 0) {
-          parsed._rawCsv = text; // store for per-pair computation
-          return parsed;
-        }
-      } catch { /* try next URL */ }
-    }
+  for (const ts of timestampsToTry) {
+    const url = `https://data.gdeltproject.org/gdeltv2/${ts}00.export.CSV.zip`;
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const buffer = await res.arrayBuffer();
+      const text = unzipSingle(buffer);
+      if (!text) continue;
+      const parsed = parseGDELT(text);
+      if (parsed && parsed.eventCount > 0) {
+        parsed._rawCsv = text; // store for per-pair computation
+        return parsed;
+      }
+    } catch { /* try next timestamp */ }
   }
   return null;
 }
 
 function parseGDELT(csvText, pairFilters) {
   const lines = csvText.trim().split('\n');
-  if (lines.length < 2) return null; // header only
+  if (lines.length < 2) return null;
 
   let totalGoldstein = 0;
   let totalTone = 0;
@@ -109,15 +123,14 @@ function parseGDELT(csvText, pairFilters) {
   let constructiveEvents = 0;
   let hostileEvents = 0;
 
-  for (let i = 1; i < lines.length; i++) {
-    const fields = lines[i].split(',');
-    if (fields.length < 36) continue;
+  for (let i = 0; i < lines.length; i++) {
+    const fields = lines[i].split('\t');
+    if (fields.length < 35) continue;
 
-    const actor1 = fields[7].trim();
-    const actor2 = fields[16].trim();
-    const rootCode = fields[26].trim();
-    const goldstein = parseFloat(fields[28]);
-    const avgTone = parseFloat(fields[34]);
+    const actor1 = fields[17].trim();
+    const actor2 = fields[19].trim();
+    const rootCode = fields[28].trim();
+    const goldstein = parseFloat(fields[30]);
 
     // Check if at least one actor is a ME country we track
     const actorMatch = GDELT_COUNTRIES.includes(actor1) || GDELT_COUNTRIES.includes(actor2);
@@ -132,11 +145,10 @@ function parseGDELT(csvText, pairFilters) {
     }
 
     // Skip events with zero Goldstein (neutral)
-    if (goldstein === 0) continue;
+    if (isNaN(goldstein) || goldstein === 0) continue;
 
     eventCount++;
     totalGoldstein += goldstein;
-    totalTone += avgTone || 0;
 
     if (goldstein > 0) constructiveEvents++;
     else hostileEvents++;
@@ -149,14 +161,12 @@ function parseGDELT(csvText, pairFilters) {
   if (eventCount === 0) return null;
 
   const avgGoldstein = totalGoldstein / eventCount;
-  const avgTone = totalTone / eventCount;
   const constructiveRatio = (constructiveEvents + hostileEvents) > 0
     ? constructiveEvents / (constructiveEvents + hostileEvents)
     : 0.5;
 
   return {
     avgGoldstein,
-    avgTone,
     eventCount,
     diplomaticCount,
     constructiveRatio,
