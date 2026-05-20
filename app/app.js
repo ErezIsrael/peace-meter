@@ -1,6 +1,6 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
-const APP_VERSION = '2.0.0'; // 2026-05-20: GDELT event data integration
+const APP_VERSION = '2.0.0'; // 2026-05-20: GDELT event data integration (deploy fix)
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
