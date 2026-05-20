@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.5.2 */
+/* VERSION: 2.5.3 */
 
-const APP_VERSION = '2.5.2'; // 2026-05-20: Real Natural Earth country outlines
+const APP_VERSION = '2.5.3'; // 2026-05-20: Real Natural Earth country outlines
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -399,25 +399,27 @@ function renderMap(pairs) {
 
 function expandMap() {
   const overlay = document.getElementById('modalOverlay');
+  const modal = overlay.querySelector('.modal');
   const content = document.getElementById('modalContent');
   overlay.classList.add('active');
+  modal.classList.add('map-modal');
   overlay.addEventListener('click', collapseMap);
 
   const pairs = (lastData && lastData.pairs) || [];
   const html = overlayMapDots(mapSVGContent, pairs, true);
-  const wrapper = document.createElement('div');
-  wrapper.style.cssText = 'padding:10px;max-width:640px;';
-  wrapper.innerHTML = html;
-  content.innerHTML = '';
-  content.appendChild(wrapper);
+  content.innerHTML = `<div class="map-wrapper">${html}</div>`;
 }
 
 function collapseMap(e) {
   if (e && e.target && e.target.closest('.modal') && !e.target.classList.contains('modal-close')) return;
   const overlay = document.getElementById('modalOverlay');
+  const modal = overlay.querySelector('.modal');
+  modal.classList.remove('map-modal');
   overlay.classList.remove('active');
   overlay.removeEventListener('click', collapseMap);
 }
+
+
 
 let mapCollapsed = true;
 
