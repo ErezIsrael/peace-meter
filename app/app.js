@@ -1,5 +1,6 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
+const APP_VERSION = '1.3.0'; // 2026-05-20: live RSS, i18n, local TZ
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 
@@ -295,6 +296,7 @@ function renderAll(data) {
   renderTrend(data.history);
   renderPublications(data.publications || []);
   updateTimestamps(data);
+  document.getElementById('versionTag').textContent = `v${APP_VERSION}`;
 }
 
 /* ── Load & render ────────────────────────────────────── */
