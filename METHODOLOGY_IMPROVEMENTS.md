@@ -6,16 +6,18 @@ The current v3 design is already strong on the "commercial reality over opinions
 
 ---
 
-### A. Replace RSS Sentiment Analysis with GDELT Event Data
+### A. Replace RSS Sentiment Analysis with GDELT Event Data ✅ IMPLEMENTED v2.0.0
 
-**Current approach:** Parse BBC/Al Jazeera/Al Monitor RSS headlines with keyword sentiment scoring.
+**Status: Implemented 2026-05-20**
+
+**Current approach (pre-v2):** Parse BBC/Al Jazeera/Al Monitor RSS headlines with keyword sentiment scoring.
 
 **Problem:**
 - Headlines ≠ events. A headline about "diplomatic talks" doesn't prove a meeting happened.
 - Keyword-based classification is brittle ("strike" in "strike a deal" = false positive war signal).
 - Limited to feeds that are reachable from Cloudflare edge.
 
-**Proposal: GDELT 2.0 Event Database**
+**Implementation: GDELT 2.0 Event Database**
 
 [GDELT](https://www.gdeltproject.org/) monitors every news source worldwide (250k+ stories/day, 80+ languages) and classifies them into structured events (Goldstein Tone scoring, CAMEO event codes).
 

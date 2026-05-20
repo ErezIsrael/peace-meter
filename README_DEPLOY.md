@@ -1,6 +1,16 @@
 # Deploying Peace Meter to Cloudflare Pages
 
-## Option A: Cloudflare Dashboard (recommended)
+## ⚠️ Critical: Always use `--skip-caching`
+
+Cloudflare Pages caches file hashes and skips re-uploading unchanged files. This causes old versions to persist even after Git pushes.
+
+```bash
+npx wrangler pages deploy app --project-name=peace-meter --skip-caching
+```
+
+**Always use `--skip-caching`** to force a full re-upload of all assets.
+
+## Option A: Cloudflare Dashboard (Git integration)
 
 1. Go to https://dash.cloudflare.com/
 2. Navigate to **Workers & Pages** → **Create application** → **Pages**
@@ -12,20 +22,21 @@
    - **Build output directory**: `app`
 6. Click **Save and Deploy**
 
-> **Important:** The `functions/` directory must be at the **repository root** (not inside `app/`). Cloudflare Pages Functions are only recognized at the repo root level.
+> **Important:** The `functions/` and `_routes.json` must be at the **repository root** (not inside `app/`). Cloudflare Pages only recognizes these at the repo root level.
+> **Important:** `wrangler.toml` must be at the **repository root** with `pages_build_output_dir = "app"` for Cloudflare to find the config.
 
 Every push to `main` triggers an automatic deployment (within 1-2 minutes).
 
-## Option B: CLI (requires API token)
+> **Note:** Git-triggered deployments may reuse cached file hashes. If the site shows an old version, deploy via CLI (Option B) with `--skip-caching`.
+
+## Option B: CLI (recommended for reliability)
 
 ```bash
-# First time only:
-wrangler login
-# or set CLOUDFLARE_API_TOKEN env var
+# Set API token:
+export CLOUDFLARE_API_TOKEN="your_token_here"
 
-# Deploy:
-npx wrangler pages dev app --compatibility-date=2026-05-20   # local test
-npx wrangler pages deploy app --project-name=peace-meter      # deploy
+# Deploy (forces full upload):
+npx wrangler pages deploy app --project-name=peace-meter --skip-caching
 ```
 
 ## Local Development
@@ -40,23 +51,42 @@ Serves on `http://127.0.0.1:8788` with Pages Functions support.
 
 ```
 peace-meter/                    ← repo root
+├── wrangler.toml               ← Cloudflare config (MUST be at root)
+├── _routes.json                ← route /data.json to function (MUST be at root)
 ├── functions/                  ← Pages Functions (MUST be at repo root)
-│   └── data.json.js           ← /data.json endpoint (live RSS + mock signals)
+│   └── data.json.js           ← /data.json endpoint (GDELT + RSS + signals)
 ├── app/                        ← build output (deployed content)
 │   ├── index.html              ← main page
 │   ├── app.js                  ← frontend logic
 │   ├── lang.js                 ← EN/HE translations + i18n
 │   ├── styles.css              ← dark theme, RTL
-│   ├── data.json               ← fallback mock data
-│   ├── _routes.json            ← routes /data.json to function
-│   └── wrangler.toml           ← Cloudflare config
+│   └── data.json               ← fallback mock data
 ├── README_DEPLOY.md
 └── LEGAL.md
 ```
 
+## Version Bumping Protocol
+
+When bumping the version, update these files:
+
+1. `app/app.js` — `const APP_VERSION` + `/* VERSION: */` comment
+2. `app/lang.js` — `/* VERSION: */` comment
+3. `app/styles.css` — `/* VERSION: */` comment
+4. `app/index.html` — `<!-- VERSION: -->` comment + `?v=X.Y.Z` query strings on `<script>` and `<link>` tags
+5. `app/data.json` — `"_version"` field
+
+This ensures file hashes change on every version bump and browser cache is busted.
+
 ## Live Data Pipeline
 
-The `data.json` endpoint fetches from **6 RSS feeds** (reachable from Cloudflare edge):
+The `data.json` endpoint fetches from **GDELT 2.0 Event Database** (primary) and **6 RSS feeds** (fallback + publications):
+
+### GDELT Integration (v2.0.0+)
+- **Political Tone**: Goldstein Scale (-10 to +10) per event, mapped to 0–100
+- **Diplomatic News**: CAMEO diplomatic event ratio, quadratic scoring
+- Falls back to RSS-based mock data when GDELT unavailable
+
+### RSS Feeds (reachable from Cloudflare edge):
 
 | Source | URL | Type | Cap |
 |--------|-----|------|-----|

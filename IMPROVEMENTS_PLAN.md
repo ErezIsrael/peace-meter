@@ -1,5 +1,32 @@
 # Peace Meter — Improvements Log
 
+## v2.0.0 (2026-05-20) — GDELT Event Data Integration
+
+### Data Pipeline ✅
+| # | Change | Details |
+|---|--------|---------|
+| G1 | Political Tone → GDELT | Goldstein Scale per event, avg mapped to 0–100. RSS fallback if GDELT unavailable |
+| G2 | Diplomatic News → GDELT | CAMEO diplomatic root codes (13,22,23,24,26,27,40,41,42,43,45,52,58,59). RSS fallback |
+| G3 | Multi-hour fallback | Tries current + 4 past hours, both .csv and .gz formats |
+| G4 | Version badge → dynamic | JS sets `#versionTag` from `APP_VERSION` constant (not hardcoded in HTML) |
+| G5 | Cache-busting | `?v=X.Y.Z` query strings on all `<script>`/`<link>` tags |
+| G6 | VERSION comments | `/* VERSION: X.Y.Z */` in all static files to force hash change on version bump |
+
+### Deployment Fixes ✅
+| # | Issue | Fix |
+|---|-------|-----|
+| D1 | `_routes.json` inside `app/` | Moved to repo root (Cloudflare only recognizes at root) |
+| D2 | `wrangler.toml` inside `app/` | Moved to repo root + added `pages_build_output_dir = "app"` |
+| D3 | Cloudflare hash caching | Always deploy with `--skip-caching` to force full re-upload |
+| D4 | Hardcoded version in HTML | Removed — now set dynamically from JS |
+
+### Methodology Updates ✅
+| # | Signal | Old | New |
+|---|--------|-----|-----|
+| M1 | Political Tone | RSS keyword sentiment | GDELT Goldstein Scale (primary), RSS (fallback) |
+| M2 | Diplomatic News | RSS headline analysis | GDELT CAMEO diplomatic event ratio (primary), RSS (fallback) |
+| M3 | Update frequency | "Every 30 min" | "Every 15 min" |
+
 ## v1.8.0 (2026-05-20) — Readability, Reliability, Professionalism
 
 ### Readability ✅

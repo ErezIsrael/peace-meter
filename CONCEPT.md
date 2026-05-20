@@ -53,20 +53,21 @@ Before defining our signals, let's ground this in what **actually preceded past 
 ## Sub-Meters (Peace Signals)
 
 ### 1. 🤝 Political Tone Signal — weight 20%
-**Sources:** BBC World Service RSS, Al Jazeera English RSS, X/Twitter feeds of key leaders
-**Method:** Track statements by senior regional officials. Classify as:
-- **Constructive:** meet, negotiate, peace plan, open to, dialogue, normalization, partnership, ceasefire, framework, mediation
-- **Hostile:** threaten, destroy, eliminate, no negotiation, will fight, escalate
+**Sources:** GDELT 2.0 Event Database (primary), RSS feeds (fallback)
+**Method:** Uses the Goldstein Scale (-10 to +10) per event from GDELT. Each news event is scored on a standardized scale where +10 is maximally positive and -10 is maximally negative.
+- Filters events where Actor1 or Actor2 is a tracked ME country (ISR, PSE, LBN, SYR, IRN, YEM, IRQ, SAU, ARE, BHR)
+- Skips neutral events (Goldstein = 0)
+- Score = `50 + (avgGoldstein / 10) × 50`, clamped to 0–100
 
-Score = `clamp(5, 95, round(ratio² × 150))` where ratio = constructive / (constructive + hostile) over 7 days.
+**Why GDELT over RSS:** GDELT monitors 250k+ news stories/day across 200 languages, provides structured event data with standardized sentiment scores. Far more reliable than scraping RSS headlines for keyword sentiment.
 
 **Why highest weight:** Expert confirmed this as the most essential signal. Senior officials' rhetoric is a direct leading indicator of policy direction.
 
 ---
 
 ### 2. 📰 Diplomatic News Signal — weight 15%
-**Sources:** BBC World Service RSS, Al Jazeera English RSS
-**Method:** Scan Middle East headlines and classify:
+**Sources:** GDELT 2.0 Event Database (primary), RSS feeds (fallback)
+**Method:** Uses CAMEO event coding from GDELT. Counts diplomatic event root codes (Consult, Discuss, Provide aid, Negotiate, etc.) vs. total ME events.
 - **Peace keywords:** ceasefire, agreement, talks, diplomacy, deal, normalize, truce, peace, reconciliation, humanitarian, aid, prisoner exchange, envoy, mediation, framework, roadmap
 - **War keywords:** strike, attack, missile, killed, escalation, war, bombardment
 

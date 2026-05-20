@@ -6,7 +6,7 @@
 
 ---
 
-## Current State (v1.8.3)
+## Current State (v2.0.0)
 
 **Files:**
 - `app/index.html` — layout: header, gauge, trend chart, signal grid (10 cards), publications list, footer
@@ -24,13 +24,23 @@
 
 ---
 
-## Phase 1 — Integrate GDELT Event Data
+## Phase 1 — Integrate GDELT Event Data ✅ COMPLETE
+
+**Status: Implemented 2026-05-20 (v2.0.0)**
 
 **Goal:** Replace RSS headline sentiment analysis (Signals 1+2) with structured GDELT event data.
 
 **Why:** GDELT monitors 250k+ news stories/day, classifies events with CAMEO codes and Goldstein tone scores (-100 to +100). Free, anonymous, no API key needed.
 
-### 1A: Add GDELT data fetcher to `functions/data.json.js`
+**Implementation details:**
+- `fetchGDELT()` tries 5 recent hours (current + 4 past), both `.csv` and `.gz` formats
+- `parseGDELT()` filters by ME country CAMEO codes, skips Goldstein=0 events
+- Political Tone: `50 + (avgGoldstein/10) × 50`, clamped 0–100
+- Diplomatic News: `(constructiveRatio)² × 150`, clamped 3–95
+- Falls back to RSS mock data when GDELT unavailable (status = "Delayed")
+- GDELT detail strings show event count, avg tone, and diplomatic event count
+
+### 1A: Add GDELT data fetcher to `functions/data.json.js` ✅
 
 **File:** `functions/data.json.js`
 
@@ -632,3 +642,23 @@ After Phase 3 infrastructure is built, add:
 
 **Recommended order:** Phase 1 → Phase 2 → Phase 3 (biggest impact, reasonable effort).
 Phase 4 and 5 are optional enhancements. Phase 6 and 7 are future stretch goals.
+
+## Deployment Checklist
+
+Every version bump requires these updates:
+
+1. `app/app.js` — `const APP_VERSION` + `/* VERSION: */` comment
+2. `app/lang.js` — `/* VERSION: */` comment
+3. `app/styles.css` — `/* VERSION: */` comment
+4. `app/index.html` — `<!-- VERSION: -->` comment + `?v=X.Y.Z` on `<script>` and `<link>` tags
+5. `app/data.json` — `"_version"` field
+
+**Deploy command (always use `--skip-caching`):**
+```bash
+npx wrangler pages deploy app --project-name=peace-meter --skip-caching
+```
+
+**Critical files at repo root (NOT inside app/):**
+- `wrangler.toml` — with `pages_build_output_dir = "app"`
+- `_routes.json` — routes `/data.json` to Pages Function
+- `functions/` — Pages Functions directory
