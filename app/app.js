@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.7.2 */
+/* VERSION: 2.7.3 */
 
-const APP_VERSION = '2.7.2'; // 2026-05-20: Real Natural Earth country outlines
+const APP_VERSION = '2.7.3'; // 2026-05-20: Real Natural Earth country outlines
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -340,7 +340,11 @@ function overlayMapDots(svgContent, pairs, large) {
       score = data.score;
     }
     overlay += `<circle cx="${pair.cx}" cy="${pair.cy}" r="${dotR + 4}" fill="${color}" opacity="0.1"/>`;
-    overlay += `<circle class="map-dot" cx="${pair.cx}" cy="${pair.cy}" r="${dotR}" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2" stroke-opacity="0.9" data-pair="${pair.id}"/>`;
+    const tooltip = score !== null ? `${pair.name}\nScore: ${score} (${getLevelLabel(score)})` : pair.name;
+    overlay += `<g class="map-dot-group" data-pair="${pair.id}">`;
+    overlay += `<title>${tooltip}</title>`;
+    overlay += `<circle class="map-dot" cx="${pair.cx}" cy="${pair.cy}" r="${dotR}" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2" stroke-opacity="0.9"/>`;
+    overlay += `</g>`;
     if (score !== null) {
       overlay += `<text x="${pair.cx}" y="${pair.cy + 3.5}" text-anchor="middle" font-size="${fs}" fill="${color}" font-family="monospace" font-weight="700">${score}</text>`;
     }
