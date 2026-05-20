@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.7.1 */
+/* VERSION: 2.7.2 */
 
-const APP_VERSION = '2.7.1'; // 2026-05-20: Real Natural Earth country outlines
+const APP_VERSION = '2.7.2'; // 2026-05-20: Real Natural Earth country outlines
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -380,7 +380,7 @@ function renderMap(pairs) {
       wrapper.className = 'map-wrapper';
       wrapper.innerHTML = html;
       wrapper.style.cursor = 'pointer';
-      wrapper.addEventListener('click', expandMap);
+      wrapper.addEventListener('click', toggleMapModal);
       container.innerHTML = '';
       container.appendChild(wrapper);
     }).catch(() => {
@@ -393,31 +393,49 @@ function renderMap(pairs) {
   wrapper.className = 'map-wrapper';
   wrapper.innerHTML = html;
   wrapper.style.cursor = 'pointer';
-  wrapper.addEventListener('click', expandMap);
+  wrapper.addEventListener('click', toggleMapModal);
   container.innerHTML = '';
   container.appendChild(wrapper);
 }
 
-function expandMap() {
+let mapModalOpen = false;
+
+function toggleMapModal(e) {
+  if (e) { e.stopPropagation(); e.preventDefault(); }
   const overlay = document.getElementById('modalOverlay');
   const modal = overlay.querySelector('.modal');
   const content = document.getElementById('modalContent');
-  overlay.classList.add('active');
-  modal.classList.add('map-modal');
-  overlay.addEventListener('click', collapseMap);
 
-  const pairs = (lastData && lastData.pairs) || [];
-  const html = overlayMapDots(mapSVGContent, pairs, true);
-  content.innerHTML = `<div class="map-wrapper">${html}</div>`;
+  if (mapModalOpen) {
+    // Close
+    modal.classList.remove('map-modal');
+    overlay.classList.remove('active');
+    overlay.removeEventListener('click', handleMapOverlayClick);
+    mapModalOpen = false;
+  } else {
+    // Open
+    overlay.classList.add('active');
+    modal.classList.add('map-modal');
+    overlay.addEventListener('click', handleMapOverlayClick);
+
+    const pairs = (lastData && lastData.pairs) || [];
+    const html = overlayMapDots(mapSVGContent, pairs, true);
+    content.innerHTML = `<div class="map-wrapper" id="modalMapWrapper">${html}</div>`;
+
+    // Also let the modal map wrapper toggle
+    const modalWrapper = document.getElementById('modalMapWrapper');
+    if (modalWrapper) {
+      modalWrapper.style.cursor = 'pointer';
+      modalWrapper.addEventListener('click', toggleMapModal);
+    }
+    mapModalOpen = true;
+  }
 }
 
-function collapseMap(e) {
+function handleMapOverlayClick(e) {
+  // Close only if clicking the overlay background, not inside the modal
   if (e && e.target && e.target.closest('.modal') && !e.target.classList.contains('modal-close')) return;
-  const overlay = document.getElementById('modalOverlay');
-  const modal = overlay.querySelector('.modal');
-  modal.classList.remove('map-modal');
-  overlay.classList.remove('active');
-  overlay.removeEventListener('click', collapseMap);
+  toggleMapModal();
 }
 
 

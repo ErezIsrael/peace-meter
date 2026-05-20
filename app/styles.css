@@ -1,5 +1,5 @@
 /* ── Reset & Variables ─────────────────────────────────── */
-/* VERSION: 2.7.1 */
+/* VERSION: 2.7.2 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -360,9 +360,9 @@ html[dir="rtl"] .gauge-card {
 }
 
 .map-wrapper svg {
-  width: 80vw;
-  height: 80vh;
-  max-width: 100%;
+  width: 100%;
+  max-width: 80vw;
+  height: auto;
 }
 
 .map-dot {
@@ -513,9 +513,9 @@ html[dir="rtl"] .gauge-card {
   overflow-y: auto;
 }
 .modal.map-modal {
-  max-width: 95vw;
-  width: 95vw;
-  max-height: 90vh;
+  max-width: 90vw;
+  width: 90vw;
+  max-height: 75vh;
   padding: 20px;
 }
 .modal h2 {
