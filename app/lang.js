@@ -26,8 +26,8 @@ const LANG = {
     status: { live: 'Live', delayed: 'Delayed' },
 
     signals: {
-      tone:        { icon:'🤝', name:'Political Tone',        weight:'20%', summary:'Statements by senior regional officials', detail:'Classifies statements as constructive (negotiate, peace plan, dialogue) or hostile (threaten, escalate). Score = ratio² × 150, clamped 5–95.', sources:['BBC World Service RSS','Al Jazeera English RSS','X/Twitter feeds of key leaders'], update:'Every 30 min' },
-      news:        { icon:'📰', name:'Diplomatic News',       weight:'15%', summary:'Headline sentiment analysis',          detail:'Scans Middle East headlines for peace vs. war keywords. Score = peace_articles / total_ME_articles, quadratic curve.', sources:['BBC World Service RSS','Al Jazeera English RSS'], update:'Every 30 min' },
+      tone:        { icon:'🤝', name:'Political Tone',        weight:'20%', summary:'GDELT event tone scoring',             detail:'Uses GDELT 2.0 Event Database. Goldstein Scale (-10 to +10) per event. Score = 50 + (avgGoldstein/10)×50, clamped 0–100. Falls back to RSS sentiment if GDELT unavailable.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
+      news:        { icon:'📰', name:'Diplomatic News',       weight:'15%', summary:'CAMEO diplomatic event ratio',        detail:'Counts CAMEO diplomatic event codes vs. total events in GDELT. Score = (constructiveRatio)² × 150, clamped 3–95. Falls back to RSS headline analysis.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
       aviation:     { icon:'✈️', name:'Commercial Aviation',    weight:'12%', summary:'Flight volume + airline policy',      detail:'40% flight count vs. pre-2023 baseline, 60% airline policy changes (route resumptions, overflight permissions).', sources:['OpenSky Network API','Airline press releases + RSS'], update:'Every 30 min' },
       prediction:   { icon:'💰', name:'Prediction Markets',     weight:'10%', summary:'Ceasefire odds on Polymarket',        detail:'Averages "Yes" probability across all active ceasefire/peace markets. Aggregated wisdom of thousands.', sources:['Polymarket API'], update:'Every hour' },
       credit:       { icon:'🏛', name:'Credit Ratings',         weight:'10%', summary:'Sovereign credit rating direction',   detail:'Tracks upgrades, downgrades, outlook changes. Direction matters more than absolute level — B+ → BB- is a peace signal.', sources:['Fitch Ratings',"S&P Global Ratings","Moody's",'Trading Economics'], update:'Weekly' },
@@ -139,8 +139,8 @@ const LANG = {
 <p>It is <strong>not a prediction</strong> — a structured aggregation of publicly available data to track positive momentum.</p>
 <h3>Signals</h3>
 <ul>
-<li><strong>Political Tone</strong> (20%) — Senior official statement sentiment</li>
-<li><strong>Diplomatic News</strong> (15%) — BBC + Al Jazeera headline analysis</li>
+<li><strong>Political Tone</strong> (20%) — GDELT event tone scoring</li>
+<li><strong>Diplomatic News</strong> (15%) — GDELT CAMEO diplomatic event ratio</li>
 <li><strong>Commercial Aviation</strong> (12%) — Flight counts + airline policy</li>
 <li><strong>Prediction Markets</strong> (10%) — Polymarket ceasefire odds</li>
 <li><strong>Credit Ratings</strong> (10%) — Fitch/S&P/Moody's sovereign ratings</li>
@@ -195,8 +195,8 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     status: { live: 'בשידור חי', delayed: 'מושהה' },
 
     signals: {
-      tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'20%', summary:'הצהרות של בכירים אזוריים', detail:'מסווגת הצהרות כבונות (משא ומתן, תוכנית שלום, דיאלוג) או עוינות (איום, הסלמה). ציון = יחס² × 150, חתוך 5-95.', sources:['RSS של BBC World Service','RSS של אל-ג׳אזירה','X/Twitter של מנהיגים מרכזיים'], update:'כל 30 דקות' },
-      news:         { icon:'📰', name:'חדשות דיפלומטיות',    weight:'15%', summary:'ניתוח רגש של כותרות', detail:'סורק כותרות במזרח התיכון עבור מילות מפתח של שלום מול מלחמה. ציון = חדשות שלום / סך החדשות, עקומה ריבועית.', sources:['RSS של BBC World Service','RSS של אל-ג׳אזירה'], update:'כל 30 דקות' },
+      tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'20%', summary:'ניקוד רגש אירועים GDELT',         detail:'משתמש במסד GDELT 2.0. סולם גולדשטיין (-10 עד +10) לאירוע. ציון = 50 + (ממוצעGoldstein/10)×50, חתוך 0-100. חוזר ל-RSS אם GDELT לא זמין.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
+      news:         { icon:'📰', name:'חדשות דיפלומטיות',    weight:'15%', summary:'יחס אירועים דיפלומטיים CAMEO', detail:'סופר קודי אירועים דיפלומטיים CAMEO לעומת סך האירועים ב-GDELT. ציון = (יחסבני)² × 150, חתוך 3-95. חוזר לניתוח כותרות RSS.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
       aviation:      { icon:'✈️', name:'תעופה מסחרית',        weight:'12%', summary:'נפח טיסות + מדיניות חברות תעופה', detail:'40% ספירת טיסות מול קו בסיס 2023, 60% שינויי מדיניות (החזרת מסלולים, רשות מעבר אווירי).', sources:['API של OpenSky Network','הצהרות לעיתונות של חברות תעופה + RSS'], update:'כל 30 דקות' },
       prediction:    { icon:'💰', name:'שווקי תחזית',         weight:'10%', summary:'הסתברות לסיכום הפסקת אש', detail:'ממוצע הסתברות "כן" בכל שווקי הסיכום הפעילים. חכמתן של אלפי משקיעים.', sources:['API של Polymarket'], update:'כל שעה' },
       credit:        { icon:'🏛', name:'דירוגי אשראי',        weight:'10%', summary:'כיוון דירוגי אשראי מדינתיים', detail:'מעקב אחר שדרוגים, ירידות דירוג ושינויי תחזית. הכיוון חשוב יותר מהרמה המוחלטת.', sources:['Fitch Ratings','S&P Global Ratings',"Moody's",'Trading Economics'], update:'שבועי' },
@@ -309,8 +309,8 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
 <p>זה <strong>אינו תחזית</strong> — אגרגציה מסודרת של נתונים ציבוריים למעקב אחר תנע חיובי.</p>
 <h3>אותות</h3>
 <ul>
-<li><strong>גוון פוליטי</strong> (20%) — רגש של הצהרות בכירים</li>
-<li><strong>חדשות דיפלומטיות</strong> (15%) — ניתוח כותרות BBC + אל-ג׳אזירה</li>
+<li><strong>גוון פוליטי</strong> (20%) — ניקוד רגש אירועים GDELT</li>
+<li><strong>חדשות דיפלומטיות</strong> (15%) — יחס אירועים דיפלומטיים CAMEO</li>
 <li><strong>תעופה מסחרית</strong> (12%) — ספירת טיסות + מדיניות חברות תעופה</li>
 <li><strong>שווקי תחזית</strong> (10%) — הסתברויות סיכום ב-Polymarket</li>
 <li><strong>דירוגי אשראי</strong> (10%) — דירוגי Fitch/S&P/Moody's</li>

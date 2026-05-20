@@ -2,6 +2,8 @@
 
 const CACHE_TTL = 60; // 1 min
 
+function clamp(min, max, val) { return Math.max(min, Math.min(max, val)); }
+
 /* ── RSS feeds (must be reachable from Cloudflare edge) ── */
 /* feeds — 'type' determines inclusion rules:
  *   thinktank  — always include (ME-focused analysis), higher cap
@@ -50,6 +52,107 @@ const EXCLUDE_KEYWORDS = [
   'election', 'voting', 'ballot', 'polling',
   'cyber attack', 'ransomware', 'phishing',
 ];
+
+/* ── GDELT 2.0 Event Database fetcher ──────────────────── */
+/* Free, anonymous API. Monitors 250k+ news stories/day.
+ * Columns (0-indexed):
+ *   7  = Actor1CountryCode  (3-char CAMEO)
+ *   16 = Actor2CountryCode
+ *   26 = EventRootCode      (2-digit root category)
+ *   28 = GoldsteinScale     (-10 to +10 per event)
+ *   34 = AvgTone            (-100 to +100 for document)
+ */
+const GDELT_COUNTRIES = ['ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR'];
+// CAMEO root codes for diplomatic events
+const CAMEO_DIPLOMATIC_ROOTS = ['13','22','23','24','26','27','40','41','42','43','45','52','58','59'];
+
+async function fetchGDELT() {
+  const now = new Date();
+
+  // Try current hour and previous 4 hours (GDELT updates every 15 min, may lag)
+  const hoursToTry = [];
+  for (let offset = 0; offset < 5; offset++) {
+    const h = new Date(now.getTime() - offset * 3600000);
+    hoursToTry.push(h.toISOString().slice(0,10).replace(/-/g,'') + h.toISOString().slice(11,13));
+  }
+
+  for (const dateHour of hoursToTry) {
+    const urls = [
+      `https://data.gdeltproject.org/gdeltv2/${dateHour}000.COUNTRY.csv`,
+      `https://data.gdeltproject.org/gdeltv2/${dateHour}000.COUNTRY.CSV.gz`,
+    ];
+
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+        if (!res.ok) continue;
+        const text = await res.text();
+        const parsed = parseGDELT(text);
+        if (parsed && parsed.eventCount > 0) return parsed;
+      } catch { /* try next URL */ }
+    }
+  }
+  return null;
+}
+
+function parseGDELT(csvText) {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2) return null; // header only
+
+  let totalGoldstein = 0;
+  let totalTone = 0;
+  let eventCount = 0;
+  let diplomaticCount = 0;
+  let constructiveEvents = 0;
+  let hostileEvents = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const fields = lines[i].split(',');
+    if (fields.length < 36) continue;
+
+    const actor1 = fields[7].trim();
+    const actor2 = fields[16].trim();
+    const rootCode = fields[26].trim();
+    const goldstein = parseFloat(fields[28]);
+    const avgTone = parseFloat(fields[34]);
+
+    // Check if at least one actor is a ME country we track
+    const actorMatch = GDELT_COUNTRIES.includes(actor1) || GDELT_COUNTRIES.includes(actor2);
+    if (!actorMatch) continue;
+
+    // Skip events with zero Goldstein (neutral)
+    if (goldstein === 0) continue;
+
+    eventCount++;
+    totalGoldstein += goldstein;
+    totalTone += avgTone || 0;
+
+    if (goldstein > 0) constructiveEvents++;
+    else hostileEvents++;
+
+    if (CAMEO_DIPLOMATIC_ROOTS.includes(rootCode)) {
+      diplomaticCount++;
+    }
+  }
+
+  if (eventCount === 0) return null;
+
+  const avgGoldstein = totalGoldstein / eventCount;
+  const avgTone = totalTone / eventCount;
+  const constructiveRatio = (constructiveEvents + hostileEvents) > 0
+    ? constructiveEvents / (constructiveEvents + hostileEvents)
+    : 0.5;
+
+  return {
+    avgGoldstein,
+    avgTone,
+    eventCount,
+    diplomaticCount,
+    constructiveRatio,
+    constructiveEvents,
+    hostileEvents,
+  };
+}
 
 /* ── Lightweight RSS parser ───────────────────────────── */
 function decodeHTML(text) {
@@ -189,7 +292,42 @@ function calcMaster(signals) {
 export async function onRequest(context) {
   try {
     const publications = await fetchPublications();
-    const masterScore = calcMaster(FALLBACK_SIGNALS);
+
+    // Fetch GDELT data (best effort, falls back to mock)
+    const gdeltData = await fetchGDELT();
+
+    // Compute tone signal from GDELT
+    let toneScore, toneDetail, toneStatus;
+    if (gdeltData && gdeltData.eventCount > 0) {
+      // Goldstein Scale: -10 to +10 per event → map to 0-100
+      // Average +10 → 100, 0 → 50, -10 → 0
+      toneScore = Math.round(clamp(0, 100, 50 + (gdeltData.avgGoldstein / 10) * 50));
+      toneDetail = `${gdeltData.eventCount} events, tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(1)}, ${gdeltData.diplomaticCount} diplomatic`;
+      toneStatus = 'Live';
+    } else {
+      toneScore = FALLBACK_SIGNALS.tone.score;
+      toneDetail = FALLBACK_SIGNALS.tone.detail;
+      toneStatus = 'Delayed';
+    }
+
+    // Compute diplomatic news signal from GDELT
+    let newsScore, newsDetail, newsStatus;
+    if (gdeltData && gdeltData.eventCount > 0) {
+      newsScore = Math.round(clamp(3, 95, Math.round(Math.pow(gdeltData.constructiveRatio, 2) * 150)));
+      newsDetail = `${gdeltData.diplomaticCount} diplomatic events / ${gdeltData.eventCount} total`;
+      newsStatus = 'Live';
+    } else {
+      newsScore = FALLBACK_SIGNALS.news.score;
+      newsDetail = FALLBACK_SIGNALS.news.detail;
+      newsStatus = 'Delayed';
+    }
+
+    // Merge computed signals into fallback data
+    const signals = { ...FALLBACK_SIGNALS };
+    signals.tone = { ...signals.tone, score: toneScore, detail: toneDetail, status: toneStatus };
+    signals.news = { ...signals.news, score: newsScore, detail: newsDetail, status: newsStatus };
+
+    const masterScore = calcMaster(signals);
 
     const data = {
       timestamp: new Date().toISOString(),
@@ -198,7 +336,7 @@ export async function onRequest(context) {
         level: masterScore <= 25 ? 'Frozen' : masterScore <= 50 ? 'Thawing' : masterScore <= 75 ? 'Growing' : 'Flourishing',
         trend: 'rising'
       },
-      signals: FALLBACK_SIGNALS,
+      signals,
       history: {
         labels: ["14:02","13:32","13:02","12:32","12:02","11:32","11:02","10:32","10:02","9:32","9:02","8:32"],
         scores: [42,44,46,47,49,50,52,53,55,56,57,58]
