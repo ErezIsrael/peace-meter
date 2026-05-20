@@ -1,4 +1,5 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "peace-meter"
-pages_build_output_dir = "."
-compatibility_date = "2025-01-29"
+compatibility_date = "2026-05-20"
+# Build output is the 'app/' directory (set in Cloudflare Dashboard)
+# Local dev: npx wrangler pages dev app --compatibility-date=2026-05-20

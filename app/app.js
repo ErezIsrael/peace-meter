@@ -297,7 +297,6 @@ function renderAll(data) {
   renderTrend(data.history);
   renderPublications(data.publications || []);
   updateTimestamps(data);
-  document.getElementById('versionTag').textContent = `v${APP_VERSION}`;
 }
 
 /* ── Load & render ────────────────────────────────────── */
