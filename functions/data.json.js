@@ -9,14 +9,16 @@ const CACHE_TTL = 60; // 1 min
  *   me-news    — always include (inherently ME feed), moderate cap
  */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',            cap: 4, type: 'thinktank' },
-  { url: 'https://www.allmep.org/feed/',         source: 'ALLMEP',            cap: 3, type: 'thinktank' },
-  { url: 'https://fmep.org/feed/',               source: 'FMEP',              cap: 3, type: 'thinktank' },
-  { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',        cap: 2, type: 'me-news' },
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 2, type: 'me-news' },
+  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',            cap: 5, type: 'thinktank' },
+  { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',        cap: 3, type: 'me-news' },
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 3, type: 'me-news' },
   { url: 'https://www.jns.org/feed/',             source: 'JNS',               cap: 2, type: 'media' },
   { url: 'https://www.timesofisrael.com/feed/',   source: 'Times of Israel',   cap: 2, type: 'media' },
 ];
+
+/* Only show publications from the last 30 days */
+const MAX_AGE_DAYS = 30;
+const MAX_AGE_MS = MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
 /* ── Relevance keywords ─────────────────────────────── */
 /* Tier 1 — peace/conflict/diplomacy (high signal) */
@@ -137,11 +139,15 @@ async function fetchPublications() {
     } catch { /* skip on error */ }
   }
 
-  // Deduplicate by title, sort by date (newest first), take top 15
+  // Deduplicate by title, filter by freshness, sort by date (newest first)
+  const now = Date.now();
   const seen = new Set();
   const unique = allItems.filter(item => {
     if (seen.has(item.title)) return false;
     seen.add(item.title);
+    // Skip articles older than MAX_AGE_DAYS
+    const age = now - (item.timestamp || 0);
+    if (age > MAX_AGE_MS) return false;
     return true;
   });
 

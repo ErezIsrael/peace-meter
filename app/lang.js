@@ -123,7 +123,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     pubTitle: '📚 פרסומי חברה אזרחית ומכונים',
     footer1: 'מדד השלום הוא פרויקט ניסיוני למטרות מידע בלבד.',
     footer2: 'הציונים הם אגרגציה אלגוריתמית של נתונים ציבוריים, לא תחזיות.',
-    donate: '☕ תרמו קפה',
+    donate: '☕ קנו לי קפה',
     close: 'סגור',
 
     levels: {
@@ -271,7 +271,7 @@ function applyTranslations() {
     : {
         '#': ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות'],
         'https://github.com/ErezIsrael/peace-meter/issues': '🐛 דווח על באג',
-        'https://ko-fi.com/erezse': '☕ תרמו קפה',
+        'https://ko-fi.com/erezse': '☕ קנו לי קפה',
       };
   const links = document.querySelectorAll('.footer-links a.footer-link');
   const hashCounter = { count: 0 };
