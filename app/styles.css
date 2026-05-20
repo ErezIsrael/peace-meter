@@ -38,7 +38,7 @@ a:hover { text-decoration: underline; }
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding: 0 16px 64px;
+  padding: 0 16px 24px;
 }
 
 /* ── Header ───────────────────────────────────────────── */

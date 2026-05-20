@@ -4,9 +4,11 @@ const CACHE_TTL = 60; // 1 min
 
 /* ── RSS feeds (must be reachable from Cloudflare edge) ── */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',   alwaysInclude: false },
-  { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', alwaysInclude: true },
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', alwaysInclude: true },
+  { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',          cap: 3 },
+  { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', cap: 3 },
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 3 },
+  { url: 'https://www.jns.org/feed/',          source: 'JNS',             cap: 3 },
+  { url: 'https://www.al-monitor.com/rss',     source: 'Al Monitor',      cap: 3 },
 ];
 
 /* Middle East relevance keywords */
@@ -95,9 +97,8 @@ async function fetchPublications() {
       const res = await fetch(feed.url, { signal: AbortSignal.timeout(4000) });
       if (!res.ok) continue;
       const xml = await res.text();
-      const items = parseRSS(xml, feed.source, feed.alwaysInclude || false);
-      // Cap each source at 4 to prevent one feed from dominating
-      allItems.push(...items.slice(0, 4));
+      const items = parseRSS(xml, feed.source, false);
+      allItems.push(...items.slice(0, feed.cap || 4));
     } catch { /* skip on error */ }
   }
 
@@ -119,7 +120,8 @@ async function fetchPublications() {
 const FALLBACK_PUBLICATIONS = [
   { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", link: "https://mitvim.org.il/en/normalization-through-strength-a-dual-israeli-saudi-examination-of-power-perception-and-the-limits-of-military-centric/", date: "2026-04-20", sentiment: "peace" },
   { source: "Times of Israel", title: "Israel-UAE Relations: A Strategic Partnership", link: "https://www.timesofisrael.com/", date: "2026-04-15", sentiment: "peace" },
-  { source: "Mitvim", title: "IMEC 2.0: A New Regional Vision After the Gaza War", link: "https://mitvim.org.il/en/imec-2-0-a-new-regional-vision-after-the-gaza-war/", date: "2026-03-10", sentiment: "peace" }
+  { source: "JNS", title: "A Jewish Future in the Middle East", link: "https://www.jns.org/", date: "2026-04-10", sentiment: "peace" },
+  { source: "Al Monitor", title: "Regional Dynamics: Gulf-Israel Relations", link: "https://www.al-monitor.com/", date: "2026-03-25", sentiment: "peace" }
 ];
 
 const FALLBACK_SIGNALS = {

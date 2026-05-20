@@ -1,6 +1,6 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
-const APP_VERSION = '1.5.1'; // 2026-05-20: Israeli sources + per-source cap + version fix
+const APP_VERSION = '1.6.0'; // 2026-05-20: 5 RSS sources, sorted pubs, layout fix
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 
@@ -233,6 +233,8 @@ function showSignalDetail(key) {
 function renderPublications(pubs) {
   const container = document.getElementById('pubList');
   container.innerHTML = '';
+  // Sort by date (newest first)
+  pubs.sort((a, b) => new Date(b.date) - new Date(a.date));
   pubs.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pub-item';
