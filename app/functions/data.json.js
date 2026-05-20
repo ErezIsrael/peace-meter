@@ -1,98 +1,170 @@
-/* ── /data.json  —  Cloudflare Pages Function ──────────── */
-/* Returns the peace-meter JSON data.
- *
- * Currently serves embedded mock data. Replace the `getData()` function
- * with real RSS/API fetching when the backend pipeline is ready.
- *
- * Deployed at: https://peace-meter.pages.dev/data.json
- */
+/* ── /data.json — Cloudflare Pages Function ───────────── */
 
-// Cache-Control: 2 minutes — balances freshness vs. bandwidth
-const CACHE_TTL = 120;
+const CACHE_TTL = 120; // 2 min
 
-/**
- * Fetch real peace-meter data.
- *
- * Future: replace this with actual RSS parsing, OpenSky queries,
- * Polymarket API calls, VIEWS data, etc.
- */
-function getData() {
-  return {
-    timestamp: new Date().toISOString(),
-    master: { score: 58, level: "Thawing", trend: "rising" },
-    signals: {
-      tone: {
-        label: "Political Tone", icon: "🤝", weight: 0.20, score: 60,
-        history: [45, 48, 50, 52, 53, 55, 56, 57, 59, 60],
-        status: "Live", detail: "55% constructive statements from senior officials (7-day)"
-      },
-      news: {
-        label: "Diplomatic News", icon: "📰", weight: 0.15, score: 65,
-        history: [42, 45, 48, 50, 52, 55, 58, 60, 62, 65],
-        status: "Live", detail: "62% peace-toned articles in ME coverage"
-      },
-      aviation: {
-        label: "Commercial Aviation", icon: "✈️", weight: 0.12, score: 48,
-        history: [35, 37, 39, 40, 42, 43, 45, 46, 47, 48],
-        status: "Live", detail: "72 aircraft in ME airspace; Turkish Airlines resumed Beirut route"
-      },
-      prediction: {
-        label: "Prediction Markets", icon: "💰", weight: 0.10, score: 41,
-        history: [20, 22, 25, 28, 30, 33, 35, 37, 39, 41],
-        status: "Live", detail: "Israel-Iran ceasefire odds: 41% (Polymarket)"
-      },
-      credit: {
-        label: "Credit Ratings", icon: "🏛", weight: 0.10, score: 50,
-        history: [45, 45, 46, 46, 47, 47, 48, 49, 49, 50],
-        status: "Delayed", detail: "Israel: A- stable; Lebanon: C stable; Saudi: A stable"
-      },
-      travel: {
-        label: "Travel Advisories", icon: "🛂", weight: 0.10, score: 30,
-        history: [15, 18, 20, 22, 24, 25, 26, 27, 28, 30],
-        status: "Live", detail: "US Level 3-4 avg; UK Level 3; Israel NSC Level 4 for Gaza"
-      },
-      thinktank: {
-        label: "Think Tank & Expert", icon: "🧠", weight: 0.10, score: 52,
-        history: [30, 32, 35, 38, 40, 44, 47, 49, 50, 52],
-        status: "Live", detail: "Mitvim: normalization framework paper published"
-      },
-      shipping: {
-        label: "Gulf Shipping", icon: "🚢", weight: 0.07, score: 55,
-        history: [30, 32, 35, 38, 40, 42, 45, 48, 52, 55],
-        status: "Live", detail: "2 safe passage articles, 1 attack in 7 days"
-      },
-      views: {
-        label: "VIEWS AI Forecast", icon: "🌍", weight: 0.05, score: 62,
-        history: [55, 56, 57, 58, 59, 60, 60, 61, 61, 62],
-        status: "Delayed", detail: "VIEWS predicts declining fatalities for Israel, Lebanon"
-      },
-      humanitarian: {
-        label: "Humanitarian", icon: "🏥", weight: 0.01, score: 35,
-        history: [10, 12, 15, 18, 20, 22, 25, 28, 32, 35],
-        status: "Live", detail: "2 aid corridors opened, 1 prisoner swap this week"
-      }
-    },
-    history: {
-      labels: ["14:02", "13:32", "13:02", "12:32", "12:02", "11:32", "11:02", "10:32", "10:02", "9:32", "9:02", "8:32"],
-      scores: [42, 44, 46, 47, 49, 50, 52, 53, 55, 56, 57, 58]
-    },
-    publications: [
-      { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", date: "2026-04-20", sentiment: "peace" },
-      { source: "JISS", title: "The Gaza Reconstruction Framework: Economic and Security Implications", date: "2026-05-08", sentiment: "peace" },
-      { source: "Mitvim", title: "IMEC 2.0: A New Regional Vision After the Gaza War", date: "2026-03-10", sentiment: "peace" }
-    ]
-  };
+/* ── RSS feeds ─────────────────────────────────────────── */
+const RSS_FEEDS = [
+  { url: 'https://mitvim.org.il/en/feed/',   source: 'Mitvim' },
+  { url: 'https://ict.org.il/feed/',         source: 'ICT' },
+  { url: 'https://reliefweb.int/rss/news.xml', source: 'ReliefWeb' },
+];
+
+/* Middle East relevance keywords */
+const ME_KEYWORDS = [
+  'israel', 'palestine', 'gaza', 'lebanon', 'iran', 'syria', 'jordan',
+  'saudi', 'uae', 'dubai', 'turkey', 'beirut', 'tel aviv', 'damascus',
+  'middle east', 'iraq', 'yemen', 'houthi', 'hamas', 'hezbollah',
+  'ceasefire', 'normalization', 'abraham accords', 'dead sea', 'mediterranean',
+  'red sea', 'sinai', 'jerusalem', 'west bank', 'iran', 'qatar', 'bahrain',
+  'imf', 'imec', 'diplomat', 'peace deal', 'truce', 'negotiation'
+];
+
+/* ── Lightweight RSS parser ───────────────────────────── */
+function stripCDATA(text) {
+  return text ? text.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '').trim() : '';
 }
 
-export async function onRequest(context) {
-  const data = getData();
-  const json = JSON.stringify(data, null, 2);
+function parseRSS(xml, sourceName) {
+  const items = [];
+  const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g);
+  if (!itemMatches) return items;
 
-  return new Response(json, {
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": `public, max-age=${CACHE_TTL}, s-maxage=${CACHE_TTL}`,
-      "Access-Control-Allow-Origin": "*",
-    },
+  for (const block of itemMatches) {
+    const titleMatch   = block.match(/<title>([\s\S]*?)<\/title>/);
+    const linkMatch    = block.match(/<link>(.*?)<\/link>/);
+    const dateRaw      = block.match(/<pubDate>(.*?)<\/pubDate>/);
+
+    if (!titleMatch || !linkMatch) continue;
+
+    const title = stripCDATA(titleMatch[1]);
+    if (!title || title.length < 10) continue; // skip garbage
+
+    const link = linkMatch[1];
+    const pubDate = dateRaw ? new Date(dateRaw[1]) : new Date();
+    const dateStr = pubDate.toISOString().slice(0, 10);
+
+    // ── ME relevance filter ─────────────────────────────
+    const lower = title.toLowerCase();
+    let relevance = 0;
+    for (const kw of ME_KEYWORDS) {
+      if (lower.includes(kw)) relevance++;
+    }
+    if (sourceName === 'ReliefWeb') relevance += 1; // ReliefWeb is generally relevant
+
+    // Skip items not related to Middle East
+    if (relevance === 0) continue;
+
+    // ── Sentiment scoring ──────────────────────────────
+    const peaceW = ['peace', 'normalize', 'dialogue', 'deal', 'agreement', 'negotiat', 'ceasefire', 'truce', 'aid', 'corridor', 'swap', 'release', 'reconstruction', 'framework', 'vision', 'integration', 'cooperation', 'rebuild', 'resolution', 'détente', 'humanitarian', 'mediation'];
+    const warW   = ['attack', 'strike', 'deadly', 'killed', 'rocket', 'missile', 'drone', 'assassin', 'fury', 'lion', 'bombing', 'war', 'conflict', 'escalat', 'hijack', 'seized', 'casualt'];
+
+    let score = 0;
+    for (const w of peaceW) if (lower.includes(w)) score++;
+    for (const w of warW)   if (lower.includes(w)) score--;
+
+    const sentiment = score > 0 ? 'peace' : score < 0 ? 'war' : 'neutral';
+
+    items.push({ source: sourceName, title, link, date: dateStr, sentiment, timestamp: pubDate.getTime() });
+  }
+  return items;
+}
+
+/* ── Fetch publications from RSS feeds ────────────────── */
+async function fetchPublications() {
+  const allItems = [];
+
+  for (const feed of RSS_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { signal: AbortSignal.timeout(4000) });
+      if (!res.ok) continue;
+      const xml = await res.text();
+      const items = parseRSS(xml, feed.source);
+      allItems.push(...items);
+    } catch { /* skip on error */ }
+  }
+
+  // Deduplicate by title, sort by date (newest first), take top 5
+  const seen = new Set();
+  const unique = allItems.filter(item => {
+    if (seen.has(item.title)) return false;
+    seen.add(item.title);
+    return true;
   });
+
+  unique.sort((a, b) => b.timestamp - a.timestamp);
+
+  if (unique.length === 0) return FALLBACK_PUBLICATIONS;
+  return unique.slice(0, 5);
+}
+
+/* ── Fallback mock data ────────────────────────────────── */
+const FALLBACK_PUBLICATIONS = [
+  { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", date: "2026-04-20", sentiment: "peace" },
+  { source: "ICT", title: "Operations Epic Fury & Roaring Lion", date: "2026-03-18", sentiment: "war" },
+  { source: "Mitvim", title: "IMEC 2.0: A New Regional Vision After the Gaza War", date: "2026-03-10", sentiment: "peace" }
+];
+
+const FALLBACK_SIGNALS = {
+  tone:        { label: "Political Tone",      icon: "🤝", weight: 0.20, score: 60, history: [45,48,50,52,53,55,56,57,59,60], status: "Live",    detail: "55% constructive statements (7-day)" },
+  news:        { label: "Diplomatic News",     icon: "📰", weight: 0.15, score: 65, history: [42,45,48,50,52,55,58,60,62,65], status: "Live",    detail: "62% peace-toned articles" },
+  aviation:    { label: "Commercial Aviation",  icon: "✈️", weight: 0.12, score: 48, history: [35,37,39,40,42,43,45,46,47,48], status: "Live",    detail: "72 aircraft in ME airspace" },
+  prediction:  { label: "Prediction Markets",   icon: "💰", weight: 0.10, score: 41, history: [20,22,25,28,30,33,35,37,39,41], status: "Live",    detail: "Ceasefire odds: 41% (Polymarket)" },
+  credit:      { label: "Credit Ratings",       icon: "🏛", weight: 0.10, score: 50, history: [45,45,46,46,47,47,48,49,49,50], status: "Delayed", detail: "Israel: A-; Lebanon: C; Saudi: A" },
+  travel:      { label: "Travel Advisories",    icon: "🛂", weight: 0.10, score: 30, history: [15,18,20,22,24,25,26,27,28,30], status: "Live",    detail: "US Level 3-4 avg; UK Level 3" },
+  thinktank:   { label: "Think Tank & Expert",  icon: "🧠", weight: 0.10, score: 52, history: [30,32,35,38,40,44,47,49,50,52], status: "Live",    detail: "Mitvim: normalization framework paper" },
+  shipping:    { label: "Gulf Shipping",        icon: "🚢", weight: 0.07, score: 55, history: [30,32,35,38,40,42,45,48,52,55], status: "Live",    detail: "2 safe passages, 1 attack (7 days)" },
+  views:       { label: "VIEWS AI Forecast",    icon: "🌍", weight: 0.05, score: 62, history: [55,56,57,58,59,60,60,61,61,62], status: "Delayed", detail: "Declining predicted fatalities" },
+  humanitarian:{ label: "Humanitarian",         icon: "🏥", weight: 0.01, score: 35, history: [10,12,15,18,20,22,25,28,32,35], status: "Live",    detail: "2 aid corridors, 1 prisoner swap" }
+};
+
+function calcMaster(signals) {
+  let score = 0;
+  for (const key of Object.keys(signals)) score += signals[key].score * signals[key].weight;
+  return Math.round(score);
+}
+
+/* ── Handler ───────────────────────────────────────────── */
+export async function onRequest(context) {
+  try {
+    const publications = await fetchPublications();
+    const masterScore = calcMaster(FALLBACK_SIGNALS);
+
+    const data = {
+      timestamp: new Date().toISOString(),
+      master: {
+        score: masterScore,
+        level: masterScore <= 25 ? 'Frozen' : masterScore <= 50 ? 'Thawing' : masterScore <= 75 ? 'Growing' : 'Flourishing',
+        trend: 'rising'
+      },
+      signals: FALLBACK_SIGNALS,
+      history: {
+        labels: ["14:02","13:32","13:02","12:32","12:02","11:32","11:02","10:32","10:02","9:32","9:02","8:32"],
+        scores: [42,44,46,47,49,50,52,53,55,56,57,58]
+      },
+      publications
+    };
+
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": `public, max-age=${CACHE_TTL}, s-maxage=${CACHE_TTL}`,
+        "Access-Control-Allow-Origin": "*",
+      }
+    });
+  } catch (err) {
+    console.error('Data fetch error:', err);
+    return new Response(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      master: { score: 58, level: "Thawing", trend: "rising" },
+      signals: FALLBACK_SIGNALS,
+      history: { labels: ["14:02","13:32","13:02"], scores: [55,57,58] },
+      publications: FALLBACK_PUBLICATIONS
+    }, null, 2), {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": `public, max-age=${CACHE_TTL}`,
+        "Access-Control-Allow-Origin": "*",
+      }
+    });
+  }
 }

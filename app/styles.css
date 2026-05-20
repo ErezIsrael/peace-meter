@@ -281,6 +281,15 @@ html[dir="rtl"] .gauge-card {
   color: var(--text);
   margin-top: 2px;
 }
+.pub-title a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--text-muted);
+}
+.pub-title a:hover {
+  color: #38bdf8;
+  border-bottom-color: #38bdf8;
+}
 .pub-date {
   font-size: 11px;
   color: var(--text-muted);

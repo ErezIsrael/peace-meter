@@ -235,10 +235,12 @@ function renderPublications(pubs) {
   pubs.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pub-item';
+    const titleEl = p.link ? `<a href="${p.link}" target="_blank" rel="noopener">${p.title}</a>` : p.title;
+    const sentimentLabel = p.sentiment === 'peace' ? '🕊 peace' : p.sentiment === 'war' ? '⚔ war' : '⚖ neutral';
     div.innerHTML = `
       <div class="pub-source">${p.source}</div>
-      <div class="pub-title">${p.title}</div>
-      <div class="pub-date">${p.date} <span class="pub-tag ${p.sentiment}">${p.sentiment}</span></div>
+      <div class="pub-title">${titleEl}</div>
+      <div class="pub-date">${p.date} <span class="pub-tag ${p.sentiment}">${sentimentLabel}</span></div>
     `;
     container.appendChild(div);
   });
