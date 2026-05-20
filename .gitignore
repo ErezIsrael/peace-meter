@@ -4,6 +4,7 @@ dist/
 *.log
 .DS_Store
 .wrangler/
+app/.wrangler/
 gdelt-proxy/*.json
 # Internal dev docs — not part of the published site
 CONCEPT.md
