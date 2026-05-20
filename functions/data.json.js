@@ -239,26 +239,31 @@ async function fetchPublications() {
       const filtered = feed.type === 'media'
         ? items.filter(item => item.sentiment === 'peace')
         : items;
-      allItems.push(...filtered.slice(0, feed.cap || 3));
+      // Tag items with feed type for freshness filtering
+      const tagged = filtered.map(item => ({ ...item, _feedType: feed.type }));
+      allItems.push(...tagged.slice(0, feed.cap || 3));
     } catch { /* skip on error */ }
   }
 
   // Deduplicate by title, filter by freshness, sort by date (newest first)
   const now = Date.now();
   const seen = new Set();
+  const thinktankMaxAgeMs = 90 * 24 * 60 * 60 * 1000; // 90 days for think tanks
   const unique = allItems.filter(item => {
     if (seen.has(item.title)) return false;
     seen.add(item.title);
-    // Skip articles older than MAX_AGE_DAYS
+    // Skip stale articles; think tanks allowed 90 days, others 30
     const age = now - (item.timestamp || 0);
-    if (age > MAX_AGE_MS) return false;
+    const maxAge = item._feedType === 'thinktank' ? thinktankMaxAgeMs : MAX_AGE_MS;
+    if (age > maxAge) return false;
     return true;
   });
 
   unique.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   if (unique.length === 0) return FALLBACK_PUBLICATIONS;
-  return unique.slice(0, 15);
+  // Strip internal _feedType before returning
+  return unique.slice(0, 15).map(({ _feedType, ...item }) => item);
 }
 
 /* ── Fallback mock data ────────────────────────────────── */
