@@ -34,6 +34,48 @@ const LANG = {
       humanitarian: { icon:'🏥', name:'Humanitarian',           weight:'1%',  summary:'Aid corridors & prisoner swaps',      detail:'Counts events: aid openings, releases, hospital access, refugee returns. Lagging indicator — happens after political decisions.', sources:['UN OCHA reports','ReliefWeb RSS','BBC/Al Jazeera humanitarian keywords'], update:'Daily' }
     },
 
+    privacy: `<h2>Privacy Policy</h2>
+<p><em>Last updated: 2026-05-20</em></p>
+<p>Peace Meter does <strong>not collect personal data</strong>. No accounts, forms, or tracking.</p>
+<h3>Data handling</h3>
+<ul>
+<li><strong>Cloudflare</strong> — Host provider. Logs IP, timestamp, user-agent for security (7-30 days retention). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">See their policy</a>.</li>
+<li><strong>localStorage</strong> — Stores only language preference (<code>pm-lang</code>). Never leaves your device.</li>
+<li><strong>Google Fonts</strong> — Inter &amp; Space Grotesk loaded from Google. <a href="https://policies.google.com/privacy" target="_blank">See their policy</a>.</li>
+</ul>
+<h3>Your rights</h3>
+<p>Under Israel's Privacy Protection Law (Amendment 13) and GDPR, you may access, correct, or delete your data. Contact via <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
+    terms: `<h2>Terms of Service</h2>
+<p><em>Last updated: 2026-05-20</em></p>
+<p>Peace Meter is provided <strong>"as is"</strong>. Scores are algorithmic aggregations — <strong>not predictions or advice</strong>.</p>
+<h3>Key points</h3>
+<ul>
+<li>Not financial, political, or security advice</li>
+<li>Data from public RSS feeds and APIs — no accuracy guarantee</li>
+<li>© 2026 Erez Israel. All rights reserved.</li>
+<li>Governed by Israeli law</li>
+</ul>`,
+
+    accessibility: `<h2>Accessibility Statement</h2>
+<p><em>Last updated: 2026-05-20</em></p>
+<p>Peace Meter aims to comply with <strong>WCAG 2.1 Level AA</strong> and <strong>Israeli Standard IS 5568</strong>.</p>
+<h3>What we do</h3>
+<ul>
+<li>Semantic HTML5 with proper heading hierarchy</li>
+<li>Keyboard navigation for all interactive elements</li>
+<li>Visible focus indicators</li>
+<li>4.5:1+ color contrast</li>
+<li>RTL layout support for Hebrew</li>
+<li>Screen reader compatible (tested NVDA + VoiceOver)</li>
+</ul>
+<h3>Known limitations</h3>
+<ul>
+<li>SVG gauge: score number provided textually for screen readers</li>
+<li>Sparkline charts are visual-only; values shown as text</li>
+</ul>
+<p>Report barriers via <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
     about: `<h2>About Peace Meter</h2>
 <p>Peace Meter measures the "temperature of peace" across the Middle East using <strong>10 independent signals</strong>.</p>
 <p>It is <strong>not a prediction</strong> — a structured aggregation of publicly available data to track positive momentum.</p>
@@ -102,6 +144,48 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
       views:         { icon:'🌍', name:'תחזית AI — VIEWS',    weight:'5%',  summary:'תחזית קונפליקט בינה מלאכותית', detail:'VIEWS משתמש ב-AI לחזות נפגטים בטווח של 1-36 חודשים. ירידה בניפגטים הצפויים = אות של שלום.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'חודשי' },
       humanitarian:  { icon:'🏥', name:'הומניטרי',            weight:'1%',  summary:'מסדרונות סיוע והחלפת אסירים', detail:'סופר אירועים: פתיחת מסדרונות, שחרורים, גישה לבתי חולים, חזרת פליטים. מדד מאחר — מתרחש אחרי החלטות פוליטיות.', sources:['דוחות UN OCHA','RSS של ReliefWeb','מילות מפתח הומניטריות ב-BBC/אל-ג׳אזירה'], update:'יומי' }
     },
+
+    privacy: `<h2>מדיניות פרטיות</h2>
+<p><em>נעדכן לאחרונה: 2026-05-20</em></p>
+<p>מדד השלום <strong>לא אוסף נתונים אישיים</strong>. אין חשבונות, טפסים או מעקב.</p>
+<h3>טיפול בנתונים</h3>
+<ul>
+<li><strong>Cloudflare</strong> — ספק אחסון. מקליד IP, חותמת זמן, סוכן משתמש לצורכי אבטחה (שמירה 7-30 ימים). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">מדיניות הפרטיות</a>.</li>
+<li><strong>localStorage</strong> — שומר רק העדפת שפה (<code>pm-lang</code>). לעולם אינו עוזב את המכשיר.</li>
+<li><strong>גופני Google</strong> — Inter ו-Space Grotesk נטענים מ-Google. <a href="https://policies.google.com/privacy" target="_blank">מדיניות הפרטיות</a>.</li>
+</ul>
+<h3>הזכויות שלך</h3>
+<p>על פי תיקון 13 לחוק הגנת הפרטיות ו-GDPR, תוכל לגשת, לתקן או למחוק נתונים. פנה דרך <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
+    terms: `<h2>תנאי שימוש</h2>
+<p><em>נעדכן לאחרונה: 2026-05-20</em></p>
+<p>מדד השלום מוצג <strong>"כפי שהוא"</strong>. הציונים הם אגרגציה אלגוריתמית — <strong>לא תחזיות או ייעוץ</strong>.</p>
+<h3>נקודות מרכזיות</h3>
+<ul>
+<li>אינו ייעוץ פיננסי, פוליטי או ביטחוני</li>
+<li>נתונים מ-RSS ציבורי ו-APIs — ללא התחייבות לדיוק</li>
+<li>© 2026 Erez Israel. כל הזכויות שמורות.</li>
+<li>כפוף לחוקי מדינת ישראל</li>
+</ul>`,
+
+    accessibility: `<h2>הצהרת נגישות</h2>
+<p><em>נעדכן לאחרונה: 2026-05-20</em></p>
+<p>מדד השלום שואף לעמוד ב-<strong>WCAG 2.1 רמה AA</strong> ו<strong>תקן ישראלי IS 5568</strong>.</p>
+<h3>מה אנו עושים</h3>
+<ul>
+<li>מבנה HTML5 סמנטי עם ירושת כותרות תקינה</li>
+<li>ניווט במקלדת לכל אלמנטים אינטראקטיביים</li>
+<li>מראי מיקוד גלויים</li>
+<li>ניגודיות צבע 4.5:1+</li>
+<li>תמיכה בפריסת RTL לעברית</li>
+<li>תואם קוראי מסך (נבדק עם NVDA + VoiceOver)</li>
+</ul>
+<h3>הגבלות ידועות</h3>
+<ul>
+<li>מד גאג׳: מספר הציון מוצג כטקסט לקוראי מסך</li>
+<li>גרפי Sparkline ויזואליים בלבד; ערכים מוצגים כטקסט</li>
+</ul>
+<p>דווח על מחסומים דרך <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
 
     about: `<h2>אודות מדד השלום</h2>
 <p>מדד השלום הוא לוח בקרה בזמן אמת שממדד את "טמפרטורת השלום" במזרח התיכון באמצעות <strong>10 אותות בלתי תלויים</strong>.</p>
@@ -174,6 +258,13 @@ function applyTranslations() {
   const footer = document.querySelectorAll('.footer p');
   if (footer[0]) footer[0].textContent = L.footer1;
   if (footer[1]) footer[1].textContent = L.footer2;
+
+  // Translate footer links
+  const linkLabels = currentLang === 'en'
+    ? ['Privacy Policy', 'Terms of Service', 'Accessibility', '🐛 Report a Bug']
+    : ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות', '🐛 דווח על באג'];
+  const links = document.querySelectorAll('.footer-links .footer-link');
+  links.forEach((el, i) => { if (i < linkLabels.length) el.textContent = linkLabels[i]; });
 }
 
 window.LANG = LANG;

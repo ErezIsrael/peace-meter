@@ -320,6 +320,24 @@ html[dir="rtl"] .gauge-card {
   padding: 24px 0;
   border-top: 1px solid var(--border);
 }
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+.footer-link {
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.footer-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
 
 /* ── Modal ───────────────────────────────────────────── */
 .modal-overlay {
@@ -352,7 +370,7 @@ html[dir="rtl"] .gauge-card {
   line-height: 1.7;
   margin-bottom: 8px;
 }
-.modal ul { padding-left: 18px; margin-bottom: 12px; }
+.modal ul { padding-left: 18px; margin-bottom: 12px; } /* RTL override below */
 .modal-close {
   background: var(--card-hover);
   border: 1px solid var(--border);
@@ -362,4 +380,13 @@ html[dir="rtl"] .gauge-card {
   cursor: pointer;
   font-size: 13px;
   margin-top: 12px;
+}
+
+/* ── RTL overrides ───────────────────────────────────── */
+html[dir="rtl"] .modal ul {
+  padding-left: 0;
+  padding-right: 18px;
+}
+html[dir="rtl"] .footer-links {
+  direction: ltr;
 }
