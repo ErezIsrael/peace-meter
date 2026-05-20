@@ -43,10 +43,10 @@
 
         <!-- ── Master Gauge ──────────────────────────── -->
         <section class="gauge-card" aria-label="Peace score gauge">
+            <span class="sr-only" id="gaugeSr">Loading peace score...</span>
             <div class="gauge-title">Middle East Peace Score</div>
             <div class="gauge-container">
                 <svg class="gauge-svg" viewBox="0 0 200 115" role="img" aria-label="Peace score gauge">
-                    <span class="sr-only" id="gaugeSr">Loading peace score...</span>
                     <defs>
                         <linearGradient id="grad-frozen"      x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#7dd3fc"/>
@@ -73,7 +73,7 @@
         <!-- ── 72-Hour Trend ─────────────────────────── -->
         <section class="chart-card" aria-label="Trend chart">
             <h3>📈 Trend (12 Hours)</h3>
-            <svg id="trendSvg" style="width:100%;height:200px;" viewBox="0 0 600 200" role="img" aria-label="12-hour trend chart"></svg>
+            <svg id="trendSvg" style="width:100%;height:160px;" viewBox="0 0 600 200" role="img" aria-label="12-hour trend chart"></svg>
         </section>
 
         <!-- ── Signal Cards ──────────────────────────── -->

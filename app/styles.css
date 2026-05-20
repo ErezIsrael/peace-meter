@@ -180,7 +180,7 @@ html[dir="rtl"] .gauge-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 20px;
+  padding: 14px 16px;
   margin-bottom: 16px;
 }
 .chart-card h3 {
@@ -189,7 +189,7 @@ html[dir="rtl"] .gauge-card {
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 /* ── Signal Grid ─────────────────────────────────────── */
