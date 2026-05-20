@@ -88,14 +88,17 @@ async function fetchGDELT() {
         if (!res.ok) continue;
         const text = await res.text();
         const parsed = parseGDELT(text);
-        if (parsed && parsed.eventCount > 0) return parsed;
+        if (parsed && parsed.eventCount > 0) {
+          parsed._rawCsv = text; // store for per-pair computation
+          return parsed;
+        }
       } catch { /* try next URL */ }
     }
   }
   return null;
 }
 
-function parseGDELT(csvText) {
+function parseGDELT(csvText, pairFilters) {
   const lines = csvText.trim().split('\n');
   if (lines.length < 2) return null; // header only
 
@@ -119,6 +122,14 @@ function parseGDELT(csvText) {
     // Check if at least one actor is a ME country we track
     const actorMatch = GDELT_COUNTRIES.includes(actor1) || GDELT_COUNTRIES.includes(actor2);
     if (!actorMatch) continue;
+
+    // If pairFilters provided, only count events matching those countries
+    if (pairFilters && pairFilters.countries) {
+      const pairMatch = (pairFilters.countries.includes(actor1) && pairFilters.countries.includes(actor2))
+        || (pairFilters.countries.includes(actor1) && !GDELT_COUNTRIES.includes(actor2))
+        || (!GDELT_COUNTRIES.includes(actor1) && pairFilters.countries.includes(actor2));
+      if (!pairMatch) continue;
+    }
 
     // Skip events with zero Goldstein (neutral)
     if (goldstein === 0) continue;
@@ -293,6 +304,55 @@ function calcMaster(signals) {
   return Math.round(score);
 }
 
+/* ── Per-pair peace scores ────────────────────────────── */
+const PAIR_DEFS = [
+  { id: 'israel-palestine', name: 'Israel-Palestine', countries: ['ISR', 'PSE'], weight: 0.35 },
+  { id: 'israel-lebanon',   name: 'Israel-Lebanon',   countries: ['ISR', 'LBN'], weight: 0.25 },
+  { id: 'red-sea',          name: 'Red Sea / Yemen',  countries: ['YEM', 'SAU', 'ARE'], weight: 0.20 },
+  { id: 'israel-iran',      name: 'Israel-Iran',      countries: ['ISR', 'IRN'], weight: 0.15 },
+  { id: 'gulf-normalization',name: 'Abraham Accords', countries: ['ISR', 'ARE', 'BHR'], weight: 0.05 },
+];
+
+function getLevelLabel(score) {
+  if (score <= 25) return 'Frozen';
+  if (score <= 50) return 'Thawing';
+  if (score <= 75) return 'Growing';
+  return 'Flourishing';
+}
+
+function computePairScore(pair, gdeltData) {
+  if (!gdeltData || !gdeltData._rawCsv) {
+    return { id: pair.id, name: pair.name, score: null, level: 'Unknown', detail: 'No data available' };
+  }
+  // Re-parse GDELT filtered to this pair's countries
+  const pairGdelt = parseGDELT(gdeltData._rawCsv, pair);
+
+  if (!pairGdelt || pairGdelt.eventCount === 0) {
+    return { id: pair.id, name: pair.name, score: null, level: 'Unknown', detail: 'No recent events' };
+  }
+
+  // Tone: Goldstein Scale mapped 0-100
+  const tone = Math.round(clamp(0, 100, 50 + (pairGdelt.avgGoldstein / 10) * 50));
+
+  // Diplomatic news: constructive ratio
+  const news = Math.round(clamp(3, 95, Math.round(Math.pow(pairGdelt.constructiveRatio, 2) * 150)));
+
+  // Conflict: hostile ratio inverted
+  const hostileRatio = pairGdelt.hostileEvents / pairGdelt.eventCount;
+  const conflict = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
+
+  // Weighted combo: tone 40%, news 30%, conflict 30%
+  const score = Math.round(tone * 0.40 + news * 0.30 + conflict * 0.30);
+
+  return {
+    id: pair.id,
+    name: pair.name,
+    score: clamp(0, 100, score),
+    level: getLevelLabel(score),
+    detail: `${pairGdelt.eventCount} events — tone ${pairGdelt.avgGoldstein > 0 ? '+' : ''}${pairGdelt.avgGoldstein.toFixed(1)}, ${pairGdelt.diplomaticCount} diplomatic`,
+  };
+}
+
 /* ── Handler ───────────────────────────────────────────── */
 export async function onRequest(context) {
   try {
@@ -354,6 +414,9 @@ export async function onRequest(context) {
 
     const masterScore = calcMaster(signals);
 
+    // Compute per-pair scores
+    const pairs = PAIR_DEFS.map(pair => computePairScore(pair, gdeltData));
+
     const data = {
       timestamp: new Date().toISOString(),
       master: {
@@ -366,7 +429,8 @@ export async function onRequest(context) {
         labels: ["14:02","13:32","13:02","12:32","12:02","11:32","11:02","10:32","10:02","9:32","9:02","8:32"],
         scores: [42,44,46,47,49,50,52,53,55,56,57,58]
       },
-      publications
+      publications,
+      pairs
     };
 
     return new Response(JSON.stringify(data, null, 2), {
@@ -383,7 +447,8 @@ export async function onRequest(context) {
       master: { score: 58, level: "Thawing", trend: "rising" },
       signals: FALLBACK_SIGNALS,
       history: { labels: ["14:02","13:32","13:02"], scores: [55,57,58] },
-      publications: FALLBACK_PUBLICATIONS
+      publications: FALLBACK_PUBLICATIONS,
+      pairs: PAIR_DEFS.map(pair => ({ id: pair.id, name: pair.name, score: null, level: 'Unknown', detail: 'Data unavailable' }))
     }, null, 2), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",

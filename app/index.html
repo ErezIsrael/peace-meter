@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERSION: 2.1.1 -->
+<!-- VERSION: 2.2.0 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,8 +14,8 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☮️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js removed — using inline SVG sparklines -->
-    <link rel="stylesheet" href="styles.css?v=2.1.1">
-    <script src="lang.js?v=2.1.1"></script>
+    <link rel="stylesheet" href="styles.css?v=2.2.0">
+    <script src="lang.js?v=2.2.0"></script>
 </head>
 <body>
     <div class="app" role="main" aria-label="Peace Meter dashboard">
@@ -82,6 +82,14 @@
             <!-- Rendered by JS -->
         </section>
 
+        <!-- ── Conflict Pairs ────────────────────────── -->
+        <section class="pairs-card" aria-label="Conflict pair scores">
+            <h3 class="pairs-toggle" onclick="togglePairs()">⚔️ Conflict Pairs <span class="toggle-arrow" id="pairArrow">▼</span></h3>
+            <div id="pairsGrid" class="pairs-grid" style="display:none">
+                <!-- Rendered by JS -->
+            </div>
+        </section>
+
         <!-- ── Think Tank Publications ───────────────── -->
         <section class="pub-card" aria-label="Publications">
             <h3>📚 Recent Think Tank Publications</h3>
@@ -113,6 +121,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=2.1.1"></script>
+    <script src="app.js?v=2.2.0"></script>
 </body>
 </html>

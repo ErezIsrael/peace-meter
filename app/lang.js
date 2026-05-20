@@ -1,5 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
-/* VERSION: 2.1.1 */
+/* VERSION: 2.2.0 */
 
 const LANG = {
   en: {
@@ -17,6 +17,8 @@ const LANG = {
     errorOffline: 'Could not load data. Please retry.',
     retry: 'Retry',
     close: 'Close',
+    pairToggle: '⚔️ Conflict Pairs',
+    pairUnknown: 'Unknown',
 
     levels: {
       frozen: '❄️ Frozen',
@@ -186,6 +188,8 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     errorOffline: 'נכשל בטעינת הנתונים. אנא נסה שוב.',
     retry: 'נסה שוב',
     close: 'סגור',
+    pairToggle: '⚔️ זוגות קונפליקט',
+    pairUnknown: 'לא ידוע',
 
     levels: {
       frozen: '❄️ קפוא',
@@ -380,6 +384,8 @@ function applyTranslations() {
   document.querySelector('.live-badge').childNodes[1].textContent = ' ' + L.live;
   document.querySelector('.gauge-title').textContent = L.gaugeTitle;
   document.querySelector('.chart-card h3').textContent = L.trendTitle;
+  const pairsH3 = document.querySelector('.pairs-toggle');
+  if (pairsH3) pairsH3.childNodes[0].textContent = L.pairToggle + ' ';
   document.querySelector('.pub-card h3').textContent = L.pubTitle;
   document.getElementById('modalClose').textContent = L.close;
   document.getElementById('retryBtn').textContent = L.retry;

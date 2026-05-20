@@ -1,5 +1,5 @@
 /* ── Reset & Variables ─────────────────────────────────── */
-/* VERSION: 2.1.1 */
+/* VERSION: 2.2.0 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -263,6 +263,73 @@ html[dir="rtl"] .gauge-card {
 }
 .signal-status.live   { color: var(--growing); background: rgba(74,222,128,0.1); }
 .signal-status.delayed { color: var(--flourishing); background: rgba(251,191,36,0.1); }
+
+/* ── Conflict Pairs ──────────────────────────────────── */
+.pairs-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.pairs-toggle {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.toggle-arrow {
+  transition: transform 0.2s;
+  font-size: 12px;
+}
+.toggle-arrow.collapsed { transform: rotate(-90deg); }
+.pairs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  .pairs-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.pair-item {
+  background: #0f1720;
+  border-radius: 8px;
+  padding: 12px;
+  border-left: 3px solid #334155;
+  text-align: center;
+  transition: background 0.15s;
+}
+.pair-item:hover { background: var(--card-hover); }
+.pair-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+.pair-score {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 700;
+}
+.pair-level {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+.pair-detail {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
 
 /* ── Publications ────────────────────────────────────── */
 .pub-card {

@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.1.1 */
+/* VERSION: 2.2.0 */
 
-const APP_VERSION = '2.1.1'; // 2026-05-20: Think tank 90-day freshness
+const APP_VERSION = '2.2.0'; // 2026-05-20: Per-pair peace scores
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -240,6 +240,49 @@ function showSignalDetail(key) {
   overlay.classList.add('active');
 }
 
+/* ── Conflict Pairs ───────────────────────────────────── */
+function renderPairs(pairs) {
+  const grid = document.getElementById('pairsGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  pairs.forEach(pair => {
+    const card = document.createElement('div');
+    card.className = 'pair-item';
+
+    let scoreText, levelText, color;
+    if (pair.score === null || pair.score === undefined) {
+      scoreText = '—';
+      levelText = t('pairUnknown') || 'Unknown';
+      color = '#64748b';
+    } else {
+      const level = getLevel(pair.score);
+      scoreText = pair.score;
+      levelText = level.label;
+      color = level.color;
+    }
+
+    card.style.borderLeftColor = color;
+    card.innerHTML = `
+      <div class="pair-name">${pair.name}</div>
+      <div class="pair-score" style="color:${color}">${scoreText}</div>
+      <div class="pair-level" style="color:${color}">${levelText}</div>
+      <div class="pair-detail">${pair.detail || ''}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+let pairsCollapsed = true;
+
+function togglePairs() {
+  const grid = document.getElementById('pairsGrid');
+  const arrow = document.getElementById('pairArrow');
+  pairsCollapsed = !pairsCollapsed;
+  grid.style.display = pairsCollapsed ? 'none' : 'grid';
+  if (arrow) arrow.classList.toggle('collapsed', pairsCollapsed);
+}
+
 /* ── Publications ─────────────────────────────────────── */
 function renderPublications(pubs) {
   const container = document.getElementById('pubList');
@@ -308,6 +351,7 @@ function renderAll(data) {
   renderGauge(data.master.score);
   renderSignals(data.signals);
   renderTrend(data.history);
+  renderPairs(data.pairs || []);
   renderPublications(data.publications || []);
   updateTimestamps(data);
 }
