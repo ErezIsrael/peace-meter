@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.5.0 */
+/* VERSION: 2.5.1 */
 
-const APP_VERSION = '2.5.0'; // 2026-05-20: Regional peace map visualization
+const APP_VERSION = '2.5.1'; // 2026-05-20: Map with country outlines + expand modal
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -286,79 +286,143 @@ function togglePairs() {
 }
 
 /* ── Regional Map ─────────────────────────────────────── */
-const MAP_LOCATIONS = [
-  { id: 'israel-palestine', label: 'IL-PS', cx: 310, cy: 210, r: 10 },
-  { id: 'israel-lebanon',   label: 'IL-LB', cx: 310, cy: 140, r: 9  },
-  { id: 'red-sea',          label: 'RS',   cx: 280, cy: 300, r: 11 },
-  { id: 'israel-iran',      label: 'IL-IR', cx: 410, cy: 160, r: 9 },
-  { id: 'usa-iran',         label: 'US-IR', cx: 470, cy: 120, r: 7 },
-  { id: 'gulf-normalization', label: 'AA', cx: 430, cy: 280, r: 8 },
+// Country outlines (simplified SVG paths for ME map)
+const ME_COUNTRIES = {
+  turkey:     { path: 'M200 30 L300 20 L360 40 L380 70 L370 100 L340 110 L280 105 L220 95 L190 60 Z', fill: '#0e1520', label: 'Turkey' },
+  syria:      { path: 'M260 110 L340 105 L370 115 L375 145 L350 160 L300 155 L260 140 Z', fill: '#0e1520', label: 'Syria' },
+  lebanon:    { path: 'M370 115 L385 118 L387 145 L375 150 L370 135 Z', fill: '#0f1620', label: 'Lebanon' },
+  israel:     { path: 'M365 155 L380 150 L382 185 L375 195 L362 190 L360 165 Z', fill: '#0f1620', label: 'Israel' },
+  jordan:     { path: 'M380 155 L410 150 L420 190 L415 230 L395 240 L380 220 L378 180 Z', fill: '#0e1520', label: 'Jordan' },
+  iraq:       { path: 'M410 100 L460 90 L490 120 L500 170 L490 220 L460 240 L420 230 L415 180 L405 130 Z', fill: '#0e1520', label: 'Iraq' },
+  iran:       { path: 'M500 80 L570 70 L620 95 L630 150 L620 210 L590 240 L550 230 L510 200 L500 140 Z', fill: '#0e1520', label: 'Iran' },
+  saudi:      { path: 'M370 240 L420 230 L460 240 L490 260 L510 310 L500 360 L460 380 L410 370 L370 340 L350 290 Z', fill: '#0e1520', label: 'Saudi Arabia' },
+  yemen:      { path: 'M350 350 L390 340 L420 360 L430 390 L400 400 L360 390 Z', fill: '#0e1520', label: 'Yemen' },
+  uae:        { path: 'M480 370 L510 365 L525 380 L515 395 L490 390 Z', fill: '#0f1620', label: 'UAE' },
+  egypt:      { path: 'M160 200 L230 180 L250 220 L260 290 L240 330 L200 340 L160 310 L150 250 Z', fill: '#0e1520', label: 'Egypt' },
+  kuwait:     { path: 'M470 240 L490 235 L495 255 L480 260 Z', fill: '#0f1620', label: 'Kuwait' },
+};
+
+// Pair score dot positions on the map
+const MAP_PAIRS = [
+  { id: 'israel-palestine', cx: 373, cy: 175 },
+  { id: 'israel-lebanon',   cx: 378, cy: 132 },
+  { id: 'red-sea',          cx: 310, cy: 310 },
+  { id: 'israel-iran',      cx: 495, cy: 160 },
+  { id: 'usa-iran',         cx: 610, cy: 140 },
+  { id: 'gulf-normalization', cx: 500, cy: 340 },
 ];
+
+// Connection lines between pair dots
+const MAP_LINES = [
+  ['israel-palestine', 'israel-lebanon'],
+  ['israel-palestine', 'israel-iran'],
+  ['red-sea', 'gulf-normalization'],
+];
+
+function buildMapSVG(pairs, large) {
+  const W = 720, H = 440;
+  const pairMap = Object.fromEntries(pairs.map(p => [p.id, p]));
+  const scale = large ? 1 : 0.72;
+  const fs = large ? 10 : 8;
+  const labelFs = large ? 11 : 9;
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;`;
+  if (!large) svg += `cursor:pointer;`;
+  svg += `">`;
+
+  // Background
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#0a0e14" rx="8"/>`;
+
+  // Water labels
+  svg += `<text x="270" y="280" text-anchor="middle" font-size="${fs}" fill="#1a2a40" font-style="italic">Red Sea</text>`;
+  svg += `<text x="520" y="350" text-anchor="middle" font-size="${fs}" fill="#1a2a40" font-style="italic">Gulf</text>`;
+  svg += `<text x="370" y="100" text-anchor="middle" font-size="${fs}" fill="#1a2a40" font-style="italic">Mediterranean</text>`;
+
+  // Country shapes
+  for (const [key, c] of Object.entries(ME_COUNTRIES)) {
+    svg += `<path d="${c.path}" fill="${c.fill}" stroke="#1e2a38" stroke-width="0.8" class="map-country" data-country="${key}"/>`;
+    // Country label
+    const pts = c.path.match(/\d+/g);
+    if (pts && pts.length >= 2) {
+      const cx = pts.slice(0, pts.length/2).reduce((a,b)=>parseInt(a)+parseInt(b),0) / (pts.length/4);
+      const cy = pts.slice(pts.length/2).reduce((a,b)=>parseInt(a)+parseInt(b),0) / (pts.length/4);
+      svg += `<text x="${cx}" y="${cy}" text-anchor="middle" font-size="${labelFs}" fill="#64748b" font-family="var(--heading-font)" font-weight="500">${c.label}</text>`;
+    }
+  }
+
+  // Connection lines
+  MAP_LINES.forEach(([fromId, toId]) => {
+    const a = MAP_PAIRS.find(p => p.id === fromId);
+    const b = MAP_PAIRS.find(p => p.id === toId);
+    if (a && b)
+      svg += `<line x1="${a.cx}" y1="${a.cy}" x2="${b.cx}" y2="${b.cy}" stroke="#2a3a50" stroke-width="1" stroke-dasharray="5,4" opacity="0.6"/>`;
+  });
+
+  // Pair score dots
+  const dotR = large ? 14 : 11;
+  MAP_PAIRS.forEach(pair => {
+    const data = pairMap[pair.id];
+    let color = '#64748b';
+    let score = null;
+    if (data && data.score != null) {
+      const level = getLevel(data.score);
+      color = level.color;
+      score = data.score;
+    }
+    // Glow
+    svg += `<circle cx="${pair.cx}" cy="${pair.cy}" r="${dotR + 4}" fill="${color}" opacity="0.1"/>`;
+    // Dot
+    svg += `<circle class="map-dot" cx="${pair.cx}" cy="${pair.cy}" r="${dotR}" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2" stroke-opacity="0.9" data-pair="${pair.id}"/>`;
+    // Score
+    if (score !== null) {
+      svg += `<text x="${pair.cx}" y="${pair.cy + 4}" text-anchor="middle" font-size="${fs + 1}" fill="${color}" font-family="var(--heading-font)" font-weight="700">${score}</text>`;
+    }
+  });
+
+  // Legend (only in large view)
+  if (large) {
+    svg += `<g transform="translate(14, ${H - 80})">`;
+    const levels = [
+      { label: 'Frozen', color: '#7dd3fc' },
+      { label: 'Thawing', color: '#38bdf8' },
+      { label: 'Growing', color: '#4ade80' },
+      { label: 'Flourishing', color: '#fbbf24' },
+    ];
+    levels.forEach((l, i) => {
+      const x = i * 55;
+      svg += `<circle cx="${x + 8}" cy="6" r="5" fill="${l.color}" opacity="0.6" stroke="${l.color}" stroke-width="1"/>`;
+      svg += `<text x="${x + 16}" y="10" font-size="8" fill="#94a3b8">${l.label}</text>`;
+    });
+    svg += `</g>`;
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
 
 function renderMap(pairs) {
   const container = document.getElementById('mapContainer');
   if (!container) return;
-  const W = 520, H = 380;
-  const pairMap = Object.fromEntries(pairs.map(p => [p.id, p]));
+  container.innerHTML = buildMapSVG(pairs, false);
+  container.querySelector('svg').addEventListener('click', expandMap);
+}
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+function expandMap() {
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+  overlay.classList.add('active');
+  overlay.addEventListener('click', collapseMap);
 
-  // Simplified ME outline (abstract, decorative)
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#0a0e14" rx="8"/>`;
+  // Re-render map at large size
+  const pairs = (lastData && lastData.pairs) || [];
+  content.innerHTML = `<div style="padding:10px;">${buildMapSVG(pairs, true)}</div>`;
+}
 
-  // Abstract land mass outlines
-  svg += `<path d="M160 80 L260 60 L340 80 L380 130 L400 200 L380 280 L340 320 L280 340 L220 320 L180 280 L160 200 L150 130 Z" fill="#111820" stroke="#1e2a38" stroke-width="1"/>`;
-  svg += `<path d="M400 260 L440 240 L470 270 L460 310 L430 330 L400 310 Z" fill="#111820" stroke="#1e2a38" stroke-width="1"/>`;
-  svg += `<path d="M180 280 L220 300 L260 330 L240 360 L200 340 Z" fill="#111820" stroke="#1e2a38" stroke-width="1"/>`;
-
-  // Country labels
-  const countryLabels = [
-    { text: 'Lebanon', x: 320, y: 120 },
-    { text: 'Israel/Palestine', x: 285, y: 195 },
-    { text: 'Syria', x: 310, y: 160 },
-    { text: 'Jordan', x: 350, y: 210 },
-    { text: 'Iraq', x: 400, y: 190 },
-    { text: 'Iran', x: 450, y: 170 },
-    { text: 'Yemen', x: 270, y: 310 },
-    { text: 'Saudi', x: 370, y: 270 },
-    { text: 'UAE/Bahrain', x: 440, y: 295 },
-    { text: 'Red Sea', x: 260, y: 340 },
-  ];
-  countryLabels.forEach(cl => {
-    svg += `<text x="${cl.x}" y="${cl.y}" class="map-label" text-anchor="middle">${cl.text}</text>`;
-  });
-
-  // Pair connection lines
-  const pairLines = [
-    { from: 'israel-palestine', to: 'israel-lebanon' },
-    { from: 'israel-palestine', to: 'israel-iran' },
-    { from: 'red-sea', to: 'gulf-normalization' },
-    { from: 'israel-iran', to: 'usa-iran' },
-  ];
-  pairLines.forEach(pl => {
-    const a = MAP_LOCATIONS.find(l => l.id === pl.from);
-    const b = MAP_LOCATIONS.find(l => l.id === pl.to);
-    if (a && b)
-      svg += `<line x1="${a.cx}" y1="${a.cy}" x2="${b.cx}" y2="${b.cy}" stroke="#1e2a38" stroke-width="0.5" stroke-dasharray="4,4"/>`;
-  });
-
-  // Score dots
-  MAP_LOCATIONS.forEach(loc => {
-    const pair = pairMap[loc.id];
-    let color = '#64748b';
-    if (pair && pair.score != null) {
-      const level = getLevel(pair.score);
-      color = level.color;
-    }
-    svg += `<circle class="map-dot" cx="${loc.cx}" cy="${loc.cy}" r="${loc.r}" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="2" stroke-opacity="0.8"/>`;
-    if (pair && pair.score != null) {
-      svg += `<text x="${loc.cx}" y="${loc.cy + 3.5}" text-anchor="middle" font-size="8" fill="${color}" font-family="var(--heading-font)" font-weight="600">${pair.score}</text>`;
-    }
-    svg += `<text x="${loc.cx}" y="${loc.cy - loc.r - 4}" text-anchor="middle" class="map-pair-label" fill="${color}">${loc.label}</text>`;
-  });
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
+function collapseMap(e) {
+  if (e && e.target && e.target.closest('.modal') && !e.target.classList.contains('modal-close')) return;
+  const overlay = document.getElementById('modalOverlay');
+  overlay.classList.remove('active');
+  overlay.removeEventListener('click', collapseMap);
 }
 
 let mapCollapsed = true;
