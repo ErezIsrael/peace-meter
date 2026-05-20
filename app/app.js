@@ -1,6 +1,6 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
-const APP_VERSION = '1.7.2'; // 2026-05-20: 30-day freshness filter, HE translation fix fix
+const APP_VERSION = '1.7.3'; // 2026-05-20: added EcoPeace ME RSS source fix
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 

@@ -9,7 +9,8 @@ const CACHE_TTL = 60; // 1 min
  *   me-news    — always include (inherently ME feed), moderate cap
  */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',            cap: 5, type: 'thinktank' },
+  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',            cap: 4, type: 'thinktank' },
+  { url: 'https://ecopeaceme.org/feed/',         source: 'EcoPeace',          cap: 3, type: 'thinktank' },
   { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',        cap: 3, type: 'me-news' },
   { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 3, type: 'me-news' },
   { url: 'https://www.jns.org/feed/',             source: 'JNS',               cap: 2, type: 'media' },
