@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js removed — using inline SVG sparklines -->
     <link rel="stylesheet" href="styles.css">
+    <script src="lang.js"></script>
 </head>
 <body>
     <div class="app">
@@ -16,7 +17,8 @@
         <header class="header">
             <h1 class="logo">☮️ Peace Meter</h1>
             <div class="header-right">
-                <div class="live-badge"><div class="live-dot"></div>Live</div>
+                <div class="live-badge"><div class="live-dot"></div> Live</div>
+                <button class="icon-btn" id="langToggle" onclick="toggleLang()" title="עברית / English">א</button>
                 <button class="icon-btn" onclick="showInfo('calculation')" title="How it works">?</button>
                 <button class="icon-btn" onclick="showInfo('about')" title="About Peace Meter">i</button>
             </div>
@@ -24,7 +26,7 @@
 
         <!-- ── Timestamp bar ─────────────────────────── -->
         <div class="timestamp-bar">
-            <span>Updated <span class="time" id="lastUpdate">--:--</span> <span class="tz" id="timezone">UTC</span></span>
+            <span id="updatedLabel">Updated</span> <span class="time" id="lastUpdate">--:--</span> <span class="tz" id="timezone"></span>
             <span id="nextUpdate"></span>
         </div>
 

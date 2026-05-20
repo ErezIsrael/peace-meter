@@ -20,6 +20,9 @@
 }
 
 html { font-size: 16px; }
+html[dir="rtl"] body {
+  font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+}
 body {
   background: var(--bg);
   color: var(--text);
@@ -83,10 +86,32 @@ a:hover { text-decoration: underline; }
   width: 28px; height: 28px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 11px;
+  font-weight: 700;
   display: grid; place-items: center;
 }
 .icon-btn:hover { background: var(--card-hover); color: var(--text); }
+
+/* ── RTL overrides ─────────────────────────────────────── */
+html[dir="rtl"] .signal-detail {
+  text-align: right;
+}
+html[dir="rtl"] .pub-item {
+  text-align: right;
+}
+html[dir="rtl"] .modal p,
+html[dir="rtl"] .modal li,
+html[dir="rtl"] .modal h2,
+html[dir="rtl"] .modal h3 {
+  text-align: right;
+}
+html[dir="rtl"] .modal ul {
+  padding-right: 18px;
+  padding-left: 0;
+}
+html[dir="rtl"] .gauge-card {
+  direction: ltr;
+}
 
 /* ── Timestamp bar ───────────────────────────────────── */
 .timestamp-bar {

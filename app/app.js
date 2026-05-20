@@ -3,12 +3,29 @@
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 
+/* ── Language toggle ──────────────────────────────────── */
+function toggleLang() {
+  const next = currentLang === 'en' ? 'he' : 'en';
+  setLanguage(next);
+  document.getElementById('langToggle').textContent = next === 'en' ? 'א' : 'En';
+  // re-render everything in new language
+  lastData && renderAll(lastData);
+}
+
 /* ── Level helpers ─────────────────────────────────────── */
 function getLevel(score) {
-  if (score <= 25) return { label: 'Frozen',      cls: 'frozen',      color: '#7dd3fc', emoji: '❄️' };
-  if (score <= 50) return { label: 'Thawing',     cls: 'thawing',     color: '#38bdf8', emoji: '🌤' };
-  if (score <= 75) return { label: 'Growing',     cls: 'growing',     color: '#4ade80', emoji: '🌱' };
-  return                    { label: 'Flourishing', cls: 'flourishing', color: '#fbbf24', emoji: '🕊' };
+  const levels = {
+    frozen:      { cls: 'frozen',      color: '#7dd3fc' },
+    thawing:     { cls: 'thawing',     color: '#38bdf8' },
+    growing:     { cls: 'growing',     color: '#4ade80' },
+    flourishing: { cls: 'flourishing', color: '#fbbf24' }
+  };
+  let key;
+  if (score <= 25) key = 'frozen';
+  else if (score <= 50) key = 'thawing';
+  else if (score <= 75) key = 'growing';
+  else key = 'flourishing';
+  return { label: t('levels.' + key), ...levels[key] };
 }
 
 /* ── Gauge rendering ──────────────────────────────────── */
@@ -25,7 +42,7 @@ function renderGauge(score) {
   scoreEl.textContent = score;
   scoreEl.style.color = level.color;
 
-  statusEl.textContent = `${level.emoji} ${level.label}`;
+  statusEl.textContent = level.label;
   statusEl.className = `status-label ${level.cls}`;
 }
 
@@ -41,7 +58,6 @@ function renderSparklineSvg(container, data, color) {
     return `${x},${y}`;
   });
 
-  // build area fill
   const firstPt = pts[0].split(',');
   const lastPt  = pts[pts.length - 1].split(',');
   const areaD = `M${pts.join(' L')} L${lastPt[0]},${h} L${firstPt[0]},${h} Z`;
@@ -50,14 +66,12 @@ function renderSparklineSvg(container, data, color) {
   svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
   svg.style.cssText = 'width:100%;height:32px;display:block;';
 
-  // area
   const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   area.setAttribute('d', areaD);
   area.setAttribute('fill', color);
   area.setAttribute('opacity', '0.12');
   svg.appendChild(area);
 
-  // line
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   line.setAttribute('points', pts.join(' '));
   line.setAttribute('fill', 'none');
@@ -86,7 +100,6 @@ function renderTrend(history) {
   svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svgEl.innerHTML = '';
 
-  // defs for gradient
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
   const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
   grad.setAttribute('id', 'trendGrad');
@@ -100,7 +113,6 @@ function renderTrend(history) {
   defs.appendChild(grad);
   svgEl.appendChild(defs);
 
-  // grid lines (0, 25, 50, 75, 100)
   for (let yVal of [0, 25, 50, 75, 100]) {
     const y = padT + chartH - (yVal / 100) * chartH;
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -117,14 +129,12 @@ function renderTrend(history) {
     svgEl.appendChild(text);
   }
 
-  // data points
   const pts = scores.map((s, i) => {
     const x = padL + (i / (scores.length - 1)) * chartW;
     const y = padT + chartH - (s / 100) * chartH;
     return { x, y };
   });
 
-  // area fill
   const areaPts = pts.map(p => `${p.x},${p.y}`);
   const firstPt = areaPts[0].split(',');
   const lastPt  = areaPts[areaPts.length - 1].split(',');
@@ -134,7 +144,6 @@ function renderTrend(history) {
   area.setAttribute('fill', 'url(#trendGrad)');
   svgEl.appendChild(area);
 
-  // line
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   line.setAttribute('points', pts.map(p => `${p.x},${p.y}`).join(' '));
   line.setAttribute('fill', 'none');
@@ -143,7 +152,6 @@ function renderTrend(history) {
   line.setAttribute('stroke-linejoin', 'round');
   svgEl.appendChild(line);
 
-  // dots
   pts.forEach((p, i) => {
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
@@ -151,7 +159,6 @@ function renderTrend(history) {
     dot.setAttribute('fill', level.color);
     svgEl.appendChild(dot);
 
-    // label (every other)
     if (i % 2 === 0) {
       const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       text.setAttribute('x', p.x); text.setAttribute('y', padT + chartH + 18);
@@ -171,15 +178,21 @@ function renderSignals(signals) {
   Object.keys(signals).forEach(key => {
     const s = signals[key];
     const level = getLevel(s.score);
+    const sigInfo = LANG[currentLang].signals[key];
+    const name = sigInfo ? sigInfo.name : s.label;
+
     const card = document.createElement('div');
     card.className = 'signal-card';
+    card.style.cursor = 'pointer';
+    card.title = sigInfo ? sigInfo.summary : '';
+    card.onclick = () => showSignalDetail(key);
     card.innerHTML = `
       <div class="signal-icon">${s.icon}</div>
-      <div class="signal-name">${s.label}</div>
+      <div class="signal-name">${name}</div>
       <div class="signal-score" style="color:${level.color}">${s.score}</div>
       <div class="signal-detail">${s.detail}</div>
       <div id="spark-${key}" class="signal-spark"></div>
-      <div style="margin-top:6px"><span class="signal-status ${s.status.toLowerCase()}">${s.status}</span></div>
+      <div style="margin-top:6px"><span class="signal-status ${s.status.toLowerCase()}">${t('status.' + s.status.toLowerCase())}</span></div>
     `;
     grid.appendChild(card);
 
@@ -188,6 +201,31 @@ function renderSignals(signals) {
       if (container) renderSparklineSvg(container, s.history, level.color);
     });
   });
+}
+
+/* ── Signal detail modal ──────────────────────────────── */
+function showSignalDetail(key) {
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+  const sigInfo = LANG[currentLang].signals[key];
+
+  if (!sigInfo) return;
+
+  const sourcesList = sigInfo.sources.map(src =>
+    `<li>${src}</li>`
+  ).join('');
+
+  content.innerHTML = `
+    <h2>${sigInfo.icon} ${sigInfo.name}</h2>
+    <p><strong>Weight:</strong> ${sigInfo.weight}</p>
+    <p>${sigInfo.summary}</p>
+    <h3>Methodology</h3>
+    <p>${sigInfo.detail}</p>
+    <h3>Sources</h3>
+    <ul>${sourcesList}</ul>
+    <p style="font-size:11px;color:#64748b;">🔄 ${sigInfo.update}</p>
+  `;
+  overlay.classList.add('active');
 }
 
 /* ── Publications ─────────────────────────────────────── */
@@ -206,13 +244,24 @@ function renderPublications(pubs) {
   });
 }
 
-/* ── Timestamps ───────────────────────────────────────── */
+/* ── Timestamps — client local time ───────────────────── */
 function updateTimestamps(data) {
   const ts = new Date(data.timestamp);
-  document.getElementById('lastUpdate').textContent = ts.toTimeString().slice(0, 5);
-  document.getElementById('timezone').textContent = 'UTC';
+  const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const shortTz = tzName.split('/').pop().replace(/_/g, ' ');
+
+  const timeStr = ts.toLocaleTimeString(currentLang === 'he' ? 'he-IL' : 'en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+
+  document.getElementById('lastUpdate').textContent = timeStr;
+  document.getElementById('timezone').textContent = shortTz;
+
   const next = new Date(ts.getTime() + UPDATE_INTERVAL);
-  document.getElementById('nextUpdate').textContent = `Next update ${next.toTimeString().slice(0, 5)}`;
+  const nextStr = next.toLocaleTimeString(currentLang === 'he' ? 'he-IL' : 'en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+  document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + nextStr;
 }
 
 /* ── Modal ────────────────────────────────────────────── */
@@ -220,46 +269,8 @@ function showInfo(type) {
   const overlay = document.getElementById('modalOverlay');
   const content = document.getElementById('modalContent');
 
-  const aboutHTML = `
-    <h2>About Peace Meter</h2>
-    <p>Peace Meter is a real-time dashboard that measures the "temperature of peace" across the Middle East using 10 independent signals.</p>
-    <p>It is <strong>not a prediction</strong> — it is a structured aggregation of publicly available data to help track positive momentum amid the noise.</p>
-    <h3>Signals</h3>
-    <ul>
-      <li><strong>Political Tone</strong> (20%) — Senior official statement sentiment</li>
-      <li><strong>Diplomatic News</strong> (15%) — BBC + Al Jazeera headline analysis</li>
-      <li><strong>Commercial Aviation</strong> (12%) — Flight counts + airline policy changes</li>
-      <li><strong>Prediction Markets</strong> (10%) — Polymarket ceasefire odds</li>
-      <li><strong>Credit Ratings</strong> (10%) — Fitch/S&P/Moody's sovereign ratings direction</li>
-      <li><strong>Travel Advisories</strong> (10%) — Foreign ministry risk levels</li>
-      <li><strong>Think Tank & Expert</strong> (10%) — Mitvim, INSS, JISS publications</li>
-      <li><strong>Gulf Shipping</strong> (7%) — Red Sea / Gulf shipping status</li>
-      <li><strong>VIEWS AI Forecast</strong> (5%) — PRIO/Uppsala conflict prediction</li>
-      <li><strong>Humanitarian</strong> (1%) — Aid corridors, prisoner swaps</li>
-    </ul>
-    <h3>Scoring</h3>
-    <p>Each signal is scored 0–100. The master score is a weighted average. An asymmetric EMA smooths the data — peace rises fast, decays slowly.</p>
-  `;
-
-  const calcHTML = `
-    <h2>How the Score Is Calculated</h2>
-    <p><strong>Formula:</strong></p>
-    <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;">
-      Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Shipping×0.07 + VIEWS×0.05 + Humanitarian×0.01
-    </p>
-    <p><strong>Peace Multiplier:</strong> When 3+ signals exceed 60, score × 1.15. When 5+ exceed 60, × 1.25. Capped at 100.</p>
-    <h3>Smoothing</h3>
-    <p>Asymmetric EMA: 3-hour half-life rising, 12-hour half-life falling. A breakthrough registers quickly; a single bad day doesn't erase progress.</p>
-    <h3>Levels</h3>
-    <ul>
-      <li>0–25: ❄️ Frozen — Active conflict, no diplomacy</li>
-      <li>26–50: 🌤 Thawing — Back-channel talks</li>
-      <li>51–75: 🌱 Growing — Active negotiations</li>
-      <li>76–100: 🕊 Flourishing — Peace agreements</li>
-    </ul>
-  `;
-
-  content.innerHTML = type === 'about' ? aboutHTML : calcHTML;
+  const html = type === 'about' ? t('about') : t('calc');
+  content.innerHTML = html;
   overlay.classList.add('active');
 }
 
@@ -270,24 +281,31 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
 });
 
+/* ── Master render ────────────────────────────────────── */
+let lastData = null;
+
+function renderAll(data) {
+  lastData = data;
+  renderGauge(data.master.score);
+  renderSignals(data.signals);
+  renderTrend(data.history);
+  renderPublications(data.publications || []);
+  updateTimestamps(data);
+}
+
 /* ── Load & render ────────────────────────────────────── */
 async function loadAndRender() {
   try {
     const res = await fetch('/data.json');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    renderGauge(data.master.score);
-    renderSignals(data.signals);
-    renderTrend(data.history);
-    renderPublications(data.publications || []);
-    updateTimestamps(data);
+    renderAll(data);
   } catch (err) {
     console.error('Failed to load data:', err);
     document.getElementById('gaugeScore').textContent = '—';
-    document.getElementById('statusLabel').textContent = 'Error loading data';
+    document.getElementById('statusLabel').textContent = 'Error';
   }
 }
 
 loadAndRender();
-// Auto-refresh every 30 minutes
 setInterval(loadAndRender, UPDATE_INTERVAL);
