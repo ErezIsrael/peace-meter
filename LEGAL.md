@@ -1,7 +1,7 @@
 # Legal Pages — Peace Meter
 
-> These are the source texts for the legal pages served from the site footer.
-> Both English and Hebrew versions. Place them as static HTML pages or serve inline.
+> Source texts for the modals served from the site footer.
+> Both English and Hebrew versions. Last updated: May 2026.
 
 ---
 
@@ -11,41 +11,39 @@
 
 **Privacy Policy — Peace Meter**
 
-*Last updated: 2026-05-20*
+*Last updated: May 2026*
 
-Peace Meter is an experimental dashboard that aggregates publicly available data about geopolitical indicators in the Middle East. This policy explains what data is collected and how it is handled.
+**1. Data We Collect**
 
-**What data we collect**
+Peace Meter does **not collect personal data**. There are no accounts, forms, or tracking.
 
-- **No user data collected.** Peace Meter does not use forms, sign-ups, accounts, or any mechanism that collects personal data from visitors.
-- **Cloudflare logs.** The site is hosted on Cloudflare Pages. Cloudflare may log IP addresses, request timestamps, and user-agent strings for security, DDoS protection, and analytics purposes. Cloudflare retains this data per its own [Privacy Policy](https://www.cloudflare.com/privacypolicy/).
-- **Local storage.** The browser stores a single `pm-lang` value (language preference: `en` or `he`) in localStorage. This never leaves your device.
-- **Google Fonts.** The site loads the Inter and Space Grotesk fonts from Google Fonts. Google may log the request (IP, font requested) per its [Privacy Policy](https://policies.google.com/privacy).
+The only data stored is:
+- Language preference in localStorage (`pm-lang`)
+- Cached data in localStorage (`pm-cache`) — server responses, auto-deleted on next successful fetch
 
-**What data we do not collect**
+**2. No Cookies**
 
-- No cookies (except `pm-lang` in localStorage)
-- No analytics trackers (Google Analytics, etc.)
-- No user accounts or authentication
-- No personal forms or contact data
-- No payment or financial data
+Peace Meter does not use cookies.
 
-**Data retention**
+**3. Third-Party Services**
 
-- Cloudflare retains server logs per its retention policy (typically 7–30 days).
-- localStorage data persists until you clear your browser data.
+Peace Meter loads two external services:
+- **Cloudflare Pages** — Hosting provider. Logs IP, timestamp, user-agent for security (7–30 days retention). [See their policy](https://www.cloudflare.com/privacypolicy/).
+- **Google Fonts** — Inter & Space Grotesk typefaces. [See their policy](https://policies.google.com/privacy).
 
-**Your rights (Israel Privacy Protection Law & GDPR)**
+**4. Data Deletion**
 
-Under Israel's Privacy Protection Law (Amendment 13) and the EU GDPR, you have the right to:
-- Access any data held about you
-- Request correction or deletion of your data
-- Withdraw consent
-- File a complaint with the Privacy Protection Authority (Israel) or your national Data Protection Authority (EU)
+You can delete all stored data at any time by:
+- Clearing your browser's site data
+- Using your browser's "Clear browsing data" feature
 
-**Contact**
+**5. Legal Basis**
 
-For privacy requests, contact the project maintainer via GitHub: [ErezIsrael/peace-meter](https://github.com/ErezIsrael/peace-meter/issues)
+This policy complies with Israel's Privacy Protection Law (Amendment 13) and GDPR.
+
+**6. Contact**
+
+For questions, contact us via [GitHub Issues](https://github.com/ErezIsrael/peace-meter/issues).
 
 ---
 
@@ -53,41 +51,39 @@ For privacy requests, contact the project maintainer via GitHub: [ErezIsrael/pea
 
 **מדיניות פרטיות — מדד השלום**
 
-*נעדכן לאחרונה: 2026-05-20*
+*עודכן לאחרונה: מאי 2026*
 
-מדד השלום הוא לוח בקרה ניסיוני המאגד נתונים ציבוריים על מצבי גיאופוליטיקה במזרח התיכון. מדיניות זו מסבירה אילו נתונים נאספים וכיצד הם מטופלים.
+**1. נתונים שאנו אוספים**
 
-**אילו נתונים אנו אוספים**
+מדד השלום **לא אוסף נתונים אישיים**. אין חשבונות, טפסים או מעקב.
 
-- **לא נאספים נתונים אישיים.** מדד השלום אינו משתמש בטפסים, הרשמות, חשבונות או כל מנגנון אחר לאיסוף נתונים אישיים ממבקרים.
-- **רשומות Cloudflare.** האתר מיושם על Cloudflare Pages. Cloudflare עשוי להקליד כתובות IP, חותמות זמן וסוכני משתמש לצורכי אבטחה, הגנה מפני DDoS ואנליטיקה. Cloudflare שומר נתונים אלה לפי [מדיניות הפרטיות](https://www.cloudflare.com/privacypolicy/) שלו.
-- **אחסון מקומי (localStorage).** הדפדפן שומר ערך אחד בלבד (`pm-lang`) המציין את שפת ההעדפה (`en` או `he`). מידע זה אינו עוזב את המכשיר שלך.
-- **גופנים של Google.** האתר טוען את הגופנים Inter ו-Space Grotesk מ-Google Fonts. Google עשויה להקליד את הבקשה (IP, גופן נטען) לפי [מדיניות הפרטיות](https://policies.google.com/privacy) שלה.
+הנתונים היחידים הנשמרים הם:
+- העדפת שפה ב-localStorage (`pm-lang`)
+- נתונים ממטמון ב-localStorage (`pm-cache`) — תגובות שרת, נמחקים אוטומטית בעת טעינה מוצלחת
 
-**אילו נתונים אנו לא אוספים**
+**2. ללא עוגיות**
 
-- אין עוגיות (פרט ל-`pm-lang` ב-localStorage)
-- אין מאגרי אנליטיקה (Google Analytics וכו')
-- אין חשבונות משתמש או אימות זהות
-- אין טפסים אישיים או פרטי יצירת קשר
-- אין נתוני תשלום או פיננסיים
+מדד השלום אינו משתמש בעוגיות.
 
-**שמירת נתונים**
+**3. שירותי צד שלישי**
 
-- Cloudflare שומר רשומות שרת לפי מדיניות השמירה שלו (בדרך כלל 7-30 ימים).
-- נתוני localStorage מתמשכים עד שתיקה את הנתונים בדפדפן.
+מדד השלום טוען שני שירותים חיצוניים:
+- **Cloudflare Pages** — ספק אחסון. מקליד IP, חותמת זמן, סוכן משתמש לצורכי אבטחה (שמירה 7-30 ימים). [מדיניות פרטיות](https://www.cloudflare.com/privacypolicy/).
+- **גופני Google** — Inter ו-Space Grotesk. [מדיניות פרטיות](https://policies.google.com/privacy).
 
-**הזכויות שלך (חוק הגנת הפרטיות וה-GDPR)**
+**4. מחיקת נתונים**
 
-על פי תיקון 13 לחוק הגנת הפרטיות הישראלי ו-GDPR האיחודי, לך יש זכות ל:
-- לגשת לנתונים שיש לך
-- לבקש תיקון או מחיקה של הנתונים שלך
-- לשלוף הסכמה
-- להגיש תלונה לרשות להגנת הפרטיות (ישראל) או לרשות הגנת הנתונים הלאומית שלך (איחוד אירופי)
+אתה יכול למחוק את כל הנתונים בכל עת:
+- ניקוי נתוני האתר בדפדפן
+- שימוש בפונקציית "ניקוי נתוני גלישה" בדפדפן
 
-**יצירת קשר**
+**5. בסיס משפטי**
 
-לבקשות פרטיות, פנה לנאמן הפרויקט דרך GitHub: [ErezIsrael/peace-meter](https://github.com/ErezIsrael/peace-meter/issues)
+מדיניות זו עומדת בדרישות חוק הגנת הפרטיות (תיקון 13) ו-GDPR.
+
+**6. יצירת קשר**
+
+לשאלות, פנה דרך [GitHub Issues](https://github.com/ErezIsrael/peace-meter/issues).
 
 ---
 
@@ -97,21 +93,39 @@ For privacy requests, contact the project maintainer via GitHub: [ErezIsrael/pea
 
 **Terms of Service — Peace Meter**
 
-*Last updated: 2026-05-20*
+*Last updated: May 2026*
 
-**1. No Warranty.** Peace Meter is provided "as is" without warranty of any kind. Scores are algorithmic aggregations of publicly available data and are **not predictions, advice, or guarantees**.
+**1. Nature of the Service**
 
-**2. Not Financial or Political Advice.** Content on this site is for informational purposes only. Do not make financial, political, or security decisions based on Peace Meter scores.
+Peace Meter is an informational dashboard aggregating publicly available data about Middle East geopolitical indicators.
 
-**3. Data Sources.** Data comes from publicly available RSS feeds, APIs, and open datasets. We make no claims about their accuracy, completeness, or timeliness.
+**2. No Predictions or Advice**
 
-**4. Limitation of Liability.** To the maximum extent permitted by law, the maintainers of Peace Meter shall not be liable for any direct, indirect, incidental, or consequential damages arising from use of this site.
+Peace Meter does not make predictions, and is not financial, political, or security advice.
 
-**5. Copyright.** All original content, code, and design on this site is © 2026 Erez Israel. All rights reserved. Third-party content retains its original copyright.
+**3. No Guarantees**
 
-**6. Governing Law.** These terms are governed by the laws of the State of Israel.
+Scores and data are provided without accuracy guarantee. Sources include public RSS feeds and APIs that may change or become unavailable.
 
-**7. Changes.** We may update these terms at any time. Continued use of the site constitutes acceptance of updated terms.
+**4. User Data**
+
+All stored data resides locally in your browser. No data is transmitted to us.
+
+**5. Intellectual Property**
+
+The code, design, and content are the property of the project author. © 2026 Erez Israel. All rights reserved.
+
+**6. Limitation of Liability**
+
+Peace Meter is provided "as is" without warranty of any kind.
+
+**7. Governing Law**
+
+These terms are governed by the laws of Israel.
+
+**8. Changes to These Terms**
+
+These terms may be updated from time to time. Check this page for the latest version.
 
 ---
 
@@ -119,21 +133,39 @@ For privacy requests, contact the project maintainer via GitHub: [ErezIsrael/pea
 
 **תנאי שימוש — מדד השלום**
 
-*נעדכן לאחרונה: 2026-05-20*
+*עודכן לאחרונה: מאי 2026*
 
-**1. ללא אחריות.** מדד השלום מוצג "כפי שהוא" ללא אחריות מסוג כלשהו. הציונים הם אגרגציה אלגוריתמית של נתונים ציבוריים ואינם **תחזיות, ייעוץ או הבטחות**.
+**1. אופי השירות**
 
-**2. לא ייעוץ פיננסי או פוליטי.** התוכן באתר הוא למטרות מידע בלבד. אל תבצע החלטות פיננסיות, פוליטיות או ביטחוניות על בסיס ציוני מדד השלום.
+מדד השלום הוא לוח בקרה מידעי המאגד נתונים ציבוריים על אינדיקטורים גיאופוליטיים במזרח התיכון.
 
-**3. מקורות נתונים.** הנתונים מגיעים מ-RSS ציבוריים, APIs ומקורות פתוחים. אנו לא טוענים דבר לגבי דיוקם, שלמותם או עדכוניוּתם.
+**2. ללא תחזיות או ייעוץ**
 
-**4. הגבלת אחריות.** במידה המרבית המותרת על פי חוק, שומרי מדד השלום אינם אחראים לכל נזק ישיר, עקיף, מקרי או תוצאתי הנובע משימוש באתר זה.
+מדד השלום אינו עושה תחזיות ואינו מהווה ייעוץ פיננסי, פוליטי או ביטחוני.
 
-**5. זכויות יוצרים.** כל התוכן המקורי, הקוד והעיצוב באתר זה הם © 2026 Erez Israel. כל הזכויות שמורות. תוכן צד שלישי שומר על זכויות היוצרים המקוריות שלו.
+**3. ללא אחריות**
 
-**6. חוק חל.** תנאים אלו כפופים לחוקי מדינת ישראל.
+הציונים והנתונים מסופקים ללא התחייבות לדיוק. המקורות כוללים RSS ציבורי ו-APIs שעלולים להשתנות.
 
-**7. שינויים.** אנו עשויים לעדכן תנאים אלו בכל עת. שימוש מתמשך באתר מהווה קבלה של התנאים המעודכנים.
+**4. נתוני משתמש**
+
+כל הנתונים נשמרים מקומית בדפדפן שלך. אף נתון אינו מועבר אלינו.
+
+**5. קניין רוחני**
+
+הקוד, העיצוב והתוכן הם רכוש יוצר הפרויקט. © 2026 Erez Israel. כל הזכויות שמורות.
+
+**6. הגבלת אחריות**
+
+מדד השלום מסופק "כפי שהוא" ללא אחריות כלשהי.
+
+**7. דיני חלופה**
+
+תנאים אלו כפופים לחוקי מדינת ישראל.
+
+**8. שינויים בתנאים**
+
+תנאים אלו עשויים להתעדכן מעת לעת. בדוק דף זה לגרסה העדכנית ביותר.
 
 ---
 
@@ -143,26 +175,36 @@ For privacy requests, contact the project maintainer via GitHub: [ErezIsrael/pea
 
 **Accessibility Statement — Peace Meter**
 
-*Last updated: 2026-05-20*
+*Last updated: May 2026*
 
-Peace Meter strives to be accessible to all users, in accordance with **WCAG 2.1 Level AA** and **Israeli Standard IS 5568** (Equal Rights for Persons with Disabilities Law).
+**1. Our Commitment**
 
-**What we do:**
-- Semantic HTML5 structure with proper heading hierarchy
-- Keyboard navigation support for all interactive elements
+Peace Meter is committed to digital accessibility for users of all abilities.
+
+**2. Current Accessibility Features**
+- Semantic HTML with proper heading hierarchy
+- Keyboard accessibility for all interactive elements
 - Visible focus indicators
-- Sufficient color contrast (4.5:1 minimum for text)
+- WCAG AA color contrast (4.5:1+)
+- Responsive design for all screen sizes
+- Language declaration (lang attribute)
 - RTL layout support for Hebrew
-- Screen reader compatible (tested with NVDA and VoiceOver)
-- Language attributes set correctly (`lang="en"` / `lang="he"`)
+- Screen reader compatibility
 
-**Known limitations:**
-- SVG gauge visualization may not convey all data to screen readers (score number is provided textually)
-- Sparkline charts are visual-only; data values are shown as text labels
+**3. Known Limitations**
+- SVG gauge chart may present challenges for screen readers (score provided textually)
+- Sparkline trend charts are visual-only; values shown as text
 
-**Feedback**
+**4. Feedback**
 
-If you encounter accessibility barriers, please report them via [GitHub Issues](https://github.com/ErezIsrael/peace-meter/issues).
+We welcome your feedback. Please [open an issue on GitHub](https://github.com/ErezIsrael/peace-meter/issues).
+
+**5. Evaluation**
+
+The evaluation process includes:
+- Self-review against WCAG 2.1 AA and IS 5568
+- Automated accessibility testing tools
+- Manual testing with keyboard and screen readers
 
 ---
 
@@ -170,23 +212,33 @@ If you encounter accessibility barriers, please report them via [GitHub Issues](
 
 **הצהרת נגישות — מדד השלום**
 
-*נעדכן לאחרונה: 2026-05-20*
+*עודכן לאחרונה: מאי 2026*
 
-מדד השלום שואף להיות נגיש לכל המשתמשים, בהתאם ל-**WCAG 2.1 רמה AA** ו**תקן ישראלי IS 5568** (חוק שוויון זכויות לאנשים עם מוגבלות).
+**1. המחשת שלנו**
 
-**מה אנו עושים:**
-- מבנה HTML5 סמנטי עם ירושת כותרות תקינה
-- תמיכה בניווט במקלדת לכל אלמנטים אינטראקטיביים
+מדד השלום מחויב לנגישות דיגיטלית למשתמשים מכל הסוגים.
+
+**2. תכונות נגישות נוכחיות**
+- HTML סמנטי עם ירושת כותרות תקינה
+- נגישות במקלדת לכל אלמנטים אינטראקטיביים
 - מראי מיקוד גלויים
-- ניגודיות צבע מספקת (מינימום 4.5:1 לטקסט)
-- תמיכה בפריסה RTL לעברית
-- תואם קוראי מסך (נבדק עם NVDA ו-VoiceOver)
-- תכונות שפה מוגדרות כראוי (`lang="en"` / `lang="he"`)
+- ניגודיות צבעי WCAG AA (4.5:1+)
+- עיצוב רספונסיבי לכל גדלי מסך
+- הצהרת שפה (שיוך lang)
+- תמיכה ב-RTL לעברית
+- תאימות לקוראי מסך
 
-**הגבלות ידועות:**
-- ויזואליזציית SVG עשויה לא להעביר את כל הנתונים לקוראי מסך (מספר הציון מוצג כטקסט)
-- גרפי Sparkline הם ויזואליים בלבד; ערכי הנתונים מוצגים כטקסט
+**3. מגבלות ידועות**
+- מד SVG עשוי להציג אתגרים לקוראי מסך (הציון מוצג כטקסט)
+- גרפי Sparkline ויזואליים בלבד; ערכים מוצגים כטקסט
 
-**משוב**
+**4. משוב**
 
-אם נתקלת במחסומי נגישות, אנא דווח דרך [GitHub Issues](https://github.com/ErezIsrael/peace-meter/issues).
+אנו מכבדים את משובך. אנא [פתח פנייה ב-GitHub](https://github.com/ErezIsrael/peace-meter/issues).
+
+**5. הערכה**
+
+תהליך ההערכה כולל:
+- בדיקה עצמית מול WCAG 2.1 AA ו-IS 5568
+- כלים אוטומטיים לבדיקת נגישות
+- בדיקה ידנית עם מקלדת וקוראי מסך

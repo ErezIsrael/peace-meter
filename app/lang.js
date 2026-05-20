@@ -39,46 +39,100 @@ const LANG = {
     },
 
     privacy: `<h2>Privacy Policy</h2>
-<p><em>Last updated: 2026-05-20</em></p>
-<p>Peace Meter does <strong>not collect personal data</strong>. No accounts, forms, or tracking.</p>
-<h3>Data handling</h3>
+<p><em>Last updated: May 2026</em></p>
+
+<h3>1. Data We Collect</h3>
+<p>Peace Meter does <strong>not collect personal data</strong>. There are no accounts, forms, or tracking.</p>
+<p>The only data stored is:</p>
 <ul>
-<li><strong>Cloudflare</strong> — Host provider. Logs IP, timestamp, user-agent for security (7-30 days retention). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">See their policy</a>.</li>
-<li><strong>localStorage</strong> — Stores only language preference (<code>pm-lang</code>). Never leaves your device.</li>
-<li><strong>Google Fonts</strong> — Inter &amp; Space Grotesk loaded from Google. <a href="https://policies.google.com/privacy" target="_blank">See their policy</a>.</li>
+<li>Language preference in localStorage (<code>pm-lang</code>)</li>
+>Cached data in localStorage (<code>pm-cache</code>) — server responses, auto-deleted on next successful fetch</li>
 </ul>
-<h3>Your rights</h3>
-<p>Under Israel's Privacy Protection Law (Amendment 13) and GDPR, you may access, correct, or delete your data. Contact via <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
+<h3>2. No Cookies</h3>
+<p>Peace Meter does not use cookies.</p>
+
+<h3>3. Third-Party Services</h3>
+<p>Peace Meter loads two external services:</p>
+<ul>
+<li><strong>Cloudflare Pages</strong> — Hosting provider. Logs IP, timestamp, user-agent for security (7–30 days retention). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">See their policy</a>.</li>
+<li><strong>Google Fonts</strong> — Inter &amp; Space Grotesk typefaces. <a href="https://policies.google.com/privacy" target="_blank">See their policy</a>.</li>
+</ul>
+
+<h3>4. Data Deletion</h3>
+<p>You can delete all stored data at any time by:</p>
+<ul>
+<li>Clearing your browser's site data</li>
+<li>Using your browser's "Clear browsing data" feature</li>
+</ul>
+
+<h3>5. Legal Basis</h3>
+<p>This policy complies with Israel's Privacy Protection Law (Amendment 13) and GDPR.</p>
+
+<h3>6. Contact</h3>
+<p>For questions, contact us via <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
 
     terms: `<h2>Terms of Service</h2>
-<p><em>Last updated: 2026-05-20</em></p>
-<p>Peace Meter is provided <strong>"as is"</strong>. Scores are algorithmic aggregations — <strong>not predictions or advice</strong>.</p>
-<h3>Key points</h3>
-<ul>
-<li>Not financial, political, or security advice</li>
-<li>Data from public RSS feeds and APIs — no accuracy guarantee</li>
-<li>© 2026 Erez Israel. All rights reserved.</li>
-<li>Governed by Israeli law</li>
-</ul>`,
+<p><em>Last updated: May 2026</em></p>
+
+<h3>1. Nature of the Service</h3>
+<p>Peace Meter is an informational dashboard aggregating publicly available data about Middle East geopolitical indicators.</p>
+
+<h3>2. No Predictions or Advice</h3>
+<p>Peace Meter does not make predictions, and is not financial, political, or security advice.</p>
+
+<h3>3. No Guarantees</h3>
+<p>Scores and data are provided without accuracy guarantee. Sources include public RSS feeds and APIs that may change or become unavailable.</p>
+
+<h3>4. User Data</h3>
+<p>All stored data resides locally in your browser. No data is transmitted to us.</p>
+
+<h3>5. Intellectual Property</h3>
+<p>The code, design, and content are the property of the project author. © 2026 Erez Israel. All rights reserved.</p>
+
+<h3>6. Limitation of Liability</h3>
+<p>Peace Meter is provided "as is" without warranty of any kind.</p>
+
+<h3>7. Governing Law</h3>
+<p>These terms are governed by the laws of Israel.</p>
+
+<h3>8. Changes to These Terms</h3>
+<p>These terms may be updated from time to time. Check this page for the latest version.</p>`,
 
     accessibility: `<h2>Accessibility Statement</h2>
-<p><em>Last updated: 2026-05-20</em></p>
-<p>Peace Meter aims to comply with <strong>WCAG 2.1 Level AA</strong> and <strong>Israeli Standard IS 5568</strong>.</p>
-<h3>What we do</h3>
+<p><em>Last updated: May 2026</em></p>
+
+<h3>1. Our Commitment</h3>
+<p>Peace Meter is committed to digital accessibility for users of all abilities.</p>
+
+<h3>2. Current Accessibility Features</h3>
 <ul>
-<li>Semantic HTML5 with proper heading hierarchy</li>
-<li>Keyboard navigation for all interactive elements</li>
+<li>Semantic HTML with proper heading hierarchy</li>
+<li>Keyboard accessibility for all interactive elements</li>
 <li>Visible focus indicators</li>
-<li>4.5:1+ color contrast</li>
+<li>WCAG AA color contrast (4.5:1+)</li>
+<li>Responsive design for all screen sizes</li>
+<li>Language declaration (lang attribute)</li>
 <li>RTL layout support for Hebrew</li>
-<li>Screen reader compatible (tested NVDA + VoiceOver)</li>
+<li>Screen reader compatibility</li>
 </ul>
-<h3>Known limitations</h3>
+
+<h3>3. Known Limitations</h3>
 <ul>
-<li>SVG gauge: score number provided textually for screen readers</li>
-<li>Sparkline charts are visual-only; values shown as text</li>
+<li>SVG gauge chart may present challenges for screen readers (score provided textually)</li>
+<li>Sparkline trend charts are visual-only; values shown as text</li>
 </ul>
-<p>Report barriers via <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
+<h3>4. Feedback</h3>
+<p>We welcome your feedback. Please <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">open an issue on GitHub</a>.</p>
+
+<h3>5. Evaluation</h3>
+<p>The evaluation process includes:</p>
+<ul>
+<li>Self-review against WCAG 2.1 AA and IS 5568</li>
+<li>Automated accessibility testing tools</li>
+<li>Manual testing with keyboard and screen readers</li>
+</ul>`,
 
     about: `<h2>About Peace Meter</h2>
 <p>Peace Meter measures the "temperature of peace" across the Middle East using <strong>10 independent signals</strong>.</p>
@@ -154,46 +208,100 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     },
 
     privacy: `<h2>מדיניות פרטיות</h2>
-<p><em>נעדכן לאחרונה: 2026-05-20</em></p>
+<p><em>עודכן לאחרונה: מאי 2026</em></p>
+
+<h3>1. נתונים שאנו אוספים</h3>
 <p>מדד השלום <strong>לא אוסף נתונים אישיים</strong>. אין חשבונות, טפסים או מעקב.</p>
-<h3>טיפול בנתונים</h3>
+<p>הנתונים היחידים הנשמרים הם:</p>
 <ul>
-<li><strong>Cloudflare</strong> — ספק אחסון. מקליד IP, חותמת זמן, סוכן משתמש לצורכי אבטחה (שמירה 7-30 ימים). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">מדיניות הפרטיות</a>.</li>
-<li><strong>localStorage</strong> — שומר רק העדפת שפה (<code>pm-lang</code>). לעולם אינו עוזב את המכשיר.</li>
-<li><strong>גופני Google</strong> — Inter ו-Space Grotesk נטענים מ-Google. <a href="https://policies.google.com/privacy" target="_blank">מדיניות הפרטיות</a>.</li>
+<li>העדפת שפה ב-localStorage (<code>pm-lang</code>)</li>
+<li>נתונים ממטמון ב-localStorage (<code>pm-cache</code>) — תגובות שרת, נמחקים אוטומטית בעת טעינה מוצלחת</li>
 </ul>
-<h3>הזכויות שלך</h3>
-<p>על פי תיקון 13 לחוק הגנת הפרטיות ו-GDPR, תוכל לגשת, לתקן או למחוק נתונים. פנה דרך <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
+<h3>2. ללא עוגיות</h3>
+<p>מדד השלום אינו משתמש בעוגיות.</p>
+
+<h3>3. שירותי צד שלישי</h3>
+<p>מדד השלום טוען שני שירותים חיצוניים:</p>
+<ul>
+<li><strong>Cloudflare Pages</strong> — ספק אחסון. מקליד IP, חותמת זמן, סוכן משתמש לצורכי אבטחה (שמירה 7-30 ימים). <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">מדיניות פרטיות</a>.</li>
+<li><strong>גופני Google</strong> — Inter ו-Space Grotesk. <a href="https://policies.google.com/privacy" target="_blank">מדיניות פרטיות</a>.</li>
+</ul>
+
+<h3>4. מחיקת נתונים</h3>
+<p>אתה יכול למחוק את כל הנתונים בכל עת:</p>
+<ul>
+<li>ניקוי נתוני האתר בדפדפן</li>
+<li>שימוש בפונקציית "ניקוי נתוני גלישה" בדפדפן</li>
+</ul>
+
+<h3>5. בסיס משפטי</h3>
+<p>מדיניות זו עומדת בדרישות חוק הגנת הפרטיות (תיקון 13) ו-GDPR.</p>
+
+<h3>6. יצירת קשר</h3>
+<p>לשאלות, פנה דרך <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
 
     terms: `<h2>תנאי שימוש</h2>
-<p><em>נעדכן לאחרונה: 2026-05-20</em></p>
-<p>מדד השלום מוצג <strong>"כפי שהוא"</strong>. הציונים הם אגרגציה אלגוריתמית — <strong>לא תחזיות או ייעוץ</strong>.</p>
-<h3>נקודות מרכזיות</h3>
-<ul>
-<li>אינו ייעוץ פיננסי, פוליטי או ביטחוני</li>
-<li>נתונים מ-RSS ציבורי ו-APIs — ללא התחייבות לדיוק</li>
-<li>© 2026 Erez Israel. כל הזכויות שמורות.</li>
-<li>כפוף לחוקי מדינת ישראל</li>
-</ul>`,
+<p><em>עודכן לאחרונה: מאי 2026</em></p>
+
+<h3>1. אופי השירות</h3>
+<p>מדד השלום הוא לוח בקרה מידעי המאגד נתונים ציבוריים על אינדיקטורים גיאופוליטיים במזרח התיכון.</p>
+
+<h3>2. ללא תחזיות או ייעוץ</h3>
+<p>מדד השלום אינו עושה תחזיות ואינו מהווה ייעוץ פיננסי, פוליטי או ביטחוני.</p>
+
+<h3>3. ללא אחריות</h3>
+<p>הציונים והנתונים מסופקים ללא התחייבות לדיוק. המקורות כוללים RSS ציבורי ו-APIs שעלולים להשתנות.</p>
+
+<h3>4. נתוני משתמש</h3>
+<p>כל הנתונים נשמרים מקומית בדפדפן שלך. אף נתון אינו מועבר אלינו.</p>
+
+<h3>5. קניין רוחני</h3>
+<p>הקוד, העיצוב והתוכן הם רכוש יוצר הפרויקט. © 2026 Erez Israel. כל הזכויות שמורות.</p>
+
+<h3>6. הגבלת אחריות</h3>
+<p>מדד השלום מסופק "כפי שהוא" ללא אחריות כלשהי.</p>
+
+<h3>7. דיני חלופה</h3>
+<p>תנאים אלו כפופים לחוקי מדינת ישראל.</p>
+
+<h3>8. שינויים בתנאים</h3>
+<p>תנאים אלו עשויים להתעדכן מעת לעת. בדוק דף זה לגרסה העדכנית ביותר.</p>`,
 
     accessibility: `<h2>הצהרת נגישות</h2>
-<p><em>נעדכן לאחרונה: 2026-05-20</em></p>
-<p>מדד השלום שואף לעמוד ב-<strong>WCAG 2.1 רמה AA</strong> ו<strong>תקן ישראלי IS 5568</strong>.</p>
-<h3>מה אנו עושים</h3>
+<p><em>עודכן לאחרונה: מאי 2026</em></p>
+
+<h3>1. המחשת שלנו</h3>
+<p>מדד השלום מחויב לנגישות דיגיטלית למשתמשים מכל הסוגים.</p>
+
+<h3>2. תכונות נגישות נוכחיות</h3>
 <ul>
-<li>מבנה HTML5 סמנטי עם ירושת כותרות תקינה</li>
-<li>ניווט במקלדת לכל אלמנטים אינטראקטיביים</li>
+<li>HTML סמנטי עם ירושת כותרות תקינה</li>
+<li>נגישות במקלדת לכל אלמנטים אינטראקטיביים</li>
 <li>מראי מיקוד גלויים</li>
-<li>ניגודיות צבע 4.5:1+</li>
-<li>תמיכה בפריסת RTL לעברית</li>
-<li>תואם קוראי מסך (נבדק עם NVDA + VoiceOver)</li>
+<li>ניגודיות צבעי WCAG AA (4.5:1+)</li>
+<li>עיצוב רספונסיבי לכל גדלי מסך</li>
+<li>הצהרת שפה (שיוך lang)</li>
+<li>תמיכה ב-RTL לעברית</li>
+<li>תאימות לקוראי מסך</li>
 </ul>
-<h3>הגבלות ידועות</h3>
+
+<h3>3. מגבלות ידועות</h3>
 <ul>
-<li>מד גאג׳: מספר הציון מוצג כטקסט לקוראי מסך</li>
+<li>מד SVG עשוי להציג אתגרים לקוראי מסך (הציון מוצג כטקסט)</li>
 <li>גרפי Sparkline ויזואליים בלבד; ערכים מוצגים כטקסט</li>
 </ul>
-<p>דווח על מחסומים דרך <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">GitHub Issues</a>.</p>`,
+
+<h3>4. משוב</h3>
+<p>אנו מכבדים את משובך. אנא <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank">פתח פנייה ב-GitHub</a>.</p>
+
+<h3>5. הערכה</h3>
+<p>תהליך ההערכה כולל:</p>
+<ul>
+<li>בדיקה עצמית מול WCAG 2.1 AA ו-IS 5568</li>
+<li>כלי בדיקת נגישות אוטומטיים</li>
+<li>בדיקה ידנית עם מקלדת וקוראי מסך</li>
+</ul>`,
 
     about: `<h2>אודות מדד השלום</h2>
 <p>מדד השלום הוא לוח בקרה בזמן אמת שממדד את "טמפרטורת השלום" במזרח התיכון באמצעות <strong>10 אותות בלתי תלויים</strong>.</p>
