@@ -1,38 +1,39 @@
 # Deploying Peace Meter to Cloudflare Pages
 
-## Prerequisites
+## Option A: Cloudflare Dashboard (recommended)
 
-1. Install Wrangler CLI:
-   ```
-   npm install -g wrangler
-   ```
+1. Go to https://dash.cloudflare.com/
+2. Navigate to **Workers & Pages** → **Create application** → **Pages**
+3. Click **Connect to Git** → select **GitHub** → authorize
+4. Select repo: **ErezIsrael/peace-meter**, branch: **main**
+5. Build settings:
+   - **Framework preset**: None
+   - **Build command**: (leave empty)
+   - **Build output directory**: `app`
+6. Click **Save and Deploy**
 
-2. Log in to Cloudflare:
-   ```
-   cd app
-   wrangler login
-   ```
+Every push to `main` triggers an automatic deployment.
 
-## Deploy
+## Option B: CLI (requires API token)
 
 ```bash
-cd app
-npx wrangler pages deploy . --project-name=peace-meter --compatibility-date=2025-01-29
-```
+# First time only:
+wrangler login
+# or set CLOUDFLARE_API_TOKEN env var
 
-This deploys the entire `app/` directory. Cloudflare Pages will:
-- Serve `index.html` as the root page
-- Route `/data.json` through `functions/__data.js`
-- Cache the data endpoint for 2 minutes
+# Deploy:
+cd app
+npx wrangler pages deploy . --project-name=peace-meter
+```
 
 ## Local Development
 
 ```bash
 cd app
-npx wrangler pages dev .
+npx wrangler pages dev . --compatibility-date=2026-05-20
 ```
 
-This starts a local server that simulates Cloudflare's environment, including Pages Functions.
+Serves on `http://127.0.0.1:8788` with Pages Functions support.
 
 ## Directory Structure
 
@@ -41,19 +42,19 @@ app/
 ├── index.html          # Main page
 ├── styles.css          # Styles
 ├── app.js              # Frontend logic
+├── lang.js             # EN/HE translations + RTL support
+├── data.json           # Fallback mock data (local dev)
 ├── _routes.json        # Routes /data.json to functions
 ├── wrangler.toml       # Cloudflare config
-├── functions/
-│   └── __data.js       # Data endpoint (mock → real data)
-└── data.json           # Fallback mock data (local dev only)
+└── functions/
+    └── data.json.js    # Live data: RSS feeds + mock signals
 ```
 
-## Updating the Data Pipeline
+## Live Data Pipeline
 
-When ready to connect real data sources:
-1. Edit `functions/__data.js` — replace the `getData()` function
-2. Add RSS parsing (Mitvim, INSS, JISS)
-3. Add OpenSky API queries for aviation
-4. Add Polymarket API for prediction markets
-5. Add VIEWS data fetching from HDX
-6. Re-deploy with `wrangler pages deploy`
+The `data.json` endpoint fetches from 3 RSS feeds:
+- **Mitvim** (`mitvim.org.il/en/feed/`) — Israeli think tank
+- **ICT** (`ict.org.il/feed/`) — Counter-terrorism research
+- **ReliefWeb** (`reliefweb.int/rss/news.xml`) — Humanitarian news
+
+Articles are filtered for Middle East relevance and auto-classified (peace/war/neutral).
