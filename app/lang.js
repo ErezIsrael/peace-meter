@@ -1,5 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
-/* VERSION: 2.3.1 */
+/* VERSION: 2.4.0 */
 
 const LANG = {
   en: {
@@ -39,6 +39,7 @@ const LANG = {
       conflict:     { icon:'💥', name:'Conflict Events',        weight:'8%',  summary:'Violence vs. diplomacy ratio',         detail:'Uses GDELT 2.0 Event Database. Counts hostile events vs. constructive events. Inverted: more hostility = lower peace score. 0 hostile → 100, all hostile → 0.', sources:['GDELT 2.0 Event Database'], update:'Every 15 min' },
       views:        { icon:'🌍', name:'VIEWS AI Forecast',      weight:'5%',  summary:'AI conflict prediction',              detail:'VIEWS uses AI to predict fatalities 1–36 months ahead. Declining predicted fatalities = peace signal.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'Monthly' },
       normalization:{ icon:'🔗', name:'Normalization',          weight:'4%',  summary:'Diplomatic normalization events',   detail:'Tracks visa openings, direct flight routes, embassy openings, trade agreements, and formal normalization deals. Events decay over 180 days. Curated list updated manually.', sources:['Foreign ministry press releases','IATA route data','Embassy opening announcements'], update:'Weekly' },
+      economic:     { icon:'📊', name:'Economic',               weight:'3%',  summary:'Trade & economic integration',    detail:'Tracks FTAs, trade milestones, economic corridors, port agreements, and cargo routes. 365-day window with exponential decay. Curated list updated manually.', sources:['Ministry of Economy press releases','World Bank trade data','Port authority announcements'], update:'Monthly' },
       humanitarian: { icon:'🏥', name:'Humanitarian',           weight:'1%',  summary:'Aid corridors & prisoner swaps',      detail:'Counts events: aid openings, releases, hospital access, refugee returns. Lagging indicator — happens after political decisions.', sources:['UN OCHA reports','ReliefWeb RSS','BBC/Al Jazeera humanitarian keywords'], update:'Daily' }
     },
 
@@ -211,6 +212,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
       conflict:      { icon:'💥', name:'אירועי קונפליקט',      weight:'8%',  summary:'יחס אלימות לעומת דיפלומטיה',     detail:'משתמש במסד GDELT 2.0. סופר אירועים עוינים מול אירועים בונים. הפוך: יותר עוינות = ציון נמוך יותר. 0 עוינות → 100, הכל עוינות → 0.', sources:['GDELT 2.0 Event Database'], update:'כל 15 דקות' },
       views:         { icon:'🌍', name:'תחזית AI — VIEWS',    weight:'5%',  summary:'תחזית קונפליקט בינה מלאכותית', detail:'VIEWS משתמש ב-AI לחזות נפגטים בטווח של 1-36 חודשים. ירידה בניפגטים הצפויים = אות של שלום.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'חודשי' },
       normalization: { icon:'🔗', name:'נרמול',               weight:'4%',  summary:'אירועי נרמול דיפלומטי',         detail:'מעקב אחר פתיחות ויזה, מסלולי טיסה ישירים, פתיחת שגרירויות, הסכמי סחר והסכמי נרמל רשמיים. אירועים דועכים לאורך 180 יום. רשימה מעודכנת ידנית.', sources:['הצהרות לעיתונות של משרדי חוץ','נתוני מסלולי IATA','הכרזות על פתיחת שגרירויות'], update:'שבועי' },
+      economic:      { icon:'📊', name:'כלכלי',              weight:'3%',  summary:'סחר ואינטגרציה כלכלית',        detail:'מעקב אחר הסכמי סחר חופשי, ציוני דרך סחירתיים, מסדרונות כלכליים, הסכמי נמלים ומסלולי מטען. חלון של 365 יום עם דעיכה מעריכית. רשימה מעודכנת ידנית.', sources:['הצהרות לעיתונות של משרדי הכלכלה','נתוני סחר של בנק העולמי','הכרזות של רשויות נמל'], update:'חודשי' },
       humanitarian:  { icon:'🏥', name:'הומניטרי',            weight:'1%',  summary:'מסדרונות סיוע והחלפת אסירים', detail:'סופר אירועים: פתיחת מסדרונות, שחרורים, גישה לבתי חולים, חזרת פליטים. מדד מאחר — מתרחש אחרי החלטות פוליטיות.', sources:['דוחות UN OCHA','RSS של ReliefWeb','מילות מפתח הומניטריות ב-BBC/אל-ג׳אזירה'], update:'יומי' }
     },
 

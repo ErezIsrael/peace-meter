@@ -296,6 +296,7 @@ const FALLBACK_SIGNALS = {
   conflict:    { label: "Conflict Events",      icon: "💥", weight: 0.08, score: 45, history: [30,32,35,38,40,42,45,48,50,45], status: "Delayed", detail: "GDELT: 12 hostile / 28 constructive / 40 total" },
   views:       { label: "VIEWS AI Forecast",    icon: "🌍", weight: 0.05, score: 62, history: [55,56,57,58,59,60,60,61,61,62], status: "Delayed", detail: "Declining predicted fatalities" },
   normalization:{ label: "Normalization",       icon: "🔗", weight: 0.04, score: 55, history: [40,42,45,48,50,51,52,53,54,55], status: "Live",    detail: "Embassy openings, visa deals, route resumptions (180d window)" },
+  economic:    { label: "Economic",             icon: "📊", weight: 0.03, score: 42, history: [25,28,30,32,35,37,39,40,41,42], status: "Live",    detail: "Trade agreements, corridors, port deals (365d window)" },
   humanitarian:{ label: "Humanitarian",         icon: "🏥", weight: 0.01, score: 35, history: [10,12,15,18,20,22,25,28,32,35], status: "Live",    detail: "2 aid corridors, 1 prisoner swap" }
 };
 
@@ -342,6 +343,49 @@ function computeNormalization() {
   return {
     score: normScore,
     detail: `${recentCount} events (180d): ${types.join(', ')}`,
+    eventCount: recentCount,
+    typeBreakdown: recent.reduce((acc, e) => { acc[e.type] = (acc[e.type] || 0) + 1; return acc; }, {}),
+  };
+}
+
+/* ── Economic Integration Tracker ─────────────────────── */
+const ECONOMIC_EVENTS = [
+  // Historical economic milestones
+  { date: '2020-01-01', countries: ['ISR', 'ARE'], type: 'fta', value: 3, desc: 'Abraham Accords trade framework' },
+  { date: '2020-09-15', countries: ['ISR', 'BHR'], type: 'fta', value: 2, desc: 'Israel-Bahrain trade agreement' },
+  { date: '2021-06-01', countries: ['ISR', 'MAR'], type: 'fta', value: 2, desc: 'Israel-Morocco trade deal' },
+  { date: '2022-03-01', countries: ['ISR', 'ARE'], type: 'trade', value: 2, desc: 'Israel-UAE $16B trade volume milestone' },
+  { date: '2023-01-01', countries: ['ISR', 'ARE'], type: 'corridor', value: 3, desc: 'IMEC economic corridor proposal' },
+  { date: '2024-01-01', countries: ['ISR', 'SAU'], type: 'trade', value: 2, desc: 'Israel-Saudi indirect trade growth' },
+  { date: '2024-06-01', countries: ['SAU', 'IND'], type: 'fta', value: 2, desc: 'Saudi-India economic corridor' },
+  { date: '2025-01-01', countries: ['ISR', 'SAU'], type: 'trade', value: 3, desc: 'Israel-Saudi trade agreement' },
+  { date: '2025-04-01', countries: ['ARE', 'ISR'], type: 'corridor', value: 2, desc: 'UAE-Israel direct cargo route' },
+  { date: '2025-11-01', countries: ['ISR', 'ARE'], type: 'port', value: 2, desc: 'Israel-UAE port cooperation deal' },
+  { date: '2026-01-01', countries: ['ISR', 'BHR'], type: 'trade', value: 1, desc: 'Israel-Bahrain trade volume increase' },
+  { date: '2026-04-01', countries: ['SAU', 'ARE'], type: 'corridor', value: 2, desc: 'Gulf intra-trade expansion' },
+];
+
+function computeEconomic() {
+  const now = Date.now();
+  const windowDays = 365;
+  const recent = ECONOMIC_EVENTS.filter(e => {
+    const ageDays = (now - Date.parse(e.date)) / 86400000;
+    return ageDays < windowDays;
+  });
+
+  let econScore = 0;
+  recent.forEach(e => {
+    const ageDays = (now - Date.parse(e.date)) / 86400000;
+    const decay = Math.exp(-ageDays / 120); // slower decay (half-life ~83 days)
+    econScore += (e.value || 1) * decay;
+  });
+
+  const recentCount = recent.length;
+  const types = [...new Set(recent.map(e => e.type))];
+
+  return {
+    score: Math.round(clamp(0, 100, econScore * 15)),
+    detail: `${recentCount} events (365d): ${types.join(', ')}`,
     eventCount: recentCount,
     typeBreakdown: recent.reduce((acc, e) => { acc[e.type] = (acc[e.type] || 0) + 1; return acc; }, {}),
   };
@@ -476,6 +520,10 @@ export async function onRequest(context) {
     // Compute normalization signal from curated events
     const normData = computeNormalization();
     signals.normalization = { ...signals.normalization, score: normData.score, detail: normData.detail, status: 'Live' };
+
+    // Compute economic integration signal from curated events
+    const econData = computeEconomic();
+    signals.economic = { ...signals.economic, score: econData.score, detail: econData.detail, status: 'Live' };
 
     const masterScore = calcMaster(signals);
 
