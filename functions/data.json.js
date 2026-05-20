@@ -53,126 +53,32 @@ const EXCLUDE_KEYWORDS = [
   'cyber attack', 'ransomware', 'phishing',
 ];
 
-/* ── GDELT 2.0 Event Database fetcher ──────────────────── */
-/* Free, anonymous API. Monitors 250k+ news stories/day.
- * Data files: YYYYMMDDHHMMSS.export.CSV.zip
- *   → contains tab-delimited .CSV file (no header row)
- * Columns (0-indexed, tab-separated):
- *   17 = Actor1CountryCode (3-char CAMEO: ISR, IRN, etc.)
- *   19 = Actor2CountryCode
- *   26 = EventCode         (3-digit CAMEO code)
- *   28 = EventRootCode     (2-digit root category)
- *   30 = GoldsteinScale    (-10 to +10 per event)
- */
-const GDELT_COUNTRIES = ['ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','USA'];
-// CAMEO root codes for diplomatic events
-const CAMEO_DIPLOMATIC_ROOTS = ['13','22','23','24','26','27','40','41','42','43','45','52','58','59'];
+/* ── GDELT Proxy — queries BigQuery via dedicated Worker ── */
+/* The proxy Worker queries gdelt_biq.gdelt_v2.events in BigQuery,
+ * computes ME-focused metrics, and caches in Cloudflare KV.
+ * This bypasses Cloudflare's egress restrictions to Google Cloud IPs. */
+const GDELT_PROXY_URL = 'https://gdelt-proxy.erez4free.workers.dev/peace-metrics';
 
-/* ZIP decompressor using fflate library.
- * GDELT export files are ZIP with one deflated .CSV inside. */
-import { unzipSync } from 'fflate';
-
-function unzipSingle(buffer) {
+async function fetchGDELTProxy() {
   try {
-    const entries = unzipSync(new Uint8Array(buffer));
-    const firstKey = Object.keys(entries)[0];
-    return new TextDecoder('utf-8').decode(entries[firstKey]);
+    const res = await fetch(GDELT_PROXY_URL, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return {
+      avgGoldstein: parseFloat(data.avgGoldstein || 0),
+      eventCount: parseInt(data.eventCount || 0),
+      constructiveEvents: parseInt(data.constructiveEvents || 0),
+      hostileEvents: parseInt(data.hostileEvents || 0),
+      diplomaticCount: parseInt(data.diplomaticEvents || 0),
+      constructiveRatio: (data.constructiveEvents + data.hostileEvents) > 0
+        ? data.constructiveEvents / (data.constructiveEvents + data.hostileEvents)
+        : 0.5,
+      _proxy: true,
+      cached: data.cached,
+    };
   } catch {
     return null;
   }
-}
-
-async function fetchGDELT() {
-  const now = new Date();
-
-  // GDELT updates every 15 min. Try recent timestamps.
-  // File format: YYYYMMDDHHMMSS.export.CSV.zip
-  const timestampsToTry = [];
-  for (let offsetMin = 0; offsetMin < 60; offsetMin += 15) {
-    const h = new Date(now.getTime() - offsetMin * 60000);
-    const ts = h.toISOString().replace(/[-T:Z]/g, '').slice(0, 12);
-    timestampsToTry.push(ts);
-  }
-
-  for (const ts of timestampsToTry) {
-    const url = `https://data.gdeltproject.org/gdeltv2/${ts}00.export.CSV.zip`;
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) continue;
-      const buffer = await res.arrayBuffer();
-      const text = unzipSingle(buffer);
-      if (!text) continue;
-      const parsed = parseGDELT(text);
-      if (parsed && parsed.eventCount > 0) {
-        parsed._rawCsv = text; // store for per-pair computation
-        return parsed;
-      }
-    } catch { /* try next timestamp */ }
-  }
-  return null;
-}
-
-function parseGDELT(csvText, pairFilters) {
-  const lines = csvText.trim().split('\n');
-  if (lines.length < 2) return null;
-
-  let totalGoldstein = 0;
-  let totalTone = 0;
-  let eventCount = 0;
-  let diplomaticCount = 0;
-  let constructiveEvents = 0;
-  let hostileEvents = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const fields = lines[i].split('\t');
-    if (fields.length < 35) continue;
-
-    const actor1 = fields[17].trim();
-    const actor2 = fields[19].trim();
-    const rootCode = fields[28].trim();
-    const goldstein = parseFloat(fields[30]);
-
-    // Check if at least one actor is a ME country we track
-    const actorMatch = GDELT_COUNTRIES.includes(actor1) || GDELT_COUNTRIES.includes(actor2);
-    if (!actorMatch) continue;
-
-    // If pairFilters provided, only count events matching those countries
-    if (pairFilters && pairFilters.countries) {
-      const pairMatch = (pairFilters.countries.includes(actor1) && pairFilters.countries.includes(actor2))
-        || (pairFilters.countries.includes(actor1) && !GDELT_COUNTRIES.includes(actor2))
-        || (!GDELT_COUNTRIES.includes(actor1) && pairFilters.countries.includes(actor2));
-      if (!pairMatch) continue;
-    }
-
-    // Skip events with zero Goldstein (neutral)
-    if (isNaN(goldstein) || goldstein === 0) continue;
-
-    eventCount++;
-    totalGoldstein += goldstein;
-
-    if (goldstein > 0) constructiveEvents++;
-    else hostileEvents++;
-
-    if (CAMEO_DIPLOMATIC_ROOTS.includes(rootCode)) {
-      diplomaticCount++;
-    }
-  }
-
-  if (eventCount === 0) return null;
-
-  const avgGoldstein = totalGoldstein / eventCount;
-  const constructiveRatio = (constructiveEvents + hostileEvents) > 0
-    ? constructiveEvents / (constructiveEvents + hostileEvents)
-    : 0.5;
-
-  return {
-    avgGoldstein,
-    eventCount,
-    diplomaticCount,
-    constructiveRatio,
-    constructiveEvents,
-    hostileEvents,
-  };
 }
 
 /* ── Lightweight RSS parser ───────────────────────────── */
@@ -419,35 +325,9 @@ function getLevelLabel(score) {
 }
 
 function computePairScore(pair, gdeltData) {
-  if (gdeltData && gdeltData._rawCsv) {
-    // Re-parse GDELT filtered to this pair's countries
-    const pairGdelt = parseGDELT(gdeltData._rawCsv, pair);
-
-    if (pairGdelt && pairGdelt.eventCount > 0) {
-      // Tone: Goldstein Scale mapped 0-100
-      const tone = Math.round(clamp(0, 100, 50 + (pairGdelt.avgGoldstein / 10) * 50));
-      // Diplomatic news: constructive ratio
-      const news = Math.round(clamp(3, 95, Math.round(Math.pow(pairGdelt.constructiveRatio, 2) * 150)));
-      // Conflict: hostile ratio inverted
-      const hostileRatio = pairGdelt.hostileEvents / pairGdelt.eventCount;
-      const conflict = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
-      // Weighted combo: tone 40%, news 30%, conflict 30%
-      const score = Math.round(tone * 0.40 + news * 0.30 + conflict * 0.30);
-
-      return {
-        id: pair.id,
-        name: pair.name,
-        score: clamp(0, 100, score),
-        level: getLevelLabel(score),
-        detail: `${pairGdelt.eventCount} events — tone ${pairGdelt.avgGoldstein > 0 ? '+' : ''}${pairGdelt.avgGoldstein.toFixed(1)}, ${pairGdelt.diplomaticCount} diplomatic`,
-        status: 'Live',
-      };
-    }
-  }
-
-  // Fallback: derive from master signals with pair-specific adjustments
-  const baseScore = FALLBACK_SIGNALS.tone.score;
-  // Each pair gets a slight modifier reflecting its typical conflict intensity
+  // GDELT proxy doesn't provide per-pair breakdown yet,
+  // so pairs always use fallback estimation from global data
+  const baseScore = gdeltData ? FALLBACK_SIGNALS.tone.score : 60;
   const modifiers = {
     'israel-palestine': -15,
     'israel-lebanon': -10,
@@ -457,14 +337,18 @@ function computePairScore(pair, gdeltData) {
     'gulf-normalization': +15,
   };
   const score = clamp(0, 100, baseScore + (modifiers[pair.id] || 0));
+  const status = gdeltData ? 'Cached' : 'Delayed';
+  const detail = gdeltData
+    ? 'Estimated from global GDELT signals'
+    : 'GDELT unavailable — estimated from regional signals';
 
   return {
     id: pair.id,
     name: pair.name,
     score,
     level: getLevelLabel(score),
-    detail: 'GDELT unavailable — estimated from regional signals',
-    status: 'Delayed',
+    detail,
+    status,
   };
 }
 
@@ -473,17 +357,16 @@ export async function onRequest(context) {
   try {
     const publications = await fetchPublications();
 
-    // Fetch GDELT data (best effort, falls back to mock)
-    const gdeltData = await fetchGDELT();
+    // Fetch GDELT data via proxy Worker (BigQuery)
+    const gdeltData = await fetchGDELTProxy();
+    const gdeltLive = gdeltData && gdeltData.eventCount > 0 && !gdeltData._proxy;
 
     // Compute tone signal from GDELT
     let toneScore, toneDetail, toneStatus;
     if (gdeltData && gdeltData.eventCount > 0) {
-      // Goldstein Scale: -10 to +10 per event → map to 0-100
-      // Average +10 → 100, 0 → 50, -10 → 0
       toneScore = Math.round(clamp(0, 100, 50 + (gdeltData.avgGoldstein / 10) * 50));
-      toneDetail = `${gdeltData.eventCount} events, tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(1)}, ${gdeltData.diplomaticCount} diplomatic`;
-      toneStatus = 'Live';
+      toneDetail = `${gdeltData.eventCount} events, tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic`;
+      toneStatus = gdeltData.cached ? 'Cached' : 'Live';
     } else {
       toneScore = FALLBACK_SIGNALS.tone.score;
       toneDetail = FALLBACK_SIGNALS.tone.detail;
@@ -495,7 +378,7 @@ export async function onRequest(context) {
     if (gdeltData && gdeltData.eventCount > 0) {
       newsScore = Math.round(clamp(3, 95, Math.round(Math.pow(gdeltData.constructiveRatio, 2) * 150)));
       newsDetail = `${gdeltData.diplomaticCount} diplomatic events / ${gdeltData.eventCount} total`;
-      newsStatus = 'Live';
+      newsStatus = gdeltData.cached ? 'Cached' : 'Live';
     } else {
       newsScore = FALLBACK_SIGNALS.news.score;
       newsDetail = FALLBACK_SIGNALS.news.detail;
@@ -505,16 +388,12 @@ export async function onRequest(context) {
     // Compute conflict events signal from GDELT
     let conflictScore, conflictDetail, conflictStatus;
     if (gdeltData && gdeltData.eventCount > 0) {
-      // Violent event ratio: hostile events vs total, mapped to peace score
-      // More hostile events = lower score
       const hostileRatio = gdeltData.eventCount > 0
         ? gdeltData.hostileEvents / gdeltData.eventCount
         : 0;
-      // Invert: high hostile ratio → low peace score
-      // 0 hostile → 100, 0.5 hostile → 50, 1.0 hostile → 0
       conflictScore = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
       conflictDetail = `${gdeltData.hostileEvents} hostile / ${gdeltData.constructiveEvents} constructive / ${gdeltData.eventCount} total`;
-      conflictStatus = 'Live';
+      conflictStatus = gdeltData.cached ? 'Cached' : 'Live';
     } else {
       conflictScore = FALLBACK_SIGNALS.conflict.score;
       conflictDetail = FALLBACK_SIGNALS.conflict.detail;

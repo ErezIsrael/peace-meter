@@ -1,5 +1,4 @@
 {
-  "dependencies": {
-    "fflate": "^0.8.3"
-  }
+  "private": true,
+  "description": "Peace Meter — regional peace temperature dashboard"
 }

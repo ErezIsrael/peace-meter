@@ -1,0 +1,11 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "gdelt-proxy"
+compatibility_date = "2026-05-20"
+
+[[kv_namespaces]]
+binding = "GDELT_CACHE"
+id = "ba57ba1748094576ac58cfd8dae26ae7"
+
+# Service account key stored as a secret:
+#   npx wrangler secret put GDELT_SA_KEY
+# The key is a JSON service account credential file.
