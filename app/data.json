@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-05-20T14:32:00Z",
+  "master": {
+    "score": 58,
+    "level": "Thawing",
+    "trend": "rising"
+  },
+  "signals": {
+    "news": {
+      "label": "Diplomatic News",
+      "icon": "📰",
+      "weight": 0.20,
+      "score": 65,
+      "history": [42, 45, 48, 50, 52, 55, 58, 60, 62, 65],
+      "status": "Live",
+      "detail": "62% peace-toned articles in ME coverage"
+    },
+    "thinktank": {
+      "label": "Think Tank & Expert",
+      "icon": "🧠",
+      "weight": 0.20,
+      "score": 52,
+      "history": [30, 32, 35, 38, 40, 44, 47, 49, 50, 52],
+      "status": "Live",
+      "detail": "Mitvim: normalization framework paper published"
+    },
+    "aviation": {
+      "label": "Civil Aviation",
+      "icon": "✈️",
+      "weight": 0.15,
+      "score": 48,
+      "history": [35, 37, 39, 40, 42, 43, 45, 46, 47, 48],
+      "status": "Live",
+      "detail": "72 aircraft in ME airspace (baseline: 95)"
+    },
+    "prediction": {
+      "label": "Prediction Markets",
+      "icon": "💰",
+      "weight": 0.12,
+      "score": 41,
+      "history": [20, 22, 25, 28, 30, 33, 35, 37, 39, 41],
+      "status": "Live",
+      "detail": "Israel-Iran ceasefire odds: 41% (Polymarket)"
+    },
+    "shipping": {
+      "label": "Gulf Shipping",
+      "icon": "🚢",
+      "weight": 0.10,
+      "score": 55,
+      "history": [30, 32, 35, 38, 40, 42, 45, 48, 52, 55],
+      "status": "Live",
+      "detail": "2 safe passage articles, 1 attack in 7 days"
+    },
+    "tone": {
+      "label": "Political Tone",
+      "icon": "🤝",
+      "weight": 0.10,
+      "score": 60,
+      "history": [45, 48, 50, 52, 53, 55, 56, 57, 59, 60],
+      "status": "Live",
+      "detail": "55% constructive statements (7-day)"
+    },
+    "views": {
+      "label": "VIEWS AI Forecast",
+      "icon": "🌍",
+      "weight": 0.08,
+      "score": 62,
+      "history": [55, 56, 57, 58, 59, 60, 60, 61, 61, 62],
+      "status": "Delayed",
+      "detail": "VIEWS predicts declining fatalities for Israel, Lebanon"
+    },
+    "humanitarian": {
+      "label": "Humanitarian",
+      "icon": "🏥",
+      "weight": 0.05,
+      "score": 35,
+      "history": [10, 12, 15, 18, 20, 22, 25, 28, 32, 35],
+      "status": "Live",
+      "detail": "2 aid corridors opened, 1 prisoner swap this week"
+    }
+  },
+  "history": {
+    "labels": ["14:02", "13:32", "13:02", "12:32", "12:02", "11:32", "11:02", "10:32", "10:02", "9:32", "9:02", "8:32"],
+    "scores": [42, 44, 46, 47, 49, 50, 52, 53, 55, 56, 57, 58]
+  },
+  "publications": [
+    { "source": "Mitvim", "title": "Normalization Through Strength? A Dual Israeli–Saudi Examination", "date": "2026-04-20", "sentiment": "peace" },
+    { "source": "INSS", "title": "October 2025 Public Opinion Survey", "date": "2025-10-15", "sentiment": "neutral" },
+    { "source": "Mitvim", "title": "IMEC 2.0: A New Regional Vision After the Gaza War", "date": "2026-03-10", "sentiment": "peace" }
+  ]
+}

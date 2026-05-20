@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Peace Meter — Middle East Peace Temperature</title>
+    <meta name="description" content="Real-time geopolitical peace monitor tracking diplomacy, aviation, prediction markets, and humanitarian signals for the Middle East. Updated every 30 minutes.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☮️</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.7/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- ── Header ────────────────────────────────── -->
+        <header class="header">
+            <h1 class="logo">☮️ Peace Meter</h1>
+            <div class="header-right">
+                <div class="live-badge"><div class="live-dot"></div>Live</div>
+                <button class="icon-btn" onclick="showInfo('calculation')" title="How it works">?</button>
+                <button class="icon-btn" onclick="showInfo('about')" title="About Peace Meter">i</button>
+            </div>
+        </header>
+
+        <!-- ── Timestamp bar ─────────────────────────── -->
+        <div class="timestamp-bar">
+            <span>Updated <span class="time" id="lastUpdate">--:--</span> <span class="tz" id="timezone">UTC</span></span>
+            <span id="nextUpdate"></span>
+        </div>
+
+        <!-- ── Master Gauge ──────────────────────────── -->
+        <div class="gauge-card">
+            <div class="gauge-title">Middle East Peace Score</div>
+            <div class="gauge-container">
+                <svg class="gauge-svg" viewBox="0 0 200 115">
+                    <defs>
+                        <linearGradient id="grad-frozen"      x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#7dd3fc"/>
+                        </linearGradient>
+                        <linearGradient id="grad-thawing"     x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#38bdf8"/>
+                        </linearGradient>
+                        <linearGradient id="grad-growing"     x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#4ade80"/>
+                        </linearGradient>
+                        <linearGradient id="grad-flourishing" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#fbbf24"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="gauge-track" d="M 20 100 A 80 80 0 0 1 180 100"/>
+                    <path class="gauge-fill" id="gaugeFill" d="M 20 100 A 80 80 0 0 1 180 100"
+                          stroke="url(#grad-thawing)" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+                </svg>
+            </div>
+            <div class="gauge-score" id="gaugeScore">--</div>
+            <div class="status-label thawing" id="statusLabel">Loading...</div>
+        </div>
+
+        <!-- ── 72-Hour Trend ─────────────────────────── -->
+        <div class="chart-card">
+            <h3>📈 Trend (12 Hours)</h3>
+            <div style="height:200px;">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- ── Signal Cards ──────────────────────────── -->
+        <div class="signal-grid" id="signalGrid">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- ── Think Tank Publications ───────────────── -->
+        <div class="pub-card">
+            <h3>📚 Recent Think Tank Publications</h3>
+            <div id="pubList">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- ── Footer ────────────────────────────────── -->
+        <footer class="footer">
+            <p>Peace Meter is an experimental project for informational purposes only.</p>
+            <p>Scores are algorithmic aggregations of publicly available data, not predictions.</p>
+        </footer>
+    </div>
+
+    <!-- ── Modal ─────────────────────────────────────── -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div id="modalContent"></div>
+            <button class="modal-close" id="modalClose">Close</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
