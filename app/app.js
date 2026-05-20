@@ -364,6 +364,12 @@ async function loadAndRender() {
 loadAndRender();
 setInterval(loadAndRender, UPDATE_INTERVAL);
 
+// Set version badge
+(function setVersion() {
+  const el = document.getElementById('versionTag');
+  if (el) el.textContent = 'v' + APP_VERSION;
+})();
+
 // L5: check if cached data is stale on load, refresh sooner
 (function checkStale() {
   try {
