@@ -1,4 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
+/* v2.0.0 */
 
 const LANG = {
   en: {
