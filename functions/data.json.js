@@ -409,7 +409,7 @@ function computePairScore(pair, gdeltData) {
     name: pair.name,
     score,
     level: getLevelLabel(score),
-    detail: 'Estimated from regional signals (GDELT unavailable)',
+    detail: 'GDELT unavailable — estimated from regional signals',
     status: 'Delayed',
   };
 }

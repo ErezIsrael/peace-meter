@@ -20,12 +20,12 @@
     "scores": [42,44,46,47,49,50,52,53,55,56,57,58]
   },
   "pairs": [
-    { "id": "israel-palestine", "name": "Israel-Palestine", "score": 45, "level": "Thawing", "detail": "Estimated from regional signals (GDELT unavailable)", "status": "Delayed" },
-    { "id": "israel-lebanon",   "name": "Israel-Lebanon",   "score": 50, "level": "Thawing", "detail": "Estimated from regional signals (GDELT unavailable)", "status": "Delayed" },
-    { "id": "red-sea",          "name": "Red Sea / Yemen",  "score": 55, "level": "Growing", "detail": "Estimated from regional signals (GDELT unavailable)", "status": "Delayed" },
-    { "id": "israel-iran",      "name": "Israel-Iran",      "score": 35, "level": "Thawing", "detail": "Estimated from regional signals (GDELT unavailable)", "status": "Delayed" },
-    { "id": "usa-iran",         "name": "USA-Iran",         "score": 50, "level": "Thawing", "detail": "Estimated from regional signals (GDELT unavailable)", "status": "Delayed" },
-    { "id": "gulf-normalization","name": "Abraham Accords", "score": 75, "level": "Growing", "detail": "Estimated from regional signals (GDELT unavailable)", "status": "Delayed" }
+    { "id": "israel-palestine", "name": "Israel-Palestine", "score": 45, "level": "Thawing", "detail": "GDELT unavailable", "status": "Delayed" },
+    { "id": "israel-lebanon",   "name": "Israel-Lebanon",   "score": 50, "level": "Thawing", "detail": "GDELT unavailable", "status": "Delayed" },
+    { "id": "red-sea",          "name": "Red Sea / Yemen",  "score": 55, "level": "Growing", "detail": "GDELT unavailable", "status": "Delayed" },
+    { "id": "israel-iran",      "name": "Israel-Iran",      "score": 35, "level": "Thawing", "detail": "GDELT unavailable", "status": "Delayed" },
+    { "id": "usa-iran",         "name": "USA-Iran",         "score": 50, "level": "Thawing", "detail": "GDELT unavailable", "status": "Delayed" },
+    { "id": "gulf-normalization","name": "Abraham Accords", "score": 75, "level": "Growing", "detail": "GDELT unavailable", "status": "Delayed" }
   ],
   "publications": [
     { "source": "Mitvim", "title": "Normalization Through Strength? A Dual Israeli–Saudi Examination", "date": "2026-04-20", "sentiment": "peace" },
