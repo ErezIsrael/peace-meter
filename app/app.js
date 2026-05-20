@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.5.1 */
+/* VERSION: 2.5.2 */
 
-const APP_VERSION = '2.5.1'; // 2026-05-20: Map with country outlines + expand modal
+const APP_VERSION = '2.5.2'; // 2026-05-20: Real Natural Earth country outlines
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -286,30 +286,16 @@ function togglePairs() {
 }
 
 /* ── Regional Map ─────────────────────────────────────── */
-// Country outlines (simplified SVG paths for ME map)
-const ME_COUNTRIES = {
-  turkey:     { path: 'M200 30 L300 20 L360 40 L380 70 L370 100 L340 110 L280 105 L220 95 L190 60 Z', fill: '#0e1520', label: 'Turkey' },
-  syria:      { path: 'M260 110 L340 105 L370 115 L375 145 L350 160 L300 155 L260 140 Z', fill: '#0e1520', label: 'Syria' },
-  lebanon:    { path: 'M370 115 L385 118 L387 145 L375 150 L370 135 Z', fill: '#0f1620', label: 'Lebanon' },
-  israel:     { path: 'M365 155 L380 150 L382 185 L375 195 L362 190 L360 165 Z', fill: '#0f1620', label: 'Israel' },
-  jordan:     { path: 'M380 155 L410 150 L420 190 L415 230 L395 240 L380 220 L378 180 Z', fill: '#0e1520', label: 'Jordan' },
-  iraq:       { path: 'M410 100 L460 90 L490 120 L500 170 L490 220 L460 240 L420 230 L415 180 L405 130 Z', fill: '#0e1520', label: 'Iraq' },
-  iran:       { path: 'M500 80 L570 70 L620 95 L630 150 L620 210 L590 240 L550 230 L510 200 L500 140 Z', fill: '#0e1520', label: 'Iran' },
-  saudi:      { path: 'M370 240 L420 230 L460 240 L490 260 L510 310 L500 360 L460 380 L410 370 L370 340 L350 290 Z', fill: '#0e1520', label: 'Saudi Arabia' },
-  yemen:      { path: 'M350 350 L390 340 L420 360 L430 390 L400 400 L360 390 Z', fill: '#0e1520', label: 'Yemen' },
-  uae:        { path: 'M480 370 L510 365 L525 380 L515 395 L490 390 Z', fill: '#0f1620', label: 'UAE' },
-  egypt:      { path: 'M160 200 L230 180 L250 220 L260 290 L240 330 L200 340 L160 310 L150 250 Z', fill: '#0e1520', label: 'Egypt' },
-  kuwait:     { path: 'M470 240 L490 235 L495 255 L480 260 Z', fill: '#0f1620', label: 'Kuwait' },
-};
+// Real country outlines from Natural Earth data (1:50m)
+// Loaded as static SVG: me_map.svg (viewBox 0 0 600 400)
 
-// Pair score dot positions on the map
+// Pair score dot positions (computed from country centroids)
 const MAP_PAIRS = [
-  { id: 'israel-palestine', cx: 373, cy: 175 },
-  { id: 'israel-lebanon',   cx: 378, cy: 132 },
-  { id: 'red-sea',          cx: 310, cy: 310 },
-  { id: 'israel-iran',      cx: 495, cy: 160 },
-  { id: 'usa-iran',         cx: 610, cy: 140 },
-  { id: 'gulf-normalization', cx: 500, cy: 340 },
+  { id: 'israel-palestine',   cx: 144, cy: 140 },
+  { id: 'israel-lebanon',     cx: 149, cy: 128 },
+  { id: 'red-sea',            cx: 178, cy: 223 },
+  { id: 'israel-iran',        cx: 259, cy: 131 },
+  { id: 'gulf-normalization', cx: 389, cy: 238 },
 ];
 
 // Connection lines between pair dots
@@ -319,47 +305,30 @@ const MAP_LINES = [
   ['red-sea', 'gulf-normalization'],
 ];
 
-function buildMapSVG(pairs, large) {
-  const W = 720, H = 440;
+async function loadMapSVG() {
+  const resp = await fetch('me_map.svg');
+  return await resp.text();
+}
+
+let mapSVGContent = null;
+
+function overlayMapDots(svgContent, pairs, large) {
   const pairMap = Object.fromEntries(pairs.map(p => [p.id, p]));
-  const scale = large ? 1 : 0.72;
-  const fs = large ? 10 : 8;
-  const labelFs = large ? 11 : 9;
+  const dotR = large ? 14 : 10;
+  const fs = large ? 11 : 9;
 
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;`;
-  if (!large) svg += `cursor:pointer;`;
-  svg += `">`;
-
-  // Background
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#0a0e14" rx="8"/>`;
-
-  // Water labels
-  svg += `<text x="270" y="280" text-anchor="middle" font-size="${fs}" fill="#1a2a40" font-style="italic">Red Sea</text>`;
-  svg += `<text x="520" y="350" text-anchor="middle" font-size="${fs}" fill="#1a2a40" font-style="italic">Gulf</text>`;
-  svg += `<text x="370" y="100" text-anchor="middle" font-size="${fs}" fill="#1a2a40" font-style="italic">Mediterranean</text>`;
-
-  // Country shapes
-  for (const [key, c] of Object.entries(ME_COUNTRIES)) {
-    svg += `<path d="${c.path}" fill="${c.fill}" stroke="#1e2a38" stroke-width="0.8" class="map-country" data-country="${key}"/>`;
-    // Country label
-    const pts = c.path.match(/\d+/g);
-    if (pts && pts.length >= 2) {
-      const cx = pts.slice(0, pts.length/2).reduce((a,b)=>parseInt(a)+parseInt(b),0) / (pts.length/4);
-      const cy = pts.slice(pts.length/2).reduce((a,b)=>parseInt(a)+parseInt(b),0) / (pts.length/4);
-      svg += `<text x="${cx}" y="${cy}" text-anchor="middle" font-size="${labelFs}" fill="#64748b" font-family="var(--heading-font)" font-weight="500">${c.label}</text>`;
-    }
-  }
+  // Build overlay group
+  let overlay = '<g id="map-overlay">';
 
   // Connection lines
   MAP_LINES.forEach(([fromId, toId]) => {
     const a = MAP_PAIRS.find(p => p.id === fromId);
     const b = MAP_PAIRS.find(p => p.id === toId);
     if (a && b)
-      svg += `<line x1="${a.cx}" y1="${a.cy}" x2="${b.cx}" y2="${b.cy}" stroke="#2a3a50" stroke-width="1" stroke-dasharray="5,4" opacity="0.6"/>`;
+      overlay += `<line x1="${a.cx}" y1="${a.cy}" x2="${b.cx}" y2="${b.cy}" stroke="#2a3a50" stroke-width="1" stroke-dasharray="5,4" opacity="0.6"/>`;
   });
 
   // Pair score dots
-  const dotR = large ? 14 : 11;
   MAP_PAIRS.forEach(pair => {
     const data = pairMap[pair.id];
     let color = '#64748b';
@@ -369,19 +338,16 @@ function buildMapSVG(pairs, large) {
       color = level.color;
       score = data.score;
     }
-    // Glow
-    svg += `<circle cx="${pair.cx}" cy="${pair.cy}" r="${dotR + 4}" fill="${color}" opacity="0.1"/>`;
-    // Dot
-    svg += `<circle class="map-dot" cx="${pair.cx}" cy="${pair.cy}" r="${dotR}" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2" stroke-opacity="0.9" data-pair="${pair.id}"/>`;
-    // Score
+    overlay += `<circle cx="${pair.cx}" cy="${pair.cy}" r="${dotR + 4}" fill="${color}" opacity="0.1"/>`;
+    overlay += `<circle class="map-dot" cx="${pair.cx}" cy="${pair.cy}" r="${dotR}" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2" stroke-opacity="0.9" data-pair="${pair.id}"/>`;
     if (score !== null) {
-      svg += `<text x="${pair.cx}" y="${pair.cy + 4}" text-anchor="middle" font-size="${fs + 1}" fill="${color}" font-family="var(--heading-font)" font-weight="700">${score}</text>`;
+      overlay += `<text x="${pair.cx}" y="${pair.cy + 3.5}" text-anchor="middle" font-size="${fs}" fill="${color}" font-family="monospace" font-weight="700">${score}</text>`;
     }
   });
 
-  // Legend (only in large view)
+  // Legend (large view only)
   if (large) {
-    svg += `<g transform="translate(14, ${H - 80})">`;
+    overlay += '<g transform="translate(14, 320)">';
     const levels = [
       { label: 'Frozen', color: '#7dd3fc' },
       { label: 'Thawing', color: '#38bdf8' },
@@ -389,22 +355,46 @@ function buildMapSVG(pairs, large) {
       { label: 'Flourishing', color: '#fbbf24' },
     ];
     levels.forEach((l, i) => {
-      const x = i * 55;
-      svg += `<circle cx="${x + 8}" cy="6" r="5" fill="${l.color}" opacity="0.6" stroke="${l.color}" stroke-width="1"/>`;
-      svg += `<text x="${x + 16}" y="10" font-size="8" fill="#94a3b8">${l.label}</text>`;
+      const x = i * 65;
+      overlay += `<circle cx="${x+8}" cy="6" r="5" fill="${l.color}" opacity="0.6" stroke="${l.color}" stroke-width="1"/>`;
+      overlay += `<text x="${x+16}" y="10" font-size="9" fill="#94a3b8">${l.label}</text>`;
     });
-    svg += `</g>`;
+    overlay += '</g>';
   }
 
-  svg += `</svg>`;
-  return svg;
+  overlay += '</g>';
+
+  // Insert overlay before closing </svg>
+  return svgContent.replace('</svg>', overlay + '</svg>');
 }
 
 function renderMap(pairs) {
   const container = document.getElementById('mapContainer');
   if (!container) return;
-  container.innerHTML = buildMapSVG(pairs, false);
-  container.querySelector('svg').addEventListener('click', expandMap);
+  if (!mapSVGContent) {
+    loadMapSVG().then(svg => {
+      mapSVGContent = svg;
+      const html = overlayMapDots(svg, pairs, false);
+      const wrapper = document.createElement('div');
+      wrapper.className = 'map-wrapper';
+      wrapper.innerHTML = html;
+      wrapper.style.cursor = 'pointer';
+      wrapper.addEventListener('click', expandMap);
+      container.innerHTML = '';
+      container.appendChild(wrapper);
+    }).catch(() => {
+      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Map unavailable</p>';
+    });
+    return;
+  }
+  const html = overlayMapDots(mapSVGContent, pairs, false);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'map-wrapper';
+  wrapper.innerHTML = html;
+  wrapper.style.cursor = 'pointer';
+  wrapper.addEventListener('click', expandMap);
+  container.innerHTML = '';
+  container.appendChild(wrapper);
 }
 
 function expandMap() {
@@ -413,9 +403,13 @@ function expandMap() {
   overlay.classList.add('active');
   overlay.addEventListener('click', collapseMap);
 
-  // Re-render map at large size
   const pairs = (lastData && lastData.pairs) || [];
-  content.innerHTML = `<div style="padding:10px;">${buildMapSVG(pairs, true)}</div>`;
+  const html = overlayMapDots(mapSVGContent, pairs, true);
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'padding:10px;max-width:640px;';
+  wrapper.innerHTML = html;
+  content.innerHTML = '';
+  content.appendChild(wrapper);
 }
 
 function collapseMap(e) {
