@@ -2,11 +2,11 @@
 
 const CACHE_TTL = 60; // 1 min
 
-/* ── RSS feeds ─────────────────────────────────────────── */
+/* ── RSS feeds (must be reachable from Cloudflare edge) ── */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',   source: 'Mitvim' },
-  { url: 'https://ict.org.il/feed/',         source: 'ICT' },
-  { url: 'https://reliefweb.int/rss/news.xml', source: 'ReliefWeb' },
+  { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',   alwaysInclude: false },
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', alwaysInclude: true },
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', alwaysInclude: false },
 ];
 
 /* Middle East relevance keywords */
@@ -16,15 +16,29 @@ const ME_KEYWORDS = [
   'middle east', 'iraq', 'yemen', 'houthi', 'hamas', 'hezbollah',
   'ceasefire', 'normalization', 'abraham accords', 'dead sea', 'mediterranean',
   'red sea', 'sinai', 'jerusalem', 'west bank', 'iran', 'qatar', 'bahrain',
-  'imf', 'imec', 'diplomat', 'peace deal', 'truce', 'negotiation'
+  'imf', 'imec', 'diplomat', 'peace deal', 'truce', 'negotiation',
+  'fury', 'roaring', 'epic', 'sitrep', 'operation', 'conflict', 'counter',
+  'terrorism', 'security', 'intelligence', 'defense', 'military'
 ];
 
 /* ── Lightweight RSS parser ───────────────────────────── */
-function stripCDATA(text) {
-  return text ? text.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '').trim() : '';
+function decodeHTML(text) {
+  return text
+    ? text.replace(/<!\[CDATA\[/g, '').replace(/\]\]>/g, '')
+          .replace(/&#8220;/g, '\"').replace(/&#8221;/g, '\"')
+          .replace(/&#8216;/g, "'").replace(/&#8217;/g, "'")
+          .replace(/&#8212;/g, '\u2014').replace(/&#8211;/g, '\u2013')
+          .replace(/&#038;/g, '&').replace(/&amp;/g, '&')
+          .replace(/&#8230;/g, '\u2026').replace(/&#39;/g, "'")
+          .replace(/&#8211;/g, '\u2013')
+          .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+          .replace(/&ndash;/g, '\u2013').replace(/&mdash;/g, '\u2014')
+          .replace(/\&#\d+;/g, ' ')
+          .trim()
+    : '';
 }
 
-function parseRSS(xml, sourceName) {
+function parseRSS(xml, sourceName, alwaysInclude) {
   const items = [];
   const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g);
   if (!itemMatches) return items;
@@ -33,30 +47,33 @@ function parseRSS(xml, sourceName) {
     const titleMatch   = block.match(/<title>([\s\S]*?)<\/title>/);
     const linkMatch    = block.match(/<link>(.*?)<\/link>/);
     const dateRaw      = block.match(/<pubDate>(.*?)<\/pubDate>/);
+    const categoryRaw  = block.match(/<category>(.*?)<\/category>/);
 
     if (!titleMatch || !linkMatch) continue;
 
-    const title = stripCDATA(titleMatch[1]);
-    if (!title || title.length < 10) continue; // skip garbage
+    const title = decodeHTML(titleMatch[1]);
+    if (!title || title.length < 10) continue;
 
     const link = linkMatch[1];
     const pubDate = dateRaw ? new Date(dateRaw[1]) : new Date();
     const dateStr = pubDate.toISOString().slice(0, 10);
 
     // ── ME relevance filter ─────────────────────────────
-    const lower = title.toLowerCase();
+    // Check title + category for relevance
+    const category = categoryRaw ? decodeHTML(categoryRaw[1]).toLowerCase() : '';
+    const searchable = (title.toLowerCase() + ' ' + category);
     let relevance = 0;
     for (const kw of ME_KEYWORDS) {
-      if (lower.includes(kw)) relevance++;
+      if (searchable.includes(kw)) relevance++;
     }
-    if (sourceName === 'ReliefWeb') relevance += 1; // ReliefWeb is generally relevant
 
-    // Skip items not related to Middle East
-    if (relevance === 0) continue;
+    // ICT is inherently ME-focused — always include its items
+    if (!alwaysInclude && relevance === 0) continue;
 
     // ── Sentiment scoring ──────────────────────────────
-    const peaceW = ['peace', 'normalize', 'dialogue', 'deal', 'agreement', 'negotiat', 'ceasefire', 'truce', 'aid', 'corridor', 'swap', 'release', 'reconstruction', 'framework', 'vision', 'integration', 'cooperation', 'rebuild', 'resolution', 'détente', 'humanitarian', 'mediation'];
-    const warW   = ['attack', 'strike', 'deadly', 'killed', 'rocket', 'missile', 'drone', 'assassin', 'fury', 'lion', 'bombing', 'war', 'conflict', 'escalat', 'hijack', 'seized', 'casualt'];
+    const lower = title.toLowerCase();
+    const peaceW = ['peace', 'normalize', 'dialogue', 'deal', 'agreement', 'negotiat', 'ceasefire', 'truce', 'aid', 'corridor', 'swap', 'release', 'reconstruction', 'framework', 'vision', 'integration', 'cooperation', 'rebuild', 'resolution', 'humanitarian', 'mediation'];
+    const warW   = ['attack', 'strike', 'deadly', 'killed', 'rocket', 'missile', 'drone', 'assassin', 'fury', 'lion', 'bombing', 'war', 'conflict', 'escalat', 'hijack', 'seized', 'casualt', 'sitrep', 'operation', 'target', 'threat', 'proxy'];
 
     let score = 0;
     for (const w of peaceW) if (lower.includes(w)) score++;
@@ -78,7 +95,7 @@ async function fetchPublications() {
       const res = await fetch(feed.url, { signal: AbortSignal.timeout(4000) });
       if (!res.ok) continue;
       const xml = await res.text();
-      const items = parseRSS(xml, feed.source);
+      const items = parseRSS(xml, feed.source, feed.alwaysInclude || false);
       allItems.push(...items);
     } catch { /* skip on error */ }
   }
@@ -94,7 +111,7 @@ async function fetchPublications() {
   unique.sort((a, b) => b.timestamp - a.timestamp);
 
   if (unique.length === 0) return FALLBACK_PUBLICATIONS;
-  return unique.slice(0, 5);
+  return unique.slice(0, 10);
 }
 
 /* ── Fallback mock data ────────────────────────────────── */
