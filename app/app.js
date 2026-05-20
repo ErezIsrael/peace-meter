@@ -1,8 +1,12 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
-const APP_VERSION = '1.7.3'; // 2026-05-20: added EcoPeace ME RSS source fix
+const APP_VERSION = '1.8.0'; // 2026-05-20: readability, reliability, professionalism
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
+const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
+const CACHE_KEY = 'pm-cache';
+const MAX_RETRY = 3;
+const RETRY_DELAY = [1000, 2000, 4000]; // L1: exponential backoff
 
 /* ── Language toggle ──────────────────────────────────── */
 function toggleLang() {
@@ -35,6 +39,7 @@ function renderGauge(score) {
   const fill = document.getElementById('gaugeFill');
   const scoreEl = document.getElementById('gaugeScore');
   const statusEl = document.getElementById('statusLabel');
+  const srEl = document.getElementById('gaugeSr'); // R4: screen reader
 
   const offset = GAUGE_PATH_LEN * (1 - score / 100);
   fill.style.strokeDashoffset = offset;
@@ -45,6 +50,9 @@ function renderGauge(score) {
 
   statusEl.textContent = level.label;
   statusEl.className = `status-label ${level.cls}`;
+
+  // R4: announce to screen readers
+  if (srEl) srEl.textContent = `Peace score: ${score} out of 100. Status: ${level.label}`;
 }
 
 /* ── SVG Sparkline (no dependencies) ──────────────────── */
@@ -186,7 +194,9 @@ function renderSignals(signals) {
     card.className = 'signal-card';
     card.style.cursor = 'pointer';
     card.title = sigInfo ? sigInfo.summary : '';
+    card.tabIndex = 0;
     card.onclick = () => showSignalDetail(key);
+    card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showSignalDetail(key); }; };
     card.innerHTML = `
       <div class="signal-icon">${s.icon}</div>
       <div class="signal-name">${name}</div>
@@ -301,19 +311,64 @@ function renderAll(data) {
   updateTimestamps(data);
 }
 
-/* ── Load & render ────────────────────────────────────── */
+/* ── Load & render (with retry, cache, error banner) ─── */
+let isInitialLoad = true;
+
 async function loadAndRender() {
-  try {
-    const res = await fetch('/data.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+  const errorBanner = document.getElementById('errorBanner');
+  const errorMessage = document.getElementById('errorMessage');
+
+  // L1: retry with exponential backoff
+  let data = null;
+  for (let attempt = 0; attempt < MAX_RETRY; attempt++) {
+    try {
+      const res = await fetch('/data.json');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+      break;
+    } catch (err) {
+      console.warn(`Fetch attempt ${attempt+1} failed:`, err.message);
+      if (attempt < MAX_RETRY - 1) {
+        await new Promise(r => setTimeout(r, RETRY_DELAY[attempt]));
+      }
+    }
+  }
+
+  if (data) {
+    // L2: cache fresh data in localStorage
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {}
+    errorBanner.style.display = 'none';
     renderAll(data);
-  } catch (err) {
-    console.error('Failed to load data:', err);
+  } else {
+    // L2: try cached data as fallback
+    try {
+      const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+      if (cached) {
+        renderAll(cached);
+        // L3: show error banner with stale notice
+        errorMessage.textContent = t('errorCached');
+        errorBanner.style.display = 'block';
+        return;
+      }
+    } catch {}
+
+    // No cache — show error
+    errorMessage.textContent = t('errorOffline');
+    errorBanner.style.display = 'block';
     document.getElementById('gaugeScore').textContent = '—';
-    document.getElementById('statusLabel').textContent = 'Error';
+    document.getElementById('statusLabel').textContent = 'Offline';
   }
 }
 
 loadAndRender();
 setInterval(loadAndRender, UPDATE_INTERVAL);
+
+// L5: check if cached data is stale on load, refresh sooner
+(function checkStale() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (cached && Date.now() - Date.parse(cached.timestamp) > STALE_THRESHOLD) {
+      setTimeout(loadAndRender, 3000);
+    }
+  } catch {}
+})();

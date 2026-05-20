@@ -12,6 +12,9 @@ const LANG = {
     footer1: 'Peace Meter is an experimental project for informational purposes only.',
     footer2: 'Scores are algorithmic aggregations of publicly available data, not predictions.',
     donate: '☕ Buy Me Coffee',
+    errorCached: 'Could not reach server. Showing cached data.',
+    errorOffline: 'Could not load data. Please retry.',
+    retry: 'Retry',
     close: 'Close',
 
     levels: {
@@ -124,6 +127,9 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     footer1: 'מדד השלום הוא פרויקט ניסיוני למטרות מידע בלבד.',
     footer2: 'הציונים הם אגרגציה אלגוריתמית של נתונים ציבוריים, לא תחזיות.',
     donate: '☕ קנו לי קפה',
+    errorCached: 'לא ניתן להגיע לשרת. מוצגים נתונים מהזיכרון.',
+    errorOffline: 'נכשל בטעינת הנתונים. אנא נסה שוב.',
+    retry: 'נסה שוב',
     close: 'סגור',
 
     levels: {
@@ -257,6 +263,7 @@ function applyTranslations() {
   document.querySelector('.chart-card h3').textContent = L.trendTitle;
   document.querySelector('.pub-card h3').textContent = L.pubTitle;
   document.getElementById('modalClose').textContent = L.close;
+  document.getElementById('retryBtn').textContent = L.retry;
   const footer = document.querySelectorAll('.footer p');
   if (footer[0]) footer[0].textContent = L.footer1;
   if (footer[1]) footer[1].textContent = L.footer2;

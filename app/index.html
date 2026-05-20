@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peace Meter — Middle East Peace Temperature</title>
     <meta name="description" content="Real-time geopolitical peace monitor tracking diplomacy, aviation, prediction markets, and humanitarian signals for the Middle East. Updated every 30 minutes.">
+    <!-- OG social sharing (P1) -->
+    <meta property="og:title" content="Peace Meter — Middle East Peace Temperature">
+    <meta property="og:description" content="Real-time geopolitical peace monitor tracking diplomacy, aviation, prediction markets, and humanitarian signals.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://peace-meter.pages.dev">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☮️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js removed — using inline SVG sparklines -->
@@ -12,9 +17,15 @@
     <script src="lang.js"></script>
 </head>
 <body>
-    <div class="app">
+    <div class="app" role="main" aria-label="Peace Meter dashboard">
+        <!-- ── Error banner (hidden by default) ──── -->
+        <div class="error-banner" id="errorBanner" style="display:none">
+            <p id="errorMessage">Failed to load data. Using cached data.</p>
+            <button id="retryBtn" onclick="loadAndRender()">Retry</button>
+        </div>
+
         <!-- ── Header ────────────────────────────────── -->
-        <header class="header">
+        <header class="header" aria-label="Header">
             <h1 class="logo">☮️ Peace Meter</h1>
             <div class="header-right">
                 <div class="live-badge"><div class="live-dot"></div> Live</div>
@@ -31,10 +42,11 @@
         </div>
 
         <!-- ── Master Gauge ──────────────────────────── -->
-        <div class="gauge-card">
+        <section class="gauge-card" aria-label="Peace score gauge">
             <div class="gauge-title">Middle East Peace Score</div>
             <div class="gauge-container">
-                <svg class="gauge-svg" viewBox="0 0 200 115">
+                <svg class="gauge-svg" viewBox="0 0 200 115" role="img" aria-label="Peace score gauge">
+                    <span class="sr-only" id="gaugeSr">Loading peace score...</span>
                     <defs>
                         <linearGradient id="grad-frozen"      x1="0%" y1="0%" x2="100%" y2="0%">
                             <stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#7dd3fc"/>
@@ -56,26 +68,26 @@
             </div>
             <div class="gauge-score" id="gaugeScore">--</div>
             <div class="status-label thawing" id="statusLabel">Loading...</div>
-        </div>
+        </section>
 
         <!-- ── 72-Hour Trend ─────────────────────────── -->
-        <div class="chart-card">
+        <section class="chart-card" aria-label="Trend chart">
             <h3>📈 Trend (12 Hours)</h3>
-            <svg id="trendSvg" style="width:100%;height:200px;" viewBox="0 0 600 200"></svg>
-        </div>
+            <svg id="trendSvg" style="width:100%;height:200px;" viewBox="0 0 600 200" role="img" aria-label="12-hour trend chart"></svg>
+        </section>
 
         <!-- ── Signal Cards ──────────────────────────── -->
-        <div class="signal-grid" id="signalGrid">
+        <section class="signal-grid" id="signalGrid" aria-label="Signal indicators">
             <!-- Rendered by JS -->
-        </div>
+        </section>
 
         <!-- ── Think Tank Publications ───────────────── -->
-        <div class="pub-card">
+        <section class="pub-card" aria-label="Publications">
             <h3>📚 Recent Think Tank Publications</h3>
             <div id="pubList" class="pub-list">
                 <!-- Rendered by JS -->
             </div>
-        </div>
+        </section>
 
         <!-- ── Footer ────────────────────────────────── -->
         <footer class="footer">
