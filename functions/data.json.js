@@ -9,11 +9,13 @@ const CACHE_TTL = 60; // 1 min
  *   me-news    — always include (inherently ME feed), moderate cap
  */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',          cap: 5, type: 'thinktank' },
+  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',            cap: 4, type: 'thinktank' },
+  { url: 'https://www.allmep.org/feed/',         source: 'ALLMEP',            cap: 3, type: 'thinktank' },
+  { url: 'https://fmep.org/feed/',               source: 'FMEP',              cap: 3, type: 'thinktank' },
+  { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',        cap: 2, type: 'me-news' },
   { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 2, type: 'me-news' },
-  { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',      cap: 2, type: 'me-news' },
-  { url: 'https://www.jns.org/feed/',             source: 'JNS',             cap: 3, type: 'media' },
-  { url: 'https://www.timesofisrael.com/feed/',   source: 'Times of Israel', cap: 3, type: 'media' },
+  { url: 'https://www.jns.org/feed/',             source: 'JNS',               cap: 2, type: 'media' },
+  { url: 'https://www.timesofisrael.com/feed/',   source: 'Times of Israel',   cap: 2, type: 'media' },
 ];
 
 /* ── Relevance keywords ─────────────────────────────── */
@@ -135,7 +137,7 @@ async function fetchPublications() {
     } catch { /* skip on error */ }
   }
 
-  // Deduplicate by title, sort by date (newest first), take top 10
+  // Deduplicate by title, sort by date (newest first), take top 15
   const seen = new Set();
   const unique = allItems.filter(item => {
     if (seen.has(item.title)) return false;
@@ -146,7 +148,7 @@ async function fetchPublications() {
   unique.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   if (unique.length === 0) return FALLBACK_PUBLICATIONS;
-  return unique.slice(0, 10);
+  return unique.slice(0, 15);
 }
 
 /* ── Fallback mock data ────────────────────────────────── */

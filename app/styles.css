@@ -264,6 +264,15 @@ html[dir="rtl"] .gauge-card {
   letter-spacing: 0.8px;
   margin-bottom: 12px;
 }
+.pub-list {
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.pub-list::-webkit-scrollbar { width: 6px; }
+.pub-list::-webkit-scrollbar-track { background: transparent; }
+.pub-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 .pub-item {
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
