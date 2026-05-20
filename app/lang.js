@@ -87,8 +87,8 @@ const LANG = {
 <h3>4. User Data</h3>
 <p>All stored data resides locally in your browser. No data is transmitted to us.</p>
 
-<h3>5. Intellectual Property</h3>
-<p>The code, design, and content are the property of the project author. © 2026 Erez Israel. All rights reserved.</p>
+<h3>5. Open Source</h3>
+<p>Peace Meter is an open-source project. Code is available on <a href="https://github.com/ErezIsrael/peace-meter" target="_blank">GitHub</a>.</p>
 
 <h3>6. Limitation of Liability</h3>
 <p>Peace Meter is provided "as is" without warranty of any kind.</p>
@@ -256,8 +256,8 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
 <h3>4. נתוני משתמש</h3>
 <p>כל הנתונים נשמרים מקומית בדפדפן שלך. אף נתון אינו מועבר אלינו.</p>
 
-<h3>5. קניין רוחני</h3>
-<p>הקוד, העיצוב והתוכן הם רכוש יוצר הפרויקט. © 2026 Erez Israel. כל הזכויות שמורות.</p>
+<h3>5. קוד פתוח</h3>
+<p>מדד השלום הוא פרויקט קוד פתוח. הקוד זמין ב-<a href="https://github.com/ErezIsrael/peace-meter" target="_blank">GitHub</a>.</p>
 
 <h3>6. הגבלת אחריות</h3>
 <p>מדד השלום מסופק "כפי שהוא" ללא אחריות כלשהי.</p>
@@ -267,6 +267,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
 
 <h3>8. שינויים בתנאים</h3>
 <p>תנאים אלו עשויים להתעדכן מעת לעת. בדוק דף זה לגרסה העדכנית ביותר.</p>`,
+
 
     accessibility: `<h2>הצהרת נגישות</h2>
 <p><em>עודכן לאחרונה: מאי 2026</em></p>

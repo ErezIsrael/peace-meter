@@ -151,9 +151,9 @@ These terms may be updated from time to time. Check this page for the latest ver
 
 כל הנתונים נשמרים מקומית בדפדפן שלך. אף נתון אינו מועבר אלינו.
 
-**5. קניין רוחני**
+**5. קוד פתוח**
 
-הקוד, העיצוב והתוכן הם רכוש יוצר הפרויקט. © 2026 Erez Israel. כל הזכויות שמורות.
+מדד השלום הוא פרויקט קוד פתוח. הקוד זמין ב-[GitHub](https://github.com/ErezIsrael/peace-meter).
 
 **6. הגבלת אחריות**
 
