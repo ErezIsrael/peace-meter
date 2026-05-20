@@ -17,7 +17,7 @@
 
 ```bash
 cd app
-npx wrangler pages deploy . --project-name=peace-meter
+npx wrangler pages deploy . --project-name=peace-meter --compatibility-date=2025-01-29
 ```
 
 This deploys the entire `app/` directory. Cloudflare Pages will:
