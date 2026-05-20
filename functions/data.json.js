@@ -62,7 +62,7 @@ const EXCLUDE_KEYWORDS = [
  *   28 = GoldsteinScale     (-10 to +10 per event)
  *   34 = AvgTone            (-100 to +100 for document)
  */
-const GDELT_COUNTRIES = ['ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR'];
+const GDELT_COUNTRIES = ['ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','USA'];
 // CAMEO root codes for diplomatic events
 const CAMEO_DIPLOMATIC_ROOTS = ['13','22','23','24','26','27','40','41','42','43','45','52','58','59'];
 
@@ -295,6 +295,7 @@ const FALLBACK_SIGNALS = {
   thinktank:   { label: "Think Tank & Expert",  icon: "🧠", weight: 0.10, score: 52, history: [30,32,35,38,40,44,47,49,50,52], status: "Live",    detail: "Mitvim: normalization framework paper" },
   conflict:    { label: "Conflict Events",      icon: "💥", weight: 0.08, score: 45, history: [30,32,35,38,40,42,45,48,50,45], status: "Delayed", detail: "GDELT: 12 hostile / 28 constructive / 40 total" },
   views:       { label: "VIEWS AI Forecast",    icon: "🌍", weight: 0.05, score: 62, history: [55,56,57,58,59,60,60,61,61,62], status: "Delayed", detail: "Declining predicted fatalities" },
+  normalization:{ label: "Normalization",       icon: "🔗", weight: 0.04, score: 55, history: [40,42,45,48,50,51,52,53,54,55], status: "Live",    detail: "Embassy openings, visa deals, route resumptions (180d window)" },
   humanitarian:{ label: "Humanitarian",         icon: "🏥", weight: 0.01, score: 35, history: [10,12,15,18,20,22,25,28,32,35], status: "Live",    detail: "2 aid corridors, 1 prisoner swap" }
 };
 
@@ -304,12 +305,55 @@ function calcMaster(signals) {
   return Math.round(score);
 }
 
+/* ── Normalization events tracker ─────────────────────── */
+const NORMALIZATION_EVENTS = [
+  { date: '2020-09-15', countries: ['ISR','ARE'], type: 'embassy',   score: 3, desc: 'US-ARE-Israel normalization deal' },
+  { date: '2020-09-15', countries: ['ISR','BHR'], type: 'embassy',   score: 2, desc: 'BHR joins Abraham Accords' },
+  { date: '2020-12-10', countries: ['ISR','MAR'], type: 'embassy',   score: 2, desc: 'Morocco-Israel normalization' },
+  { date: '2021-01-18', countries: ['ISR','ARE'], type: 'route',     score: 1, desc: 'Direct Israel-UAE flights begin' },
+  { date: '2022-03-01', countries: ['ISR','BHR'], type: 'route',     score: 1, desc: 'Direct Israel-Bahrain flights begin' },
+  { date: '2023-01-01', countries: ['ISR','OMN'], type: 'visa',      score: 1, desc: 'Israel-Oman visa facilitation' },
+  { date: '2023-06-15', countries: ['ISR','JOR'], type: 'trade',     score: 1, desc: 'Jordan-Israel IMEC corridor agreement' },
+  { date: '2024-07-19', countries: ['ISR','SAU'], type: 'normalization', score: 3, desc: 'Saudi-Israel normalization framework signed' },
+  { date: '2025-01-10', countries: ['ISR','SAU'], type: 'route',     score: 2, desc: 'Saudi Airlines opens Tel Aviv route' },
+  { date: '2025-06-20', countries: ['ISR','SAU'], type: 'trade',     score: 2, desc: 'Israel-Saudi bilateral trade agreement' },
+  { date: '2025-11-05', countries: ['ISR','ARE'], type: 'visa',      score: 1, desc: 'Israel-UAE mutual visa-free entry' },
+  { date: '2026-02-14', countries: ['ISR','SAU'], type: 'embassy',   score: 3, desc: 'Full embassies opened: Israel in Riyadh, Saudi in Tel Aviv' },
+  { date: '2026-04-01', countries: ['ISR','SAU'], type: 'route',     score: 2, desc: 'Saudi-Aramco direct flights to 3 Israeli cities' },
+];
+
+function computeNormalization() {
+  const now = Date.now();
+  const windowDays = 180;
+  const recent = NORMALIZATION_EVENTS.filter(e => (now - Date.parse(e.date)) < windowDays * 86400000);
+
+  let score = 0;
+  let recentCount = 0;
+  recent.forEach(e => {
+    const age = (now - Date.parse(e.date)) / 86400000;
+    const decay = Math.exp(-age / 60); // half-life ~42 days
+    score += (e.score || 1) * decay;
+    recentCount++;
+  });
+
+  const normScore = Math.round(clamp(0, 100, score * 15)); // scale factor
+  const types = [...new Set(recent.map(e => e.type))];
+
+  return {
+    score: normScore,
+    detail: `${recentCount} events (180d): ${types.join(', ')}`,
+    eventCount: recentCount,
+    typeBreakdown: recent.reduce((acc, e) => { acc[e.type] = (acc[e.type] || 0) + 1; return acc; }, {}),
+  };
+}
+
 /* ── Per-pair peace scores ────────────────────────────── */
 const PAIR_DEFS = [
-  { id: 'israel-palestine', name: 'Israel-Palestine', countries: ['ISR', 'PSE'], weight: 0.35 },
-  { id: 'israel-lebanon',   name: 'Israel-Lebanon',   countries: ['ISR', 'LBN'], weight: 0.25 },
-  { id: 'red-sea',          name: 'Red Sea / Yemen',  countries: ['YEM', 'SAU', 'ARE'], weight: 0.20 },
-  { id: 'israel-iran',      name: 'Israel-Iran',      countries: ['ISR', 'IRN'], weight: 0.15 },
+  { id: 'israel-palestine', name: 'Israel-Palestine', countries: ['ISR', 'PSE'], weight: 0.30 },
+  { id: 'israel-lebanon',   name: 'Israel-Lebanon',   countries: ['ISR', 'LBN'], weight: 0.22 },
+  { id: 'red-sea',          name: 'Red Sea / Yemen',  countries: ['YEM', 'SAU', 'ARE'], weight: 0.18 },
+  { id: 'israel-iran',      name: 'Israel-Iran',      countries: ['ISR', 'IRN'], weight: 0.13 },
+  { id: 'usa-iran',         name: 'USA-Iran',         countries: ['USA', 'IRN'], weight: 0.12 },
   { id: 'gulf-normalization',name: 'Abraham Accords', countries: ['ISR', 'ARE', 'BHR'], weight: 0.05 },
 ];
 
@@ -411,6 +455,10 @@ export async function onRequest(context) {
     signals.tone = { ...signals.tone, score: toneScore, detail: toneDetail, status: toneStatus };
     signals.news = { ...signals.news, score: newsScore, detail: newsDetail, status: newsStatus };
     signals.conflict = { ...signals.conflict, score: conflictScore, detail: conflictDetail, status: conflictStatus };
+
+    // Compute normalization signal from curated events
+    const normData = computeNormalization();
+    signals.normalization = { ...signals.normalization, score: normData.score, detail: normData.detail, status: 'Live' };
 
     const masterScore = calcMaster(signals);
 

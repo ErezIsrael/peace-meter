@@ -1,5 +1,5 @@
 {
-  "_version": "2.2.0",
+  "_version": "2.3.0",
   "timestamp": "2026-05-20T14:32:00Z",
   "master": { "score": 54, "level": "Growing", "trend": "rising" },
   "signals": {
@@ -12,6 +12,7 @@
     "thinktank": { "label": "Think Tank & Expert", "icon": "🧠", "weight": 0.10, "score": 52, "history": [30,32,35,38,40,44,47,49,50,52], "status": "Live", "detail": "Mitvim: normalization framework paper published" },
     "conflict": { "label": "Conflict Events", "icon": "💥", "weight": 0.08, "score": 70, "history": [55,58,60,62,64,65,66,67,69,70], "status": "Delayed", "detail": "GDELT: 12 hostile / 28 constructive / 40 total" },
     "views": { "label": "VIEWS AI Forecast", "icon": "🌍", "weight": 0.05, "score": 62, "history": [55,56,57,58,59,60,60,61,61,62], "status": "Delayed", "detail": "VIEWS predicts declining fatalities for Israel, Lebanon" },
+    "normalization": { "label": "Normalization", "icon": "🔗", "weight": 0.04, "score": 55, "history": [40,42,45,48,50,51,52,53,54,55], "status": "Live", "detail": "6 events (180d): embassy, visa, route, trade, normalization" },
     "humanitarian": { "label": "Humanitarian", "icon": "🏥", "weight": 0.01, "score": 35, "history": [10,12,15,18,20,22,25,28,32,35], "status": "Live", "detail": "2 aid corridors opened, 1 prisoner swap this week" }
   },
   "history": {
