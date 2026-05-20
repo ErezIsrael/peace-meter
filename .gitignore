@@ -5,3 +5,11 @@ dist/
 .DS_Store
 .wrangler/
 gdelt-proxy/*.json
+# Internal dev docs — not part of the published site
+CONCEPT.md
+IMPLEMENTATION_PLAN_V4.md
+IMPROVEMENTS_PLAN.md
+LEGAL.md
+METHODOLOGY_IMPROVEMENTS.md
+README_DEPLOY.md
+SITE_STRUCTURE.md
