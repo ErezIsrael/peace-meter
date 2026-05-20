@@ -1,5 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
-/* VERSION: 2.4.0 */
+/* VERSION: 2.5.0 */
 
 const LANG = {
   en: {
@@ -19,6 +19,7 @@ const LANG = {
     close: 'Close',
     pairToggle: '⚔️ Conflict Pairs',
     pairUnknown: 'Unknown',
+    mapToggle: '🗺️ Regional Peace Map',
 
     levels: {
       frozen: '❄️ Frozen',
@@ -192,6 +193,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     close: 'סגור',
     pairToggle: '⚔️ זוגות קונפליקט',
     pairUnknown: 'לא ידוע',
+    mapToggle: '🗺️ מפת שלום אזורית',
 
     levels: {
       frozen: '❄️ קפוא',
@@ -390,6 +392,8 @@ function applyTranslations() {
   document.querySelector('.chart-card h3').textContent = L.trendTitle;
   const pairsH3 = document.querySelector('.pairs-toggle');
   if (pairsH3) pairsH3.childNodes[0].textContent = L.pairToggle + ' ';
+  const mapH3 = document.querySelector('.map-toggle');
+  if (mapH3) mapH3.childNodes[0].textContent = L.mapToggle + ' ';
   document.querySelector('.pub-card h3').textContent = L.pubTitle;
   document.getElementById('modalClose').textContent = L.close;
   document.getElementById('retryBtn').textContent = L.retry;

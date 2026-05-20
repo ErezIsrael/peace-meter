@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.4.0 */
+/* VERSION: 2.5.0 */
 
-const APP_VERSION = '2.4.0'; // 2026-05-20: Economic integration signal
+const APP_VERSION = '2.5.0'; // 2026-05-20: Regional peace map visualization
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -285,6 +285,92 @@ function togglePairs() {
   if (arrow) arrow.classList.toggle('collapsed', pairsCollapsed);
 }
 
+/* ── Regional Map ─────────────────────────────────────── */
+const MAP_LOCATIONS = [
+  { id: 'israel-palestine', label: 'IL-PS', cx: 310, cy: 210, r: 10 },
+  { id: 'israel-lebanon',   label: 'IL-LB', cx: 310, cy: 140, r: 9  },
+  { id: 'red-sea',          label: 'RS',   cx: 280, cy: 300, r: 11 },
+  { id: 'israel-iran',      label: 'IL-IR', cx: 410, cy: 160, r: 9 },
+  { id: 'usa-iran',         label: 'US-IR', cx: 470, cy: 120, r: 7 },
+  { id: 'gulf-normalization', label: 'AA', cx: 430, cy: 280, r: 8 },
+];
+
+function renderMap(pairs) {
+  const container = document.getElementById('mapContainer');
+  if (!container) return;
+  const W = 520, H = 380;
+  const pairMap = Object.fromEntries(pairs.map(p => [p.id, p]));
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Simplified ME outline (abstract, decorative)
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#0a0e14" rx="8"/>`;
+
+  // Abstract land mass outlines
+  svg += `<path d="M160 80 L260 60 L340 80 L380 130 L400 200 L380 280 L340 320 L280 340 L220 320 L180 280 L160 200 L150 130 Z" fill="#111820" stroke="#1e2a38" stroke-width="1"/>`;
+  svg += `<path d="M400 260 L440 240 L470 270 L460 310 L430 330 L400 310 Z" fill="#111820" stroke="#1e2a38" stroke-width="1"/>`;
+  svg += `<path d="M180 280 L220 300 L260 330 L240 360 L200 340 Z" fill="#111820" stroke="#1e2a38" stroke-width="1"/>`;
+
+  // Country labels
+  const countryLabels = [
+    { text: 'Lebanon', x: 320, y: 120 },
+    { text: 'Israel/Palestine', x: 285, y: 195 },
+    { text: 'Syria', x: 310, y: 160 },
+    { text: 'Jordan', x: 350, y: 210 },
+    { text: 'Iraq', x: 400, y: 190 },
+    { text: 'Iran', x: 450, y: 170 },
+    { text: 'Yemen', x: 270, y: 310 },
+    { text: 'Saudi', x: 370, y: 270 },
+    { text: 'UAE/Bahrain', x: 440, y: 295 },
+    { text: 'Red Sea', x: 260, y: 340 },
+  ];
+  countryLabels.forEach(cl => {
+    svg += `<text x="${cl.x}" y="${cl.y}" class="map-label" text-anchor="middle">${cl.text}</text>`;
+  });
+
+  // Pair connection lines
+  const pairLines = [
+    { from: 'israel-palestine', to: 'israel-lebanon' },
+    { from: 'israel-palestine', to: 'israel-iran' },
+    { from: 'red-sea', to: 'gulf-normalization' },
+    { from: 'israel-iran', to: 'usa-iran' },
+  ];
+  pairLines.forEach(pl => {
+    const a = MAP_LOCATIONS.find(l => l.id === pl.from);
+    const b = MAP_LOCATIONS.find(l => l.id === pl.to);
+    if (a && b)
+      svg += `<line x1="${a.cx}" y1="${a.cy}" x2="${b.cx}" y2="${b.cy}" stroke="#1e2a38" stroke-width="0.5" stroke-dasharray="4,4"/>`;
+  });
+
+  // Score dots
+  MAP_LOCATIONS.forEach(loc => {
+    const pair = pairMap[loc.id];
+    let color = '#64748b';
+    if (pair && pair.score != null) {
+      const level = getLevel(pair.score);
+      color = level.color;
+    }
+    svg += `<circle class="map-dot" cx="${loc.cx}" cy="${loc.cy}" r="${loc.r}" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="2" stroke-opacity="0.8"/>`;
+    if (pair && pair.score != null) {
+      svg += `<text x="${loc.cx}" y="${loc.cy + 3.5}" text-anchor="middle" font-size="8" fill="${color}" font-family="var(--heading-font)" font-weight="600">${pair.score}</text>`;
+    }
+    svg += `<text x="${loc.cx}" y="${loc.cy - loc.r - 4}" text-anchor="middle" class="map-pair-label" fill="${color}">${loc.label}</text>`;
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+let mapCollapsed = true;
+
+function toggleMap() {
+  const container = document.getElementById('mapContainer');
+  const arrow = document.getElementById('mapArrow');
+  mapCollapsed = !mapCollapsed;
+  container.style.display = mapCollapsed ? 'none' : 'block';
+  if (arrow) arrow.classList.toggle('collapsed', mapCollapsed);
+}
+
 /* ── Publications ─────────────────────────────────────── */
 function renderPublications(pubs) {
   const container = document.getElementById('pubList');
@@ -354,6 +440,7 @@ function renderAll(data) {
   renderSignals(data.signals);
   renderTrend(data.history);
   renderPairs(data.pairs || []);
+  renderMap(data.pairs || []);
   renderPublications(data.publications || []);
   updateTimestamps(data);
 }

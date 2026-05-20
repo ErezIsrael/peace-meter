@@ -1,5 +1,5 @@
 /* ── Reset & Variables ─────────────────────────────────── */
-/* VERSION: 2.4.0 */
+/* VERSION: 2.5.0 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -329,6 +329,60 @@ html[dir="rtl"] .gauge-card {
   color: var(--text-muted);
   margin-top: 6px;
   line-height: 1.4;
+}
+
+/* ── Regional Map ─────────────────────────────────────── */
+.map-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.map-toggle {
+  cursor: pointer;
+  margin: 0 0 8px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0;
+}
+
+.map-container {
+  text-align: center;
+}
+
+.map-container svg {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+}
+
+.map-dot {
+  cursor: pointer;
+  transition: r 0.15s;
+}
+.map-dot:hover {
+  filter: brightness(1.3);
+}
+
+.map-label {
+  font-size: 8px;
+  fill: var(--text-muted);
+  font-family: var(--heading-font);
+  pointer-events: none;
+}
+
+.map-pair-label {
+  font-size: 7px;
+  font-family: var(--heading-font);
+  pointer-events: none;
 }
 
 /* ── Publications ────────────────────────────────────── */
