@@ -22,7 +22,7 @@
 
 import { jwtClient } from './jwt-client.js';
 
-const CACHE_TTL_SECONDS = 15 * 60; // 15 minutes
+const CACHE_TTL_SECONDS = 60 * 60; // 60 minutes — stays within BigQuery free tier (1 TB/month)
 const BIGQUERY_PROJECT = 'gdelt_biq';
 
 /**
@@ -42,38 +42,15 @@ SELECT
   SUM(CASE WHEN GoldsteinScale > 0 THEN 1 ELSE 0 END) AS constructive,
   SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) AS hostile,
   SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS diplomatic
-FROM \`gdelt_biq.gdelt_v2.events\`
+FROM \`gdelt_biq.gdelt_v2.events_partitioned\`
 WHERE
-  DATE >= CURRENT_DATE() - INTERVAL '7' DAY
-  AND _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '7' DAY)
+  _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '1' DAY)
   AND (
     Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
     OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
     OR Actor1Code = 'USA' OR Actor2Code = 'USA'
   )
   AND GoldsteinScale != 0
-`;
-
-/**
- * Per-pair query — focused on specific country pairs
- */
-const PAIR_QUERY = `
-SELECT
-  Actor1CountryCode, Actor2CountryCode,
-  COUNT(*) as event_count,
-  SUM(GoldsteinScale) as total_goldstein,
-  SUM(CASE WHEN GoldsteinScale > 0 THEN 1 ELSE 0 END) as constructive,
-  SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) as hostile,
-  SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) as diplomatic
-FROM \`gdelt_biq.gdelt_v2.events\`
-WHERE
-  DATE >= CURRENT_DATE() - INTERVAL '7' DAY
-  AND _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '7' DAY)
-  AND GoldsteinScale != 0
-  AND (
-    (Actor1CountryCode IN ('{countries}') OR Actor2CountryCode IN ('{countries}'))
-  )
-GROUP BY Actor1CountryCode, Actor2CountryCode
 `;
 
 /**
@@ -167,18 +144,6 @@ function scoreFromMetrics(metrics) {
 
   return { tone, news, conflict };
 }
-
-/**
- * Per-pair country definitions
- */
-const PAIR_DEFS = [
-  { id: 'israel-palestine', name: 'Israel-Palestine', countries: ['ISR', 'PSE'] },
-  { id: 'israel-lebanon', name: 'Israel-Lebanon', countries: ['ISR', 'LBN'] },
-  { id: 'red-sea', name: 'Red Sea / Yemen', countries: ['YEM', 'SAU', 'ARE'] },
-  { id: 'israel-iran', name: 'Israel-Iran', countries: ['ISR', 'IRN'] },
-  { id: 'usa-iran', name: 'USA-Iran', countries: ['USA', 'IRN'] },
-  { id: 'gulf-normalization', name: 'Abraham Accords', countries: ['ISR', 'ARE', 'BHR'] },
-];
 
 /**
  * Main handler

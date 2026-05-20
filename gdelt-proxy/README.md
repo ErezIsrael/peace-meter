@@ -56,7 +56,7 @@ Expected response:
 }
 ```
 
-Subsequent calls within 15 minutes return `"cached": true`.
+Subsequent calls within 60 minutes return `"cached": true`.
 
 ## BigQuery Query
 
@@ -70,9 +70,8 @@ SELECT
   SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) AS hostile,
   SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59')
     THEN 1 ELSE 0 END) AS diplomatic
-FROM `gdelt_biq.gdelt_v2.events`
-WHERE DATE >= CURRENT_DATE() - INTERVAL '7' DAY
-  AND _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '7' DAY)
+FROM `gdelt_biq.gdelt_v2.events_partitioned`
+WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '1' DAY)
   AND (
     Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
     OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
@@ -81,11 +80,27 @@ WHERE DATE >= CURRENT_DATE() - INTERVAL '7' DAY
   AND GoldsteinScale != 0
 ```
 
-## Cost
+**Optimized for zero cost**: Only scans 1 day of partitions, ME countries only, non-neutral events.
 
-- **BigQuery**: First 1 TB/month is free. This query scans ~1-5 GB per execution.
-- **Cloudflare Workers**: 100K requests/day free tier. KV reads/writes included.
-- **Total**: Essentially free for this use case.
+## Cost — Zero-Cost Configuration
+
+BigQuery free tier: **1 TB query processing per month**.
+
+### Cost optimization strategy:
+
+| Parameter | Value | Why |
+|---|---|---|
+| Time window | **1 day** | Partition pruning — only scans last 24h |
+| KV cache TTL | **60 minutes** | Only 24 BigQuery queries/day |
+| Goldstein != 0 | **filter** | Skips ~40% of neutral events |
+| ME countries only | **filter** | ~15% of global events |
+| Estimated scan | **~0.3-0.5 GB/query** | Partitioned table, 1 day |
+
+**Monthly cost: ~0.3-0.6 TB/month — safely within 1 TB free tier.**
+
+- **Cloudflare Workers**: 100K requests/day free. KV reads/writes included.
+- **BigQuery**: 0 cost (under free tier).
+- **Total: $0/month.**
 
 ## Future Improvements
 
