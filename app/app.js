@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.7.3 */
+/* VERSION: 2.7.4 */
 
-const APP_VERSION = '2.7.3'; // 2026-05-20: Real Natural Earth country outlines
+const APP_VERSION = '2.7.4'; // 2026-05-20: Fixed map SVG async loading
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -312,6 +312,16 @@ async function loadMapSVG() {
 }
 
 let mapSVGContent = null;
+let mapSVGLoaded = null; // promise
+
+async function ensureMapSVG() {
+  if (mapSVGContent) return mapSVGContent;
+  if (!mapSVGLoaded) {
+    mapSVGLoaded = loadMapSVG().then(svg => { mapSVGContent = svg; }).catch(() => { mapSVGContent = '<svg viewBox="0 0 600 400"><text x="300" y="200" text-anchor="middle" fill="#64748b">Map unavailable</text></svg>'; });
+  }
+  await mapSVGLoaded;
+  return mapSVGContent;
+}
 
 function overlayMapDots(svgContent, pairs, large) {
   const pairMap = Object.fromEntries(pairs.map(p => [p.id, p]));
@@ -373,26 +383,12 @@ function overlayMapDots(svgContent, pairs, large) {
   return svgContent.replace('</svg>', overlay + '</svg>');
 }
 
-function renderMap(pairs) {
+async function renderMap(pairs) {
   const container = document.getElementById('mapContainer');
   if (!container) return;
-  if (!mapSVGContent) {
-    loadMapSVG().then(svg => {
-      mapSVGContent = svg;
-      const html = overlayMapDots(svg, pairs, false);
-      const wrapper = document.createElement('div');
-      wrapper.className = 'map-wrapper';
-      wrapper.innerHTML = html;
-      wrapper.style.cursor = 'pointer';
-      wrapper.addEventListener('click', toggleMapModal);
-      container.innerHTML = '';
-      container.appendChild(wrapper);
-    }).catch(() => {
-      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Map unavailable</p>';
-    });
-    return;
-  }
-  const html = overlayMapDots(mapSVGContent, pairs, false);
+  let svg;
+  try { svg = await ensureMapSVG(); } catch { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Map unavailable</p>'; return; }
+  const html = overlayMapDots(svg, pairs, false);
   const wrapper = document.createElement('div');
   wrapper.className = 'map-wrapper';
   wrapper.innerHTML = html;
@@ -404,7 +400,7 @@ function renderMap(pairs) {
 
 let mapModalOpen = false;
 
-function toggleMapModal(e) {
+async function toggleMapModal(e) {
   if (e) { e.stopPropagation(); e.preventDefault(); }
   const overlay = document.getElementById('modalOverlay');
   const modal = overlay.querySelector('.modal');
@@ -423,7 +419,8 @@ function toggleMapModal(e) {
     overlay.addEventListener('click', handleMapOverlayClick);
 
     const pairs = (lastData && lastData.pairs) || [];
-    const html = overlayMapDots(mapSVGContent, pairs, true);
+    const svg = await ensureMapSVG();
+    const html = overlayMapDots(svg, pairs, true);
     content.innerHTML = `<div class="map-wrapper" id="modalMapWrapper">${html}</div>`;
 
     // Also let the modal map wrapper toggle
