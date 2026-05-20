@@ -21,43 +21,53 @@ function getData() {
     timestamp: new Date().toISOString(),
     master: { score: 58, level: "Thawing", trend: "rising" },
     signals: {
+      tone: {
+        label: "Political Tone", icon: "🤝", weight: 0.20, score: 60,
+        history: [45, 48, 50, 52, 53, 55, 56, 57, 59, 60],
+        status: "Live", detail: "55% constructive statements from senior officials (7-day)"
+      },
       news: {
-        label: "Diplomatic News", icon: "📰", weight: 0.20, score: 65,
+        label: "Diplomatic News", icon: "📰", weight: 0.15, score: 65,
         history: [42, 45, 48, 50, 52, 55, 58, 60, 62, 65],
         status: "Live", detail: "62% peace-toned articles in ME coverage"
       },
-      thinktank: {
-        label: "Think Tank & Expert", icon: "🧠", weight: 0.20, score: 52,
-        history: [30, 32, 35, 38, 40, 44, 47, 49, 50, 52],
-        status: "Live", detail: "Mitvim: normalization framework paper published"
-      },
       aviation: {
-        label: "Civil Aviation", icon: "✈️", weight: 0.15, score: 48,
+        label: "Commercial Aviation", icon: "✈️", weight: 0.12, score: 48,
         history: [35, 37, 39, 40, 42, 43, 45, 46, 47, 48],
-        status: "Live", detail: "72 aircraft in ME airspace (baseline: 95)"
+        status: "Live", detail: "72 aircraft in ME airspace; Turkish Airlines resumed Beirut route"
       },
       prediction: {
-        label: "Prediction Markets", icon: "💰", weight: 0.12, score: 41,
+        label: "Prediction Markets", icon: "💰", weight: 0.10, score: 41,
         history: [20, 22, 25, 28, 30, 33, 35, 37, 39, 41],
         status: "Live", detail: "Israel-Iran ceasefire odds: 41% (Polymarket)"
       },
+      credit: {
+        label: "Credit Ratings", icon: "🏛", weight: 0.10, score: 50,
+        history: [45, 45, 46, 46, 47, 47, 48, 49, 49, 50],
+        status: "Delayed", detail: "Israel: A- stable; Lebanon: C stable; Saudi: A stable"
+      },
+      travel: {
+        label: "Travel Advisories", icon: "🛂", weight: 0.10, score: 30,
+        history: [15, 18, 20, 22, 24, 25, 26, 27, 28, 30],
+        status: "Live", detail: "US Level 3-4 avg; UK Level 3; Israel NSC Level 4 for Gaza"
+      },
+      thinktank: {
+        label: "Think Tank & Expert", icon: "🧠", weight: 0.10, score: 52,
+        history: [30, 32, 35, 38, 40, 44, 47, 49, 50, 52],
+        status: "Live", detail: "Mitvim: normalization framework paper published"
+      },
       shipping: {
-        label: "Gulf Shipping", icon: "🚢", weight: 0.10, score: 55,
+        label: "Gulf Shipping", icon: "🚢", weight: 0.07, score: 55,
         history: [30, 32, 35, 38, 40, 42, 45, 48, 52, 55],
         status: "Live", detail: "2 safe passage articles, 1 attack in 7 days"
       },
-      tone: {
-        label: "Political Tone", icon: "🤝", weight: 0.10, score: 60,
-        history: [45, 48, 50, 52, 53, 55, 56, 57, 59, 60],
-        status: "Live", detail: "55% constructive statements (7-day)"
-      },
       views: {
-        label: "VIEWS AI Forecast", icon: "🌍", weight: 0.08, score: 62,
+        label: "VIEWS AI Forecast", icon: "🌍", weight: 0.05, score: 62,
         history: [55, 56, 57, 58, 59, 60, 60, 61, 61, 62],
         status: "Delayed", detail: "VIEWS predicts declining fatalities for Israel, Lebanon"
       },
       humanitarian: {
-        label: "Humanitarian", icon: "🏥", weight: 0.05, score: 35,
+        label: "Humanitarian", icon: "🏥", weight: 0.01, score: 35,
         history: [10, 12, 15, 18, 20, 22, 25, 28, 32, 35],
         status: "Live", detail: "2 aid corridors opened, 1 prisoner swap this week"
       }

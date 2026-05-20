@@ -6,14 +6,16 @@ A real-time dashboard measuring the "temperature of peace" across the Middle Eas
 
 | Signal | Source | Weight |
 |--------|--------|--------|
-| 📰 Diplomatic News | BBC + Al Jazeera RSS | 20% |
-| 🧠 Think Tank & Expert | Mitvim, INSS, JISS RSS | 20% |
-| ✈️ Civil Aviation | OpenSky Network API | 15% |
-| 💰 Prediction Markets | Polymarket API | 12% |
-| 🚢 Gulf Shipping | RSS keyword analysis | 10% |
-| 🤝 Political Tone | BBC + Al Jazeera RSS | 10% |
-| 🌍 VIEWS AI Forecast | PRIO/Uppsala HDX API | 8% |
-| 🏥 Humanitarian | UN OCHA, ReliefWeb RSS | 5% |
+| 🤝 Political Tone | BBC + Al Jazeera RSS + X/Twitter | 20% |
+| 📰 Diplomatic News | BBC + Al Jazeera RSS | 15% |
+| ✈️ Commercial Aviation | OpenSky + airline press releases | 12% |
+| 💰 Prediction Markets | Polymarket API | 10% |
+| 🏛 Credit Ratings | Fitch, S&P, Moody's, Trading Economics | 10% |
+| 🛂 Travel Advisories | US State Dept, UK FCDO, Canada, Israel NSC | 10% |
+| 🧠 Think Tank & Expert | Mitvim, INSS, JISS, ICT RSS | 10% |
+| 🚢 Gulf Shipping | RSS keyword analysis | 7% |
+| 🌍 VIEWS AI Forecast | PRIO/Uppsala HDX API | 5% |
+| 🏥 Humanitarian | UN OCHA, ReliefWeb RSS | 1% |
 
 ## Peace Levels
 

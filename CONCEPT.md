@@ -1,4 +1,4 @@
-# Peace Meter — Concept Document v2
+# Peace Meter — Concept Document v3
 
 ## What Is It?
 
@@ -18,30 +18,55 @@ StrikeRadar tells you when things are about to blow up. The Peace Meter tells yo
 
 ---
 
+## Expert Feedback (from an Israeli Think Tank Representative)
+
+> This section captures direct feedback from a representative of one of the tracked Israeli institutes, provided in Hebrew on 2026-05-20:
+
+| Feedback (translated) | Impact on Concept |
+|-----------------------|-------------------|
+| "Tracking statements of senior officials **must** be included" | ✅ Political Tone signal confirmed as essential (20% weight — highest) |
+| "Think tank opinions are **problematic** — we recommend policy steps, that doesn't necessarily reflect what will happen" | ⚠️ Think Tank weight reduced from 20% → 10%. Still useful as sentiment indicator but not a leading predictor |
+| "I would add **commercial trust** — are airlines easing restrictions?" | ✅ Aviation signal refined: now tracks airline policy/route changes, not just flight counts |
+| "Add **credit rating indicators** — what's the direction? Downgrade or upgrade?" | ✅ NEW signal: Credit Ratings (10%) — sovereign ratings from Fitch/S&P/Moody's |
+| "What's the travel risk level for a country according to various foreign ministries?" | ✅ NEW signal: Travel Advisories (10%) — aggregated risk levels from US State Dept, UK FCDO, Canada, etc. |
+
+---
+
 ## Historical Signals of Approaching Peace
 
-Before defining our signals, let's ground this in what **actually preceded past ceasefires and peace deals** in the Middle East. Studying the 2025 Gaza ceasefire, the 2026 Israel-Iran and Israel-Lebanon ceasefires, and earlier Oslo-era patterns, these were the leading indicators:
+Before defining our signals, let's ground this in what **actually preceded past ceasefires and peace deals** in the Middle East. Studying the 2025 Gaza ceasefire, the 2026 Israel-Iran and Israel-Lebanon ceasefires, and earlier Oslo-era patterns:
 
 | Signal | What Happened Before Ceasefires |
 |--------|-------------------------------|
-| **Back-channel diplomacy** | Qatari, Egyptian, Turkish mediators shuttling between parties — often unreported for weeks |
-| **Think tank "off-ramp" papers** | Mitvim, INSS, and others publish frameworks for de-escalation 2–6 months before deals |
-| **Prediction market shifts** | Polymarket "ceasefire" odds jumped from 10% → 60%+ in the weeks before deals |
-| **Flight corridors reopening** | Commercial airlines resume routes over conflict zones — airlines act on security intel before it's public |
-| **Oil price calming** | After months of volatility, Brent crude stabilizes as traders price in reduced risk |
-| **UN Security Council activity** | Resolutions, envoy visits, and "monthly forecast" language shifts from "escalation" to "ceasefire" |
+| **Back-channel diplomacy** | Qatari, Egyptian, Turkish mediators shuttling — often unreported for weeks |
+| **Senior official statements** | Constructive rhetoric from leaders 1-3 months before deals (confirmed by think tank expert) |
+| **Prediction market shifts** | Polymarket "ceasefire" odds jumped 10% → 60%+ in the weeks before deals |
+| **Airline restrictions easing** | Commercial carriers resume routes over conflict zones — they act on security intel before it's public |
+| **Credit rating upgrades/stabilization** | Fitch/S&P upgrade or stabilize ratings as traders price in reduced risk |
+| **Travel advisory downgrades** | Foreign ministries lower travel warnings (Level 4 → 3 → 2) |
+| **UN Security Council activity** | Resolutions, envoy visits, "monthly forecast" language shifts from "escalation" to "ceasefire" |
 | **Humanitarian corridor openings** | Aid trucks, prisoner swaps, hospital access — tangible steps toward peace |
-| **Media narrative shift** | BBC/Al Jazeera headlines shift from "escalation" to "negotiations" and "framework" language |
-
-These are the signals our meters should track.
+| **Media narrative shift** | BBC/Al Jazeera headlines shift from "escalation" to "negotiations" |
 
 ---
 
 ## Sub-Meters (Peace Signals)
 
-### 1. 📰 Diplomatic News Signal — weight 20%
+### 1. 🤝 Political Tone Signal — weight 20%
+**Sources:** BBC World Service RSS, Al Jazeera English RSS, X/Twitter feeds of key leaders
+**Method:** Track statements by senior regional officials. Classify as:
+- **Constructive:** meet, negotiate, peace plan, open to, dialogue, normalization, partnership, ceasefire, framework, mediation
+- **Hostile:** threaten, destroy, eliminate, no negotiation, will fight, escalate
+
+Score = `clamp(5, 95, round(ratio² × 150))` where ratio = constructive / (constructive + hostile) over 7 days.
+
+**Why highest weight:** Expert confirmed this as the most essential signal. Senior officials' rhetoric is a direct leading indicator of policy direction.
+
+---
+
+### 2. 📰 Diplomatic News Signal — weight 15%
 **Sources:** BBC World Service RSS, Al Jazeera English RSS
-**Method:** Same RSS parsing as StrikeRadar. Scan Middle East headlines and classify:
+**Method:** Scan Middle East headlines and classify:
 - **Peace keywords:** ceasefire, agreement, talks, diplomacy, deal, normalize, truce, peace, reconciliation, humanitarian, aid, prisoner exchange, envoy, mediation, framework, roadmap
 - **War keywords:** strike, attack, missile, killed, escalation, war, bombardment
 
@@ -49,50 +74,23 @@ Score = `clamp(3, 95, round(ratio² × 150))` where ratio = peace_articles / tot
 
 ---
 
-### 2. 🧠 Think Tank & Expert Signal — weight 20%
-**Sources:** RSS feeds + Twitter/X feeds from the most active Israeli & international analysis institutes.
+### 3. ✈️ Commercial Aviation / Airline Trust Signal — weight 12%
+**Sources:** OpenSky Network API + airline press releases + RSS
+**Method:** Two-layer signal:
+1. **Flight volume** — count commercial aircraft in ME airspace (Israel, Lebanon, Syria, Iraq, Iran, Gulf)
+2. **Airline policy** — track when airlines lift restrictions: route resumptions, overflight permission changes, charter cancellations
 
-**Why this is the most important signal:** Historically, think tank publications framing "off-ramps," "ceasefire frameworks," and "political solutions" have preceded actual deals by 2–6 months. These papers often reflect access to closed-door conversations.
+Rising flight volumes + easing restrictions = commercial confidence = peace signal.
+Score = combined metric: 40% flight volume vs. pre-2023 baseline, 60% airline policy changes.
 
-**Institutes tracked (all have RSS feeds or Twitter accounts):**
-
-| Institute | RSS Feed | Twitter | Peace-Relevant? |
-|-----------|----------|---------|-----------------|
-| **Mitvim** | `mitvim.org.il/en/feed/` | @mitvim | ✅ High — consistently publishes normalization, diplomacy, and framework papers |
-| **INSS** | `inss.org.il/feed/` | @inssorg | ✅ Moderate — publishes public opinion surveys + strategic analysis, often signals shifts in Israeli consensus |
-| **JISS** | `jiss.org.il/en/feed/` | — | ⚠️ Moderate — hawkish-leaning but useful for tracking "when even hawks say stop" |
-| **ICT** (IDC) | `ict.org.il/feed/` | — | ❌ Low — counter-terrorism focused, mostly conflict-oriented |
-
-**Additional international sources:**
-| Institute | Feed | Notes |
-|-----------|------|-------|
-| **VIEWS** (PRIO/Uppsala) | `viewsforecasting.org` + HDX API | ✅ High — AI conflict forecast; if VIEWS predicts declining fatalities for a country, that's a peace signal. Data at `data.humdata.org/dataset/views-conflict-forecasts` |
-| **Security Council Report** | `securitycouncilreport.org` | ✅ High — monthly ME forecasts; language shifts from "crisis" to "ceasefire" signal progress |
-| **International Crisis Group** | `crisisgroup.org` | ✅ Moderate — publishes "off-ramp" analysis |
-
-**Method:**
-- Parse RSS feeds for new articles every 30 min
-- NLP sentiment scoring on headlines + article text
-- Peace-relevant articles score +1, conflict articles score -1
-- Weight by institute reliability score (Mitvim = 1.3x, INSS = 1.0x, JISS = 0.8x, ICT = 0.5x)
-- Also monitor Twitter feeds for real-time signals from institute researchers
-- 7-day rolling score
-
-Score = weighted sum of peace vs. conflict publications, normalized to 0–100.
+**Why 60/40 split:** Expert emphasized that airline policy changes are more meaningful than raw flight counts — when El Al or Turkish Airlines announce resumed routes to a conflict zone, that reflects concrete risk assessment.
 
 ---
 
-### 3. ✈️ Civil Aviation Signal — weight 15%
-**Source:** OpenSky Network API
-**Method:** Count commercial aircraft transiting Israel, Lebanon, Syria, Iraq, Iran, and Gulf airspace. Rising flight volumes = normalization.
-Score = current flight count vs. pre-2023 baseline. 100% of baseline = 90, below 30% = 10.
-
----
-
-### 4. 💰 Prediction Markets Signal — weight 12%
+### 4. 💰 Prediction Markets Signal — weight 10%
 **Source:** Polymarket API
 **Method:** Track ceasefire/peace-related markets. Currently active:
-- "Israel x Iran ceasefire before July?" — `polymarket.com/event/israel-x-iran-ceasefire-before-july`
+- "Israel x Iran ceasefire before July?"
 - Monitor for new ceasefire/peace agreement markets
 - Average the "Yes" probabilities across all relevant markets
 
@@ -100,7 +98,29 @@ Score = average "Yes" probability × 100.
 
 ---
 
-### 5. 🚢 Gulf Shipping Signal — weight 10%
+### 5. 🏛 Credit Ratings Signal — weight 10%
+**Sources:** Trading Economics (`tradingeconomics.com/country-list/rating`), CountryRisk.io API, Fitch/S&P/Moody's press releases via RSS
+**Method:** Track sovereign credit ratings for Israel, Lebanon, Syria, Iraq, Iran, Saudi Arabia.
+- **Upgrade or positive outlook** = peace signal (+1 per country)
+- **Downgrade or negative outlook** = conflict signal (-1 per country)
+- **Rating direction matters more than absolute level** — a country going from B+ to BB- is a peace signal even if still speculative grade
+
+Score = net rating direction across tracked countries, normalized to 0–100. Weekly update (ratings change slowly).
+
+---
+
+### 6. 🛂 Travel Advisories Signal — weight 10%
+**Sources:** US State Department (travel.state.gov), UK FCDO (gov.uk/foreign-travel-advice), Canada (travel.gc.ca), Israel NSC (gov.il/travel-warnings), TravelAdvisory.io aggregator
+**Method:** Each foreign ministry rates countries on a scale (typically 1-4, where 4 = "Do not travel"). Track the average advisory level for each Middle East country.
+- **Downward movement** (Level 4 → 3) = peace signal
+- **Upward movement** (Level 2 → 3) = conflict signal
+- Score = weighted average of advisory levels across all ministries, inverted (lower risk = higher score)
+
+Score = `(4 - average_level) / 3 × 100`, averaged across all tracked ministries. Updated daily.
+
+---
+
+### 7. 🚢 Gulf Shipping Signal — weight 7%
 **Source:** BBC + Al Jazeera RSS (keyword filter)
 **Method:** Scan for Red Sea / Gulf shipping articles:
 - **Peace indicators:** resumed shipping, port reopened, safe passage, trade normalized, commercial traffic restored
@@ -110,48 +130,49 @@ Score = ratio of peace-classified shipping articles over 7-day window.
 
 ---
 
-### 6. 🤝 Political Tone Signal — weight 10%
-**Source:** BBC + Al Jazeera RSS
-**Method:** Track statements by key regional leaders. Classify as:
-- **Constructive:** meet, negotiate, peace plan, open to, dialogue, normalization, partnership
-- **Hostile:** threaten, destroy, eliminate, no negotiation, will fight
+### 8. 🧠 Think Tank & Expert Signal — weight 10%
+**Sources:** RSS feeds from Mitvim, INSS, JISS, ICT + Security Council Report
+**Method:** Parse RSS feeds for new articles. NLP sentiment scoring on headlines.
+- Peace-relevant articles score +1, conflict articles score -1
+- Weight by institute reliability (Mitvim = 1.3x, INSS = 1.0x, JISS = 0.8x, ICT = 0.5x)
+- 7-day rolling score
 
-Score = `clamp(5, 95, round(ratio² × 150))` where ratio = constructive / (constructive + hostile) over 7 days.
+**⚠️ Caveat (from institute representative):** Think tank publications reflect policy recommendations, not predictions. A paper saying "Israel should pursue ceasefire" does not mean a ceasefire will happen. This signal captures **diplomatic sentiment and consensus-building**, not outcomes. Used as a supporting indicator, not a primary predictor.
 
 ---
 
-### 7. 🌍 VIEWS Conflict Forecast Signal — weight 8%
+### 9. 🌍 VIEWS AI Forecast Signal — weight 5%
 **Source:** VIEWS API / HDX (`api.viewsforecasting.org`)
-**Method:** VIEWS (Violence & Impacts Early-Warning System) uses AI to predict fatalities 1–36 months ahead for each country. Download monthly country-level forecasts from HDX. For Israel, Lebanon, Syria, Iraq, Iran, Gaza — if predicted fatalities are declining vs. previous forecast, that's a peace signal.
+**Method:** VIEWS uses AI to predict fatalities 1–36 months ahead. For Israel, Lebanon, Syria, Iraq, Iran — if predicted fatalities are declining vs. previous forecast, that's a peace signal.
 
-Score = average decline in predicted fatalities across tracked countries, normalized to 0–100. If VIEWS predicts fewer fatalities next month than it predicted for this month → score rises.
+Score = average decline in predicted fatalities, normalized to 0–100.
 
 ---
 
-### 8. 🏥 Humanitarian Signal — weight 5%
-**Source:** UN OCHA reports, ReliefWeb RSS (when accessible), BBC/Al Jazeera humanitarian keywords
-**Method:** Count articles/reports about:
-- Aid corridor openings
-- Prisoner/hostage releases
-- Hospital access restored
-- Refugee return
-- Reconstruction announcements
+### 10. 🏥 Humanitarian Signal — weight 1%
+**Source:** UN OCHA reports, ReliefWeb RSS, BBC/Al Jazeera humanitarian keywords
+**Method:** Count events:
+- Aid corridor openings, Prisoner/hostage releases, Hospital access restored, Refugee return, Reconstruction announcements
 
 Score = event count mapped: 0 = 5, 1 = 25, 2 = 50, 3 = 70, 4+ = 95.
+
+**Why 1% weight:** Humanitarian events are important for human impact but are lagging indicators — they happen after political decisions are made.
 
 ---
 
 ## Master Score Calculation
 
 ```
-Peace Score = (News × 0.20) + (ThinkTank × 0.20) + (Aviation × 0.15)
-             + (Prediction × 0.12) + (Shipping × 0.10) + (Tone × 0.10)
-             + (VIEWS × 0.08) + (Humanitarian × 0.05)
+Peace Score = (Tone    × 0.20) + (News    × 0.15)
+             + (Aviation× 0.12) + (Predict × 0.10)
+             + (Credit  × 0.10) + (Travel  × 0.10)
+             + (ThinkTank×0.10) + (Shipping× 0.07)
+             + (VIEWS   × 0.05) + (Humanitarian × 0.01)
 ```
 
 **Peace Multiplier:** When 3+ sub-meters cross above 60, apply 1.15x. When 5+ cross above 60, apply 1.25x. Caps at 100.
 
-**Smoothing:** Asymmetric EMA — fast rise (3-hour half-life), slow decay (12-hour half-life).
+**Smoothing:** Asymmetric EMA — fast rise (3-hour half-life), slow decay (12-hour half-life). A breakthrough registers quickly; a single bad day doesn't erase progress.
 
 ---
 
@@ -166,17 +187,22 @@ Peace Score = (News × 0.20) + (ThinkTank × 0.20) + (Aviation × 0.15)
 
 ---
 
-## Why the Think Tank Signal Is the Crown Jewel
+## Signal Philosophy — Commercial Reality Over Opinions
 
-The Think Tank & Expert signal (20% weight, tied for highest) is what makes the Peace Meter fundamentally different from StrikeRadar. Here's why:
+The v3 design philosophy, shaped by the institute representative's feedback:
 
-1. **Early warning:** Mitvim and INSS papers framing "off-ramps" consistently appear 2–6 months before deals materialize. They often reflect knowledge from closed-door diplomatic conversations.
+| Priority | Rationale |
+|----------|-----------|
+| **1. What senior officials say** (20%) | Direct leading indicator of policy direction |
+| **2. What the media reports** (15%) | Captures diplomatic activity visible in news |
+| **3. What airlines do** (12%) | Commercial entities act on risk intel before it's public |
+| **4. What markets price in** (10%) | Prediction markets aggregate thousands of individual judgments |
+| **5. What credit agencies rate** (10%) | Sovereign ratings reflect institutional risk assessment |
+| **6. What foreign ministries warn** (10%) | Government risk assessments for citizens |
+| **7. What think tanks recommend** (10%) | Policy sentiment — useful but not predictive |
+| **8-10. Supporting signals** (13%) | Shipping, AI forecasts, humanitarian |
 
-2. **Inside perspective:** These are Israeli think tanks with access to Israeli government circles. When INSS publishes a public opinion survey showing majority support for ceasefire, that's a leading indicator of Netanyahu's room to maneuver.
-
-3. **Sentiment shift:** When even hawkish outlets like JISS publish "time for restraint" papers, the signal is strong — it means even the hardline consensus is shifting.
-
-4. **VIEWS AI forecasts:** The PRIO/Uppsala VIEWS system uses machine learning on 100+ indicators to predict conflict. When its AI says "fewer fatalities expected," that's an independent, data-driven peace signal.
+**Key insight:** The top signals are **commercial and official actions** (airlines, markets, credit agencies, foreign ministries), not **opinions** (think tanks, media). Opinions still matter but carry less weight.
 
 ---
 
@@ -191,8 +217,8 @@ The Think Tank & Expert signal (20% weight, tied for highest) is what makes the 
 │                                              │
 │         ╭───────────────────────╮            │
 │         │   MASTER GAUGE        │            │
-│         │   Peace Score: 62     │            │
-│         │   🌱 Growing          │            │
+│         │   Peace Score: 58     │            │
+│         │   🌤 Thawing          │            │
 │         │   [arc gauge visual]  │            │
 │         ╰───────────────────────╯            │
 │                                              │
@@ -201,19 +227,24 @@ The Think Tank & Expert signal (20% weight, tied for highest) is what makes the 
 ├─────────────────────────────────────────────┤
 │                                              │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
-│  │ 📰 News  │ │ 🧠 Think │ │ ✈️ Aviat │    │
-│  │  Score:68│ │  Score:55│ │  Score:72│    │
+│  │ 🤝 Tone  │ │ 📰 News  │ │ ✈️ Aviat │    │
+│  │  Score:60│ │  Score:65│ │  Score:48│    │
 │  └──────────┘ └──────────┘ └──────────┘    │
 │                                              │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
-│  │ 💰 Pred  │ │ 🚢 Ship  │ │ 🤝 Tone  │    │
-│  │  Score:45│ │  Score:60│ │  Score:70│    │
+│  │ 💰 Pred  │ │ 🏛 Credit│ │ 🛂 Travel│    │
+│  │  Score:41│ │  Score:55│ │  Score:30│    │
 │  └──────────┘ └──────────┘ └──────────┘    │
 │                                              │
-│  ┌──────────┐ ┌──────────┐                  │
-│  │ 🌍 VIEWS │ │ 🏥 Aid   │                  │
-│  │  Score:50│ │  Score:40│                  │
-│  └──────────┘ └──────────┘                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
+│  │ 🚢 Ship  │ │ 🧠 Think │ │ 🌍 VIEWS │    │
+│  │  Score:55│ │  Score:52│ │  Score:62│    │
+│  └──────────┘ └──────────┘ └──────────┘    │
+│                                              │
+│  ┌──────────┐                              │
+│  │ 🏥 Aid   │                              │
+│  │  Score:35│                              │
+│  └──────────┘                              │
 │                                              │
 ├─────────────────────────────────────────────┤
 │  Recent Think Tank Publications             │
@@ -224,32 +255,51 @@ The Think Tank & Expert signal (20% weight, tied for highest) is what makes the 
 
 ---
 
+## Data Sources & APIs
+
+| Signal | Source | Access Method | Update Frequency |
+|--------|--------|---------------|-----------------|
+| Political Tone | BBC + Al Jazeera RSS + X/Twitter | RSS + Twitter API | Every 30 min |
+| Diplomatic News | BBC + Al Jazeera RSS | RSS parsing | Every 30 min |
+| Aviation | OpenSky Network + airline RSS | API + RSS | Every 30 min |
+| Prediction Markets | Polymarket | API | Every hour |
+| Credit Ratings | Trading Economics, CountryRisk.io | API / scraping | Weekly |
+| Travel Advisories | US State Dept, UK FCDO, Canada, Israel NSC | Scraping / RSS | Daily |
+| Shipping | BBC + Al Jazeera RSS | RSS keyword filter | Every 30 min |
+| Think Tank | Mitvim, INSS, JISS, ICT RSS | RSS parsing | Every 30 min |
+| VIEWS | HDX / viewsforecasting.org | CSV download | Monthly |
+| Humanitarian | UN OCHA, ReliefWeb RSS | RSS parsing | Daily |
+
+---
+
 ## Tech Stack
 
 | Layer       | Technology                        |
 |-------------|-----------------------------------|
-| Frontend    | Vanilla JS + HTML + CSS, Chart.js for graphs |
-| Backend     | Node.js or Python — cron every 30 min |
-| RSS Parser  | `feedparser` (Python) or `rss-parser` (Node) |
-| NLP         | HuggingFace free sentiment API or local transformer model for headline classification |
-| VIEWS Data  | HDX API or CSV downloads from `api.viewsforecasting.org` |
-| Twitter/X   | Nitter alternative or Twitter API for institute accounts |
+| Frontend    | Vanilla JS + HTML + CSS, inline SVG charts |
+| Backend     | Cloudflare Pages Functions (edge-computed) |
+| RSS Parser  | `rss-parser` (Node.js) |
+| NLP         | HuggingFace sentiment API or lightweight classifier |
+| Credit Data | Trading Economics API or CountryRisk.io API |
+| Travel Advisories | Scraping from foreign ministry sites or TravelAdvisory.io |
 | OpenSky     | Public API for flight tracking |
 | Polymarket  | Polymarket API for prediction market odds |
-| Hosting     | Cloudflare Pages / Vercel + GitHub Actions cron for data updates |
+| Hosting     | Cloudflare Pages (free tier) |
 
 ---
 
-## Key Design Decisions vs. StrikeRadar
+## Key Design Decisions vs. v2
 
-| Aspect | StrikeRadar | Peace Meter | Rationale |
-|--------|-------------|-------------|-----------|
-| Top signal | News (25%) | Think Tanks + News (20% each) | Expert analysis is an earlier, more reliable peace signal than news |
-| Oil signal | Volatility = bad | Stability = good | Inverted logic |
-| New signal | N/A | VIEWS AI forecasts | Independent ML-based conflict prediction |
-| New signal | N/A | Humanitarian | Grounds peace in human impact |
-| Color scheme | Green→Red | Blue→Green→Gold | Matches "frozen→flourishing" metaphor |
-| Multiplier | Escalation (1.5x) | Peace (1.25x) | More conservative — peace compounds slower |
+| Change | v2 → v3 | Rationale |
+|--------|----------|-----------|
+| Political Tone weight | 10% → **20%** | Expert confirmed as essential signal |
+| Think Tank weight | 20% → **10%** | Expert warned: opinions ≠ predictions |
+| Aviation refined | Flight counts only → **counts + airline policy** | Commercial trust matters more |
+| NEW: Credit Ratings | — → **10%** | Institutional risk assessment, objective |
+| NEW: Travel Advisories | — → **10%** | Government risk levels, actionable |
+| Humanitarian weight | 5% → **1%** | Lagging indicator, not predictive |
+| VIEWS weight | 8% → **5%** | Useful but updates infrequently |
+| Total signals | 8 → **10** | Broader coverage, better balance |
 
 ---
 
@@ -261,3 +311,4 @@ The Think Tank & Expert signal (20% weight, tied for highest) is what makes the 
 - **Telegram alerts:** "Peace score crossed 70 🌱"
 - **Shareable cards:** Social media images with current score
 - **Public API:** REST endpoint for other projects
+- **Arabic/Hebrew localization:** Mirror site for ME audiences

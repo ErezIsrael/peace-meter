@@ -222,18 +222,20 @@ function showInfo(type) {
 
   const aboutHTML = `
     <h2>About Peace Meter</h2>
-    <p>Peace Meter is a real-time dashboard that measures the "temperature of peace" across the Middle East using 8 independent signals.</p>
+    <p>Peace Meter is a real-time dashboard that measures the "temperature of peace" across the Middle East using 10 independent signals.</p>
     <p>It is <strong>not a prediction</strong> — it is a structured aggregation of publicly available data to help track positive momentum amid the noise.</p>
     <h3>Signals</h3>
     <ul>
-      <li><strong>Diplomatic News</strong> — BBC + Al Jazeera headline sentiment</li>
-      <li><strong>Think Tank & Expert</strong> — Mitvim, INSS, JISS publications analysis</li>
-      <li><strong>Civil Aviation</strong> — OpenSky flight counts over ME airspace</li>
-      <li><strong>Prediction Markets</strong> — Polymarket ceasefire odds</li>
-      <li><strong>Gulf Shipping</strong> — Red Sea / Gulf shipping status</li>
-      <li><strong>Political Tone</strong> — Leader statement sentiment</li>
-      <li><strong>VIEWS AI Forecast</strong> — PRIO/Uppsala conflict prediction</li>
-      <li><strong>Humanitarian</strong> — Aid corridors, prisoner swaps</li>
+      <li><strong>Political Tone</strong> (20%) — Senior official statement sentiment</li>
+      <li><strong>Diplomatic News</strong> (15%) — BBC + Al Jazeera headline analysis</li>
+      <li><strong>Commercial Aviation</strong> (12%) — Flight counts + airline policy changes</li>
+      <li><strong>Prediction Markets</strong> (10%) — Polymarket ceasefire odds</li>
+      <li><strong>Credit Ratings</strong> (10%) — Fitch/S&P/Moody's sovereign ratings direction</li>
+      <li><strong>Travel Advisories</strong> (10%) — Foreign ministry risk levels</li>
+      <li><strong>Think Tank & Expert</strong> (10%) — Mitvim, INSS, JISS publications</li>
+      <li><strong>Gulf Shipping</strong> (7%) — Red Sea / Gulf shipping status</li>
+      <li><strong>VIEWS AI Forecast</strong> (5%) — PRIO/Uppsala conflict prediction</li>
+      <li><strong>Humanitarian</strong> (1%) — Aid corridors, prisoner swaps</li>
     </ul>
     <h3>Scoring</h3>
     <p>Each signal is scored 0–100. The master score is a weighted average. An asymmetric EMA smooths the data — peace rises fast, decays slowly.</p>
@@ -243,7 +245,7 @@ function showInfo(type) {
     <h2>How the Score Is Calculated</h2>
     <p><strong>Formula:</strong></p>
     <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;">
-      Score = News×0.20 + ThinkTank×0.20 + Aviation×0.15 + Predict×0.12 + Shipping×0.10 + Tone×0.10 + VIEWS×0.08 + Humanitarian×0.05
+      Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Shipping×0.07 + VIEWS×0.05 + Humanitarian×0.01
     </p>
     <p><strong>Peace Multiplier:</strong> When 3+ signals exceed 60, score × 1.15. When 5+ exceed 60, × 1.25. Capped at 100.</p>
     <h3>Smoothing</h3>
