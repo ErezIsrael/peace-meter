@@ -1,14 +1,14 @@
-/* ── Peace Meter — Frontend App ─────────────────────────── */
+/* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 
 /* ── Level helpers ─────────────────────────────────────── */
 function getLevel(score) {
-  if (score <= 25) return { label: 'Frozen',     cls: 'frozen',      color: '#7dd3fc', emoji: '❄️' };
-  if (score <= 50) return { label: 'Thawing',    cls: 'thawing',     color: '#38bdf8', emoji: '🌤' };
-  if (score <= 75) return { label: 'Growing',    cls: 'growing',     color: '#4ade80', emoji: '🌱' };
-  return                  { label: 'Flourishing', cls: 'flourishing', color: '#fbbf24', emoji: '🕊' };
+  if (score <= 25) return { label: 'Frozen',      cls: 'frozen',      color: '#7dd3fc', emoji: '❄️' };
+  if (score <= 50) return { label: 'Thawing',     cls: 'thawing',     color: '#38bdf8', emoji: '🌤' };
+  if (score <= 75) return { label: 'Growing',     cls: 'growing',     color: '#4ade80', emoji: '🌱' };
+  return                    { label: 'Flourishing', cls: 'flourishing', color: '#fbbf24', emoji: '🕊' };
 }
 
 /* ── Gauge rendering ──────────────────────────────────── */
@@ -18,7 +18,6 @@ function renderGauge(score) {
   const scoreEl = document.getElementById('gaugeScore');
   const statusEl = document.getElementById('statusLabel');
 
-  // stroke-dashoffset: 0 = full, 251.2 = empty
   const offset = GAUGE_PATH_LEN * (1 - score / 100);
   fill.style.strokeDashoffset = offset;
   fill.style.stroke = `url(#grad-${level.cls})`;
@@ -30,32 +29,137 @@ function renderGauge(score) {
   statusEl.className = `status-label ${level.cls}`;
 }
 
-/* ── Sparkline rendering (Chart.js) ───────────────────── */
-const sparkCharts = {};
-function renderSparkline(canvasId, data, color) {
-  if (sparkCharts[canvasId]) sparkCharts[canvasId].destroy();
-  const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
-  sparkCharts[canvasId] = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map((_, i) => i),
-      datasets: [{
-        data,
-        borderColor: color,
-        borderWidth: 1.5,
-        fill: false,
-        pointRadius: 0,
-        tension: 0.3,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      scales: { x: { display: false }, y: { display: false } },
-      animation: { duration: 600 },
-    },
+/* ── SVG Sparkline (no dependencies) ──────────────────── */
+function renderSparklineSvg(container, data, color) {
+  const w = 140, h = 32, pad = 2;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - pad * 2);
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return `${x},${y}`;
+  });
+
+  // build area fill
+  const firstPt = pts[0].split(',');
+  const lastPt  = pts[pts.length - 1].split(',');
+  const areaD = `M${pts.join(' L')} L${lastPt[0]},${h} L${firstPt[0]},${h} Z`;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.style.cssText = 'width:100%;height:32px;display:block;';
+
+  // area
+  const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  area.setAttribute('d', areaD);
+  area.setAttribute('fill', color);
+  area.setAttribute('opacity', '0.12');
+  svg.appendChild(area);
+
+  // line
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  line.setAttribute('points', pts.join(' '));
+  line.setAttribute('fill', 'none');
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', '1.5');
+  line.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(line);
+
+  container.innerHTML = '';
+  container.appendChild(svg);
+}
+
+/* ── SVG Trend Chart (no dependencies) ───────────────── */
+function renderTrend(history) {
+  const svgEl = document.getElementById('trendSvg');
+  const scores = history.scores;
+  const labels = history.labels;
+  const lastScore = scores[scores.length - 1];
+  const level = getLevel(lastScore);
+
+  const W = 600, H = 200;
+  const padL = 40, padR = 20, padT = 20, padB = 30;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svgEl.innerHTML = '';
+
+  // defs for gradient
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+  grad.setAttribute('id', 'trendGrad');
+  grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+  grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+  const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  stop1.setAttribute('offset', '0%'); stop1.setAttribute('stop-color', level.color); stop1.setAttribute('stop-opacity', '0.2');
+  const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+  stop2.setAttribute('offset', '100%'); stop2.setAttribute('stop-color', level.color); stop2.setAttribute('stop-opacity', '0');
+  grad.appendChild(stop1); grad.appendChild(stop2);
+  defs.appendChild(grad);
+  svgEl.appendChild(defs);
+
+  // grid lines (0, 25, 50, 75, 100)
+  for (let yVal of [0, 25, 50, 75, 100]) {
+    const y = padT + chartH - (yVal / 100) * chartH;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', padL); line.setAttribute('y1', y);
+    line.setAttribute('x2', padL + chartW); line.setAttribute('y2', y);
+    line.setAttribute('stroke', '#1e2a38'); line.setAttribute('stroke-width', '1');
+    svgEl.appendChild(line);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', padL - 6); text.setAttribute('y', y + 4);
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('fill', '#64748b'); text.setAttribute('font-size', '10');
+    text.textContent = yVal;
+    svgEl.appendChild(text);
+  }
+
+  // data points
+  const pts = scores.map((s, i) => {
+    const x = padL + (i / (scores.length - 1)) * chartW;
+    const y = padT + chartH - (s / 100) * chartH;
+    return { x, y };
+  });
+
+  // area fill
+  const areaPts = pts.map(p => `${p.x},${p.y}`);
+  const firstPt = areaPts[0].split(',');
+  const lastPt  = areaPts[areaPts.length - 1].split(',');
+  const areaD = `M${areaPts.join(' L')} L${lastPt[0]},${padT + chartH} L${firstPt[0]},${padT + chartH} Z`;
+  const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  area.setAttribute('d', areaD);
+  area.setAttribute('fill', 'url(#trendGrad)');
+  svgEl.appendChild(area);
+
+  // line
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  line.setAttribute('points', pts.map(p => `${p.x},${p.y}`).join(' '));
+  line.setAttribute('fill', 'none');
+  line.setAttribute('stroke', level.color);
+  line.setAttribute('stroke-width', '2.5');
+  line.setAttribute('stroke-linejoin', 'round');
+  svgEl.appendChild(line);
+
+  // dots
+  pts.forEach((p, i) => {
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
+    dot.setAttribute('r', '3');
+    dot.setAttribute('fill', level.color);
+    svgEl.appendChild(dot);
+
+    // label (every other)
+    if (i % 2 === 0) {
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', p.x); text.setAttribute('y', padT + chartH + 18);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('fill', '#64748b'); text.setAttribute('font-size', '9');
+      text.textContent = labels[labels.length - 1 - i] || '';
+      svgEl.appendChild(text);
+    }
   });
 }
 
@@ -64,8 +168,7 @@ function renderSignals(signals) {
   const grid = document.getElementById('signalGrid');
   grid.innerHTML = '';
 
-  const keys = Object.keys(signals);
-  keys.forEach((key, i) => {
+  Object.keys(signals).forEach(key => {
     const s = signals[key];
     const level = getLevel(s.score);
     const card = document.createElement('div');
@@ -75,70 +178,15 @@ function renderSignals(signals) {
       <div class="signal-name">${s.label}</div>
       <div class="signal-score" style="color:${level.color}">${s.score}</div>
       <div class="signal-detail">${s.detail}</div>
-      <canvas id="spark-${key}" class="signal-spark"></canvas>
+      <div id="spark-${key}" class="signal-spark"></div>
       <div style="margin-top:6px"><span class="signal-status ${s.status.toLowerCase()}">${s.status}</span></div>
     `;
     grid.appendChild(card);
 
-    // render sparkline after DOM insertion
     requestAnimationFrame(() => {
-      renderSparkline(`spark-${key}`, s.history, level.color);
+      const container = document.getElementById(`spark-${key}`);
+      if (container) renderSparklineSvg(container, s.history, level.color);
     });
-  });
-}
-
-/* ── Trend chart ──────────────────────────────────────── */
-let trendChart;
-function renderTrend(history) {
-  if (trendChart) trendChart.destroy();
-  const ctx = document.getElementById('trendChart');
-  const lastScore = history.scores[history.scores.length - 1];
-  const level = getLevel(lastScore);
-
-  trendChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: history.labels,
-      datasets: [{
-        data: history.scores,
-        borderColor: level.color,
-        borderWidth: 2,
-        fill: {
-          style: 'value',
-          value: 0,
-        },
-        backgroundColor: level.color + '18',
-        pointRadius: 2,
-        pointBackgroundColor: level.color,
-        tension: 0.35,
-      }],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1e293b',
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          cornerRadius: 8,
-          displayColors: false,
-        },
-      },
-      scales: {
-        x: {
-          grid: { color: '#1e2a38' },
-          ticks: { color: '#64748b', font: { size: 10 } },
-        },
-        y: {
-          min: 0, max: 100,
-          grid: { color: '#1e2a38' },
-          ticks: { color: '#64748b', font: { size: 10 }, stepSize: 25 },
-        },
-      },
-      animation: { duration: 800 },
-    },
   });
 }
 
@@ -221,24 +269,15 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 });
 
 /* ── Load & render ────────────────────────────────────── */
-async function loadData() {
-  try {
-    const res = await fetch('data.json');
-    const data = await res.json();
-    renderGauge(data.master.score);
-    renderSignals(data.signals);
-    renderTrend(data.history);
-    renderPublications(data.publications || []);
-    updateTimestamps(data);
-  } catch (err) {
-    console.error('Failed to load data:', err);
-    document.getElementById('gaugeScore').textContent = '—';
-    document.getElementById('statusLabel').textContent = 'Error loading data';
-  }
+function renderAll() {
+  const data = APP_DATA;
+  renderGauge(data.master.score);
+  renderSignals(data.signals);
+  renderTrend(data.history);
+  renderPublications(data.publications || []);
+  updateTimestamps(data);
 }
 
-// Initial load
-loadData();
-
-// Auto-refresh
-setInterval(loadData, UPDATE_INTERVAL);
+renderAll();
+// Auto-refresh (for future: will reload from backend)
+setInterval(() => { location.reload(); }, UPDATE_INTERVAL);

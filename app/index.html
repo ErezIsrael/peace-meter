@@ -7,7 +7,7 @@
     <meta name="description" content="Real-time geopolitical peace monitor tracking diplomacy, aviation, prediction markets, and humanitarian signals for the Middle East. Updated every 30 minutes.">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☮️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.7/chart.umd.min.js"></script>
+    <!-- Chart.js removed — using inline SVG sparklines -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -59,9 +59,7 @@
         <!-- ── 72-Hour Trend ─────────────────────────── -->
         <div class="chart-card">
             <h3>📈 Trend (12 Hours)</h3>
-            <div style="height:200px;">
-                <canvas id="trendChart"></canvas>
-            </div>
+            <svg id="trendSvg" style="width:100%;height:200px;" viewBox="0 0 600 200"></svg>
         </div>
 
         <!-- ── Signal Cards ──────────────────────────── -->
@@ -92,6 +90,7 @@
         </div>
     </div>
 
+    <script src="data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
