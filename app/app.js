@@ -269,15 +269,23 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 });
 
 /* ── Load & render ────────────────────────────────────── */
-function renderAll() {
-  const data = APP_DATA;
-  renderGauge(data.master.score);
-  renderSignals(data.signals);
-  renderTrend(data.history);
-  renderPublications(data.publications || []);
-  updateTimestamps(data);
+async function loadAndRender() {
+  try {
+    const res = await fetch('/data.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderGauge(data.master.score);
+    renderSignals(data.signals);
+    renderTrend(data.history);
+    renderPublications(data.publications || []);
+    updateTimestamps(data);
+  } catch (err) {
+    console.error('Failed to load data:', err);
+    document.getElementById('gaugeScore').textContent = '—';
+    document.getElementById('statusLabel').textContent = 'Error loading data';
+  }
 }
 
-renderAll();
-// Auto-refresh (for future: will reload from backend)
-setInterval(() => { location.reload(); }, UPDATE_INTERVAL);
+loadAndRender();
+// Auto-refresh every 30 minutes
+setInterval(loadAndRender, UPDATE_INTERVAL);
