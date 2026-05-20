@@ -365,35 +365,52 @@ function getLevelLabel(score) {
 }
 
 function computePairScore(pair, gdeltData) {
-  if (!gdeltData || !gdeltData._rawCsv) {
-    return { id: pair.id, name: pair.name, score: null, level: 'Unknown', detail: 'No data available' };
+  if (gdeltData && gdeltData._rawCsv) {
+    // Re-parse GDELT filtered to this pair's countries
+    const pairGdelt = parseGDELT(gdeltData._rawCsv, pair);
+
+    if (pairGdelt && pairGdelt.eventCount > 0) {
+      // Tone: Goldstein Scale mapped 0-100
+      const tone = Math.round(clamp(0, 100, 50 + (pairGdelt.avgGoldstein / 10) * 50));
+      // Diplomatic news: constructive ratio
+      const news = Math.round(clamp(3, 95, Math.round(Math.pow(pairGdelt.constructiveRatio, 2) * 150)));
+      // Conflict: hostile ratio inverted
+      const hostileRatio = pairGdelt.hostileEvents / pairGdelt.eventCount;
+      const conflict = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
+      // Weighted combo: tone 40%, news 30%, conflict 30%
+      const score = Math.round(tone * 0.40 + news * 0.30 + conflict * 0.30);
+
+      return {
+        id: pair.id,
+        name: pair.name,
+        score: clamp(0, 100, score),
+        level: getLevelLabel(score),
+        detail: `${pairGdelt.eventCount} events — tone ${pairGdelt.avgGoldstein > 0 ? '+' : ''}${pairGdelt.avgGoldstein.toFixed(1)}, ${pairGdelt.diplomaticCount} diplomatic`,
+        status: 'Live',
+      };
+    }
   }
-  // Re-parse GDELT filtered to this pair's countries
-  const pairGdelt = parseGDELT(gdeltData._rawCsv, pair);
 
-  if (!pairGdelt || pairGdelt.eventCount === 0) {
-    return { id: pair.id, name: pair.name, score: null, level: 'Unknown', detail: 'No recent events' };
-  }
-
-  // Tone: Goldstein Scale mapped 0-100
-  const tone = Math.round(clamp(0, 100, 50 + (pairGdelt.avgGoldstein / 10) * 50));
-
-  // Diplomatic news: constructive ratio
-  const news = Math.round(clamp(3, 95, Math.round(Math.pow(pairGdelt.constructiveRatio, 2) * 150)));
-
-  // Conflict: hostile ratio inverted
-  const hostileRatio = pairGdelt.hostileEvents / pairGdelt.eventCount;
-  const conflict = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
-
-  // Weighted combo: tone 40%, news 30%, conflict 30%
-  const score = Math.round(tone * 0.40 + news * 0.30 + conflict * 0.30);
+  // Fallback: derive from master signals with pair-specific adjustments
+  const baseScore = FALLBACK_SIGNALS.tone.score;
+  // Each pair gets a slight modifier reflecting its typical conflict intensity
+  const modifiers = {
+    'israel-palestine': -15,
+    'israel-lebanon': -10,
+    'red-sea': -5,
+    'israel-iran': -25,
+    'usa-iran': -10,
+    'gulf-normalization': +15,
+  };
+  const score = clamp(0, 100, baseScore + (modifiers[pair.id] || 0));
 
   return {
     id: pair.id,
     name: pair.name,
-    score: clamp(0, 100, score),
+    score,
     level: getLevelLabel(score),
-    detail: `${pairGdelt.eventCount} events — tone ${pairGdelt.avgGoldstein > 0 ? '+' : ''}${pairGdelt.avgGoldstein.toFixed(1)}, ${pairGdelt.diplomaticCount} diplomatic`,
+    detail: 'Estimated from regional signals (GDELT unavailable)',
+    status: 'Delayed',
   };
 }
 
@@ -496,7 +513,7 @@ export async function onRequest(context) {
       signals: FALLBACK_SIGNALS,
       history: { labels: ["14:02","13:32","13:02"], scores: [55,57,58] },
       publications: FALLBACK_PUBLICATIONS,
-      pairs: PAIR_DEFS.map(pair => ({ id: pair.id, name: pair.name, score: null, level: 'Unknown', detail: 'Data unavailable' }))
+      pairs: PAIR_DEFS.map(pair => computePairScore(pair, null))
     }, null, 2), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
