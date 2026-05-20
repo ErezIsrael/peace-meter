@@ -337,9 +337,10 @@ function computePairScore(pair, gdeltData) {
     'gulf-normalization': +15,
   };
   const score = clamp(0, 100, baseScore + (modifiers[pair.id] || 0));
-  const status = gdeltData ? 'Cached' : 'Delayed';
-  const detail = gdeltData
-    ? 'Estimated from global GDELT signals'
+  const gdeltOnline = !!(gdeltData && gdeltData.eventCount > 0);
+  const status = gdeltOnline ? 'Live' : 'Delayed';
+  const detail = gdeltOnline
+    ? ''
     : 'GDELT unavailable — estimated from regional signals';
 
   return {

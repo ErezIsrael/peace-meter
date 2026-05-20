@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.5.3 */
+/* VERSION: 2.7.1 */
 
-const APP_VERSION = '2.5.3'; // 2026-05-20: Real Natural Earth country outlines
+const APP_VERSION = '2.7.1'; // 2026-05-20: Real Natural Earth country outlines
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -263,13 +263,14 @@ function renderPairs(pairs) {
     }
 
     card.style.borderLeftColor = color;
-    const statusLabel = pair.status === 'Live' ? '●' : '◌';
-    const statusColor = pair.status === 'Live' ? '#22c55e' : '#f59e0b';
+    const isOnline = ['Live','Cached'].includes(pair.status);
+    const statusLabel = isOnline ? '●' : '◌';
+    const statusColor = isOnline ? '#22c55e' : '#f59e0b';
     card.innerHTML = `
       <div class="pair-name">${pair.name} <span class="pair-status" style="color:${statusColor}">${statusLabel}</span></div>
       <div class="pair-score" style="color:${color}">${scoreText}</div>
       <div class="pair-level" style="color:${color}">${levelText}</div>
-      <div class="pair-detail">${pair.detail || ''}</div>
+      ${pair.detail ? '<div class="pair-detail">' + pair.detail + '</div>' : ''}
     `;
     grid.appendChild(card);
   });

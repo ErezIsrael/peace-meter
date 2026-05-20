@@ -1,5 +1,5 @@
 /* ── Reset & Variables ─────────────────────────────────── */
-/* VERSION: 2.7.0 */
+/* VERSION: 2.7.1 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -261,7 +261,8 @@ html[dir="rtl"] .gauge-card {
   padding: 2px 6px;
   border-radius: 4px;
 }
-.signal-status.live   { color: var(--growing); background: rgba(74,222,128,0.1); }
+.signal-status.live    { color: var(--growing); background: rgba(74,222,128,0.1); }
+.signal-status.cached  { color: var(--growing); background: rgba(74,222,128,0.1); }
 .signal-status.delayed { color: var(--flourishing); background: rgba(251,191,36,0.1); }
 
 /* ── Conflict Pairs ──────────────────────────────────── */
