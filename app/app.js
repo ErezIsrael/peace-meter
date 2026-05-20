@@ -235,6 +235,9 @@ function renderPublications(pubs) {
   pubs.forEach(p => {
     const div = document.createElement('div');
     div.className = 'pub-item';
+    div.style.cursor = 'pointer';
+    div.onclick = () => { if (p.link) window.open(p.link, '_blank'); };
+
     const titleEl = p.link ? `<a href="${p.link}" target="_blank" rel="noopener">${p.title}</a>` : p.title;
     const sentimentLabel = p.sentiment === 'peace' ? '🕊 peace' : p.sentiment === 'war' ? '⚔ war' : '⚖ neutral';
     div.innerHTML = `

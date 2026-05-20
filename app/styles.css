@@ -267,6 +267,11 @@ html[dir="rtl"] .gauge-card {
 .pub-item {
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pub-item:hover {
+  background: var(--card-hover);
 }
 .pub-item:last-child { border-bottom: none; }
 .pub-source {

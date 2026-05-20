@@ -99,9 +99,9 @@ async function fetchPublications() {
 
 /* ── Fallback mock data ────────────────────────────────── */
 const FALLBACK_PUBLICATIONS = [
-  { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", date: "2026-04-20", sentiment: "peace" },
-  { source: "ICT", title: "Operations Epic Fury & Roaring Lion", date: "2026-03-18", sentiment: "war" },
-  { source: "Mitvim", title: "IMEC 2.0: A New Regional Vision After the Gaza War", date: "2026-03-10", sentiment: "peace" }
+  { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", link: "https://mitvim.org.il/en/normalization-through-strength-a-dual-israeli-saudi-examination-of-power-perception-and-the-limits-of-military-centric/", date: "2026-04-20", sentiment: "peace" },
+  { source: "ICT", title: "Operations Epic Fury & Roaring Lion", link: "https://ict.org.il/operations-epic-fury-roaring-lion/", date: "2026-03-18", sentiment: "war" },
+  { source: "Mitvim", title: "IMEC 2.0: A New Regional Vision After the Gaza War", link: "https://mitvim.org.il/en/imec-2-0-a-new-regional-vision-after-the-gaza-war/", date: "2026-03-10", sentiment: "peace" }
 ];
 
 const FALLBACK_SIGNALS = {
