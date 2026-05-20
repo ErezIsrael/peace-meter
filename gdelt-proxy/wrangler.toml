@@ -1,5 +1,6 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "gdelt-proxy"
+main = "./index.js"
 compatibility_date = "2026-05-20"
 
 [[kv_namespaces]]

@@ -21,10 +21,12 @@ async function signJwt(payload, privateKeyPem) {
   // Build JWT header
   const header = { alg: 'RS256', typ: 'JWT' };
 
-  // Parse PEM key
+  // Parse PEM key (handles both PKCS#1 RSA and PKCS#8 formats)
   const pem = privateKeyPem
     .replace('-----BEGIN RSA PRIVATE KEY-----', '')
     .replace('-----END RSA PRIVATE KEY-----', '')
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
     .replace(/\s/g, '');
 
   const binaryDer = Uint8Array.from(atob(pem), c => c.charCodeAt(0));
