@@ -130,7 +130,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
       growing: '🌱 צומח',
       flourishing: '🕊 פורח'
     },
-    status: { live: 'בשידור חי', delayed: 'מבוזמן' },
+    status: { live: 'בשידור חי', delayed: 'מושהה' },
 
     signals: {
       tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'20%', summary:'הצהרות של בכירים אזוריים', detail:'מסווגת הצהרות כבונות (משא ומתן, תוכנית שלום, דיאלוג) או עוינות (איום, הסלמה). ציון = יחס² × 150, חתוך 5-95.', sources:['RSS של BBC World Service','RSS של אל-ג׳אזירה','X/Twitter של מנהיגים מרכזיים'], update:'כל 30 דקות' },

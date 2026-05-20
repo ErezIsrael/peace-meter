@@ -3,24 +3,43 @@
 const CACHE_TTL = 60; // 1 min
 
 /* ── RSS feeds (must be reachable from Cloudflare edge) ── */
+/* feeds — 'alwaysInclude' means skip relevance filter (inherently ME-focused) */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',          cap: 3 },
-  { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', cap: 3 },
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 3 },
-  { url: 'https://www.jns.org/feed/',          source: 'JNS',             cap: 3 },
-  { url: 'https://www.al-monitor.com/rss',     source: 'Al Monitor',      cap: 3 },
+  { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',         cap: 3, alwaysInclude: true },
+  { url: 'https://www.al-monitor.com/rss',     source: 'Al Monitor',     cap: 3, alwaysInclude: true },
+  { url: 'https://www.jns.org/feed/',          source: 'JNS',            cap: 3, alwaysInclude: false },
+  { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', cap: 3, alwaysInclude: false },
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 4, alwaysInclude: true },
 ];
 
-/* Middle East relevance keywords */
-const ME_KEYWORDS = [
-  'israel', 'palestine', 'gaza', 'lebanon', 'iran', 'syria', 'jordan',
-  'saudi', 'uae', 'dubai', 'turkey', 'beirut', 'tel aviv', 'damascus',
-  'middle east', 'iraq', 'yemen', 'houthi', 'hamas', 'hezbollah',
-  'ceasefire', 'normalization', 'abraham accords', 'dead sea', 'mediterranean',
-  'red sea', 'sinai', 'jerusalem', 'west bank', 'iran', 'qatar', 'bahrain',
-  'imf', 'imec', 'diplomat', 'peace deal', 'truce', 'negotiation',
-  'fury', 'roaring', 'epic', 'sitrep', 'operation', 'conflict', 'counter',
-  'terrorism', 'security', 'intelligence', 'defense', 'military'
+/* ── Relevance keywords ─────────────────────────────── */
+/* Tier 1 — peace/conflict/diplomacy (high signal) */
+const RELEVANCE_PRIMARY = [
+  'ceasefire', 'truce', 'peace deal', 'negotiat', 'diplomat', 'normalization',
+  'abraham accords', 'framework', 'mediation', 'dialogue', 'agreement',
+  'hamas', 'hezbollah', 'houthi', 'palestine', 'gaza', 'west bank',
+  'syria', 'lebanon', 'yemen', 'iraq', 'red sea', 'dead sea', 'sinai',
+  'bahrain', 'qatar',
+  'conflict', 'escalat', 'attack', 'strike', 'bombing', 'killed', 'war',
+  'rocket', 'missile', 'drone', 'casualt', 'proxy', 'target', 'threat',
+];
+
+/* Tier 2 — place names (low signal, need +1 primary to pass) */
+const RELEVANCE_SECONDARY = [
+  'israel', 'jerusalem', 'tel aviv', 'beirut', 'damascus',
+  'saudi', 'uae', 'dubai', 'turkey', 'iran', 'mediterranean',
+  'imf', 'imec',
+];
+
+/* Negative keywords — exclude clearly off-topic articles */
+const EXCLUDE_KEYWORDS = [
+  'world cup', 'super bowl', 'champions league', 'premier league',
+  'academy awards', 'oscars', 'grammy', 'emmy',
+  'stock market', 'nasdaq', 'dow jones', 's&p 500',
+  'kindergarten', 'school', 'hospital', 'weather',
+  'railway', 'railway', 'airport', 'traffic',
+  'election', 'voting', 'ballot', 'polling',
+  'cyber attack', 'ransomware', 'phishing',
 ];
 
 /* ── Lightweight RSS parser ───────────────────────────── */
@@ -59,18 +78,24 @@ function parseRSS(xml, sourceName, alwaysInclude) {
     const link = linkMatch[1];
     const pubDate = dateRaw ? new Date(dateRaw[1]) : new Date();
     const dateStr = pubDate.toISOString().slice(0, 10);
-
-    // ── ME relevance filter ─────────────────────────────
-    // Check title + category for relevance
     const category = categoryRaw ? decodeHTML(categoryRaw[1]).toLowerCase() : '';
     const searchable = (title.toLowerCase() + ' ' + category);
-    let relevance = 0;
-    for (const kw of ME_KEYWORDS) {
-      if (searchable.includes(kw)) relevance++;
-    }
 
-    // ICT is inherently ME-focused — always include its items
-    if (!alwaysInclude && relevance === 0) continue;
+    // ── Exclusion filter (always applies, even for trusted feeds) ─
+    let excluded = false;
+    for (const kw of EXCLUDE_KEYWORDS) {
+      if (searchable.includes(kw)) { excluded = true; break; }
+    }
+    if (excluded) continue;
+
+    // ── ME relevance filter ───────────────────────────
+    if (!alwaysInclude) {
+      // For general news feeds, require 1+ primary keyword
+      // (secondary alone is too broad — "Israel" category is everywhere)
+      let primaryHits = 0;
+      for (const kw of RELEVANCE_PRIMARY)    if (searchable.includes(kw)) primaryHits++;
+      if (primaryHits < 1) continue;
+    }
 
     // ── Sentiment scoring ──────────────────────────────
     const lower = title.toLowerCase();
@@ -97,12 +122,12 @@ async function fetchPublications() {
       const res = await fetch(feed.url, { signal: AbortSignal.timeout(4000) });
       if (!res.ok) continue;
       const xml = await res.text();
-      const items = parseRSS(xml, feed.source, false);
+      const items = parseRSS(xml, feed.source, feed.alwaysInclude || false);
       allItems.push(...items.slice(0, feed.cap || 4));
     } catch { /* skip on error */ }
   }
 
-  // Deduplicate by title, sort by date (newest first), take top 5
+  // Deduplicate by title, sort by date (newest first), take top 10
   const seen = new Set();
   const unique = allItems.filter(item => {
     if (seen.has(item.title)) return false;
@@ -110,7 +135,7 @@ async function fetchPublications() {
     return true;
   });
 
-  unique.sort((a, b) => b.timestamp - a.timestamp);
+  unique.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
   if (unique.length === 0) return FALLBACK_PUBLICATIONS;
   return unique.slice(0, 10);
@@ -118,10 +143,10 @@ async function fetchPublications() {
 
 /* ── Fallback mock data ────────────────────────────────── */
 const FALLBACK_PUBLICATIONS = [
-  { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", link: "https://mitvim.org.il/en/normalization-through-strength-a-dual-israeli-saudi-examination-of-power-perception-and-the-limits-of-military-centric/", date: "2026-04-20", sentiment: "peace" },
-  { source: "Times of Israel", title: "Israel-UAE Relations: A Strategic Partnership", link: "https://www.timesofisrael.com/", date: "2026-04-15", sentiment: "peace" },
-  { source: "JNS", title: "A Jewish Future in the Middle East", link: "https://www.jns.org/", date: "2026-04-10", sentiment: "peace" },
-  { source: "Al Monitor", title: "Regional Dynamics: Gulf-Israel Relations", link: "https://www.al-monitor.com/", date: "2026-03-25", sentiment: "peace" }
+  { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", link: "https://mitvim.org.il/en/normalization-through-strength-a-dual-israeli-saudi-examination-of-power-perception-and-the-limits-of-military-centric/", date: "2026-04-20", timestamp: Date.parse("2026-04-20"), sentiment: "peace" },
+  { source: "Times of Israel", title: "Israel-UAE Relations: A Strategic Partnership", link: "https://www.timesofisrael.com/", date: "2026-04-15", timestamp: Date.parse("2026-04-15"), sentiment: "peace" },
+  { source: "JNS", title: "A Jewish Future in the Middle East", link: "https://www.jns.org/", date: "2026-04-10", timestamp: Date.parse("2026-04-10"), sentiment: "peace" },
+  { source: "Al Monitor", title: "Regional Dynamics: Gulf-Israel Relations", link: "https://www.al-monitor.com/", date: "2026-03-25", timestamp: Date.parse("2026-03-25"), sentiment: "peace" }
 ];
 
 const FALLBACK_SIGNALS = {
