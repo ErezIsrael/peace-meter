@@ -1,6 +1,6 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
 
-const APP_VERSION = '1.4.0'; // 2026-05-20: legal pages, report bug
+const APP_VERSION = '1.4.1'; // 2026-05-20: redeploy trigger
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 30 * 60 * 1000; // 30 min
 

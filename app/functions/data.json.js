@@ -1,6 +1,6 @@
 /* ── /data.json — Cloudflare Pages Function ───────────── */
 
-const CACHE_TTL = 120; // 2 min
+const CACHE_TTL = 60; // 1 min
 
 /* ── RSS feeds ─────────────────────────────────────────── */
 const RSS_FEEDS = [
