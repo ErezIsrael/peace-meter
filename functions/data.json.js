@@ -3,13 +3,17 @@
 const CACHE_TTL = 60; // 1 min
 
 /* ── RSS feeds (must be reachable from Cloudflare edge) ── */
-/* feeds — 'alwaysInclude' means skip relevance filter (inherently ME-focused) */
+/* feeds — 'type' determines inclusion rules:
+ *   thinktank  — always include (ME-focused analysis), higher cap
+ *   media      — include only if sentiment is 'peace' (skip war/neutral)
+ *   me-news    — always include (inherently ME feed), moderate cap
+ */
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',         cap: 3, alwaysInclude: true },
-  { url: 'https://www.al-monitor.com/rss',     source: 'Al Monitor',     cap: 3, alwaysInclude: true },
-  { url: 'https://www.jns.org/feed/',          source: 'JNS',            cap: 3, alwaysInclude: false },
-  { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', cap: 3, alwaysInclude: false },
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 4, alwaysInclude: true },
+  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',          cap: 5, type: 'thinktank' },
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 2, type: 'me-news' },
+  { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',      cap: 2, type: 'me-news' },
+  { url: 'https://www.jns.org/feed/',             source: 'JNS',             cap: 3, type: 'media' },
+  { url: 'https://www.timesofisrael.com/feed/',   source: 'Times of Israel', cap: 3, type: 'media' },
 ];
 
 /* ── Relevance keywords ─────────────────────────────── */
@@ -59,7 +63,7 @@ function decodeHTML(text) {
     : '';
 }
 
-function parseRSS(xml, sourceName, alwaysInclude) {
+function parseRSS(xml, sourceName, feedType) {
   const items = [];
   const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g);
   if (!itemMatches) return items;
@@ -89,9 +93,9 @@ function parseRSS(xml, sourceName, alwaysInclude) {
     if (excluded) continue;
 
     // ── ME relevance filter ───────────────────────────
-    if (!alwaysInclude) {
-      // For general news feeds, require 1+ primary keyword
-      // (secondary alone is too broad — "Israel" category is everywhere)
+    // 'media' feeds must pass primary keyword check;
+    // 'thinktank' and 'me-news' skip this filter
+    if (feedType === 'media') {
       let primaryHits = 0;
       for (const kw of RELEVANCE_PRIMARY)    if (searchable.includes(kw)) primaryHits++;
       if (primaryHits < 1) continue;
@@ -122,8 +126,12 @@ async function fetchPublications() {
       const res = await fetch(feed.url, { signal: AbortSignal.timeout(4000) });
       if (!res.ok) continue;
       const xml = await res.text();
-      const items = parseRSS(xml, feed.source, feed.alwaysInclude || false);
-      allItems.push(...items.slice(0, feed.cap || 4));
+      const items = parseRSS(xml, feed.source, feed.type || 'media');
+      // 'media' feeds: only keep items with 'peace' sentiment
+      const filtered = feed.type === 'media'
+        ? items.filter(item => item.sentiment === 'peace')
+        : items;
+      allItems.push(...filtered.slice(0, feed.cap || 3));
     } catch { /* skip on error */ }
   }
 
