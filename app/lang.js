@@ -1,5 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
-/* VERSION: 2.0.0 */
+/* VERSION: 2.1.0 */
 
 const LANG = {
   en: {
@@ -34,7 +34,7 @@ const LANG = {
       credit:       { icon:'🏛', name:'Credit Ratings',         weight:'10%', summary:'Sovereign credit rating direction',   detail:'Tracks upgrades, downgrades, outlook changes. Direction matters more than absolute level — B+ → BB- is a peace signal.', sources:['Fitch Ratings',"S&P Global Ratings","Moody's",'Trading Economics'], update:'Weekly' },
       travel:       { icon:'🛂', name:'Travel Advisories',      weight:'10%', summary:'Foreign ministry risk levels',        detail:'Aggregates advisory levels (1-4) from multiple foreign ministries. Downward movement = peace. Score = (4 - avg)/3 × 100.', sources:['US State Department','UK FCDO','Government of Canada','Israel NSC'], update:'Daily' },
       thinktank:    { icon:'🧠', name:'Think Tank & Expert',    weight:'10%', summary:'Policy sentiment & consensus',        detail:'NLP sentiment scoring on publications, weighted by institute reliability. Note: reflects recommendations, not predictions.', sources:['Mitvim RSS','EcoPeace RSS','JISS RSS'], update:'Every 30 min' },
-      shipping:     { icon:'🚢', name:'Gulf Shipping',          weight:'7%',  summary:'Red Sea / Gulf shipping status',      detail:'Scans shipping articles. Keywords: resumed shipping, port reopened, safe passage vs. attacked, seized, hijacked.', sources:['BBC World Service RSS','Al Jazeera English RSS'], update:'Every 30 min' },
+      conflict:     { icon:'💥', name:'Conflict Events',        weight:'8%',  summary:'Violence vs. diplomacy ratio',         detail:'Uses GDELT 2.0 Event Database. Counts hostile events vs. constructive events. Inverted: more hostility = lower peace score. 0 hostile → 100, all hostile → 0.', sources:['GDELT 2.0 Event Database'], update:'Every 15 min' },
       views:        { icon:'🌍', name:'VIEWS AI Forecast',      weight:'5%',  summary:'AI conflict prediction',              detail:'VIEWS uses AI to predict fatalities 1–36 months ahead. Declining predicted fatalities = peace signal.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'Monthly' },
       humanitarian: { icon:'🏥', name:'Humanitarian',           weight:'1%',  summary:'Aid corridors & prisoner swaps',      detail:'Counts events: aid openings, releases, hospital access, refugee returns. Lagging indicator — happens after political decisions.', sources:['UN OCHA reports','ReliefWeb RSS','BBC/Al Jazeera humanitarian keywords'], update:'Daily' }
     },
@@ -146,8 +146,8 @@ const LANG = {
 <li><strong>Prediction Markets</strong> (10%) — Polymarket ceasefire odds</li>
 <li><strong>Credit Ratings</strong> (10%) — Fitch/S&P/Moody's sovereign ratings</li>
 <li><strong>Travel Advisories</strong> (10%) — Foreign ministry risk levels</li>
-<li><strong>Think Tank & Expert</strong> (10%) — Mitvim, INSS, JISS publications</li>
-<li><strong>Gulf Shipping</strong> (7%) — Red Sea / Gulf shipping</li>
+<li><strong>Think Tank & Expert</strong> (10%) — Mitvim, EcoPeace ME publications</li>
+<li><strong>Conflict Events</strong> (8%) — GDELT hostile vs constructive event ratio</li>
 <li><strong>VIEWS AI Forecast</strong> (5%) — PRIO/Uppsala AI prediction</li>
 <li><strong>Humanitarian</strong> (1%) — Aid corridors, prisoner swaps</li>
 </ul>
@@ -157,7 +157,7 @@ const LANG = {
     calc: `<h2>How the Score Is Calculated</h2>
 <p><strong>Formula:</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;">
-Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Shipping×0.07 + VIEWS×0.05 + Humanitarian×0.01
+Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Conflict×0.08 + VIEWS×0.05 + Humanitarian×0.01
 </p>
 <p><strong>Peace Multiplier:</strong> 3+ signals &gt; 60 → ×1.15. 5+ signals &gt; 60 → ×1.25. Capped at 100.</p>
 <h3>Smoothing</h3>
@@ -203,7 +203,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
       credit:        { icon:'🏛', name:'דירוגי אשראי',        weight:'10%', summary:'כיוון דירוגי אשראי מדינתיים', detail:'מעקב אחר שדרוגים, ירידות דירוג ושינויי תחזית. הכיוון חשוב יותר מהרמה המוחלטת.', sources:['Fitch Ratings','S&P Global Ratings',"Moody's",'Trading Economics'], update:'שבועי' },
       travel:        { icon:'🛂', name:'אזהרות נסיעות',       weight:'10%', summary:'רמות סיכון של משרדי חוץ', detail:'מאגד רמות אזהרה (1-4) ממספר משרדי חוץ. ירידה באזהרה = אות של שלום. ציון = (4 - ממוצע)/3 × 100.', sources:['משרד החוץ האמריקאי','FCDO בריטי','ממשלת קנדה','נציבות השלטון הישראלי'], update:'יומי' },
       thinktank:     { icon:'🧠', name:'מכוני מחקר',          weight:'10%', summary:'רגש מדיני וקונצנזוס', detail:'ניקוד רגש NLP של פרסומים, משוקלל לפי אמינות המכון. הערה: משקף המלצות מדיניות, לא תחזיות.', sources:['RSS של מיטבim','RSS של INSS','RSS של JISS','RSS של ICT'], update:'כל 30 דקות' },
-      shipping:      { icon:'🚢', name:'ספנות מפרץ',          weight:'7%',  summary:'סטטוס ספנות בים האדום / המפרץ', detail:'סורק מודעות ספנות. מילות מפתח: חידוש ספנות, נמל נפתח, מעבר בטוח מול התקפה, חטיפה.', sources:['RSS של BBC World Service','RSS של אל-ג׳אזירה'], update:'כל 30 דקות' },
+      conflict:      { icon:'💥', name:'אירועי קונפליקט',      weight:'8%',  summary:'יחס אלימות לעומת דיפלומטיה',     detail:'משתמש במסד GDELT 2.0. סופר אירועים עוינים מול אירועים בונים. הפוך: יותר עוינות = ציון נמוך יותר. 0 עוינות → 100, הכל עוינות → 0.', sources:['GDELT 2.0 Event Database'], update:'כל 15 דקות' },
       views:         { icon:'🌍', name:'תחזית AI — VIEWS',    weight:'5%',  summary:'תחזית קונפליקט בינה מלאכותית', detail:'VIEWS משתמש ב-AI לחזות נפגטים בטווח של 1-36 חודשים. ירידה בניפגטים הצפויים = אות של שלום.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'חודשי' },
       humanitarian:  { icon:'🏥', name:'הומניטרי',            weight:'1%',  summary:'מסדרונות סיוע והחלפת אסירים', detail:'סופר אירועים: פתיחת מסדרונות, שחרורים, גישה לבתי חולים, חזרת פליטים. מדד מאחר — מתרחש אחרי החלטות פוליטיות.', sources:['דוחות UN OCHA','RSS של ReliefWeb','מילות מפתח הומניטריות ב-BBC/אל-ג׳אזירה'], update:'יומי' }
     },
@@ -316,8 +316,8 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
 <li><strong>שווקי תחזית</strong> (10%) — הסתברויות סיכום ב-Polymarket</li>
 <li><strong>דירוגי אשראי</strong> (10%) — דירוגי Fitch/S&P/Moody's</li>
 <li><strong>אזהרות נסיעות</strong> (10%) — רמות סיכון של משרדי חוץ</li>
-<li><strong>מכוני מחקר</strong> (10%) — פרסומי MiTvim, INSS, JISS</li>
-<li><strong>ספנות מפרץ</strong> (7%) — ספנות ים אדום / מפרץ</li>
+<li><strong>מכוני מחקר</strong> (10%) — פרסומי Mitvim, EcoPeace ME</li>
+<li><strong>אירועי קונפליקט</strong> (8%) — יחס אירועים עוינים לבונים מ-GDELT</li>
 <li><strong>VIEWS AI</strong> (5%) — תחזית AI של PRIO/Uppsala</li>
 <li><strong>הומניטרי</strong> (1%) — מסדרונות סיוע, החלפת אסירים</li>
 </ul>
@@ -327,7 +327,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     calc: `<h2>איך הציון מחושב</h2>
 <p><strong>נוסחה:</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;direction:ltr;text-align:left;">
-Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Shipping×0.07 + VIEWS×0.05 + Humanitarian×0.01
+Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Conflict×0.08 + VIEWS×0.05 + Humanitarian×0.01
 </p>
 <p><strong>מכפיל שלום:</strong> כש-3+ אותות &gt; 60 → ×1.15. כש-5+ אותות &gt; 60 → ×1.25. תקרה ב-100.</p>
 <h3>החלקה</h3>

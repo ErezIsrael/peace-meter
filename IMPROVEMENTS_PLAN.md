@@ -1,5 +1,16 @@
 # Peace Meter — Improvements Log
 
+## v2.1.0 (2026-05-20) — Conflict Events Signal
+
+### Signal Change ✅
+| # | Change | Details |
+|---|--------|---------|
+| C1 | Gulf Shipping → Conflict Events | Replaced RSS shipping with GDELT hostile vs constructive event ratio |
+| C2 | Weight change | 7% → 8% (conflict weighted higher than shipping was) |
+| C3 | Scoring method | `100 - (hostileRatio × 100)`, clamped 0–100 |
+| C4 | Update interval | 30 min → 15 min (all GDELT signals share 15-min cycle) |
+| C5 | ACLED not used | OAuth tokens expire every 24h, not viable for serverless edge |
+
 ## v2.0.0 (2026-05-20) — GDELT Event Data Integration
 
 ### Data Pipeline ✅

@@ -121,13 +121,14 @@ Score = `(4 - average_level) / 3 × 100`, averaged across all tracked ministries
 
 ---
 
-### 7. 🚢 Gulf Shipping Signal — weight 7%
-**Source:** BBC + Al Jazeera RSS (keyword filter)
-**Method:** Scan for Red Sea / Gulf shipping articles:
-- **Peace indicators:** resumed shipping, port reopened, safe passage, trade normalized, commercial traffic restored
-- **Conflict indicators:** attacked, seized, hijacked, mine, blockade
+### 7. 💥 Conflict Events Signal — weight 8%
+**Source:** GDELT 2.0 Event Database
+**Method:** Counts hostile events vs constructive events in the ME region from GDELT structured data.
+- **Hostile events:** Goldstein Scale < 0 (attacks, strikes, threats)
+- **Constructive events:** Goldstein Scale > 0 (negotiations, aid, agreements)
+- Score = `100 - (hostileRatio × 100)`, clamped to 0–100
 
-Score = ratio of peace-classified shipping articles over 7-day window.
+**Why this replaced Gulf Shipping:** Gulf Shipping tracked shipping status via RSS. Conflict Events provides a direct, quantitative measure of violence vs. diplomacy from structured event data. More reliable and directly relevant to peace measurement.
 
 ---
 
@@ -167,7 +168,7 @@ Score = event count mapped: 0 = 5, 1 = 25, 2 = 50, 3 = 70, 4+ = 95.
 Peace Score = (Tone    × 0.20) + (News    × 0.15)
              + (Aviation× 0.12) + (Predict × 0.10)
              + (Credit  × 0.10) + (Travel  × 0.10)
-             + (ThinkTank×0.10) + (Shipping× 0.07)
+             + (ThinkTank×0.10) + (Conflict× 0.08)
              + (VIEWS   × 0.05) + (Humanitarian × 0.01)
 ```
 

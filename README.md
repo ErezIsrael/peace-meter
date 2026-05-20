@@ -15,7 +15,7 @@ A real-time, open-source dashboard measuring the "temperature of peace" across t
 | 5 | 🏛 Credit Ratings | 10% | Fitch, S&P, Moody's |
 | 6 | 🛂 Travel Advisories | 10% | US State Dept, UK FCDO, Canada, Israel |
 | 7 | 🧠 Think Tank & Expert | 10% | Mitvim, EcoPeace ME RSS |
-| 8 | 🚢 Gulf Shipping | 7% | RSS keyword analysis |
+| 8 | 💥 Conflict Events | 8% | GDELT 2.0 Event Database (RSS fallback) |
 | 9 | 🌍 VIEWS AI Forecast | 5% | PRIO/Uppsala HDX API |
 | 10 | 🏥 Humanitarian | 1% | UN OCHA, ReliefWeb RSS |
 

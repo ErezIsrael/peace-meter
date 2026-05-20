@@ -42,36 +42,28 @@ GDELT updates every 15 minutes. Free. No API key.
 
 ---
 
-### B. Add Conflict Event Density (ACLED / UCDP)
+### B. Add Conflict Event Density ✅ IMPLEMENTED v2.1.0 (as GDELT)
 
-**New signal proposal:** Replace or supplement "Gulf Shipping" with a **Conflict Event Density** signal.
+**Status: Implemented 2026-05-20**
 
-**Why:** The [Global Peace Index](https://www.economicsandpeace.org/) measures peace using 23 indicators, the most important being "number of conflicts" and "deadliness of conflict." We need a direct measure of violence to invert it into a peace score.
+**New signal:** Replaced "Gulf Shipping" with **Conflict Events** (8% weight).
 
-**Data sources:**
+**Why:** The [Global Peace Index](https://www.economicsandpeace.org/) measures peace using 23 indicators, the most important being "number of conflicts" and "deadliness of conflict."
+
+**Decision: GDELT instead of ACLED**
+- ACLED requires OAuth tokens that expire every 24 hours — not viable for serverless Cloudflare edge
+- GDELT already integrated, provides hostile vs constructive event counts
+- Method: `100 - (hostileRatio × 100)` where hostileRatio = hostileEvents / eventCount
+
+**Original plan (ACLED):** Rejected due to OAuth token expiry issues.
 
 | Source | Coverage | Update | Access |
 |--------|----------|--------|--------|
-| **ACLED** | Middle East, event-level violence | Daily | Free API (registration required) |
+| **GDELT** (chosen) | Global, 250k+ stories/day | Every 15 min | Free, no auth |
+| ~~**ACLED**~~ (rejected) | Middle East, event-level violence | Daily | Free API (OAuth, 24h expiry) |
 | **UCDP/PRIO** | Global armed conflicts | Quarterly | Free download |
 
-**Method:**
-```
-Conflict Density = ACLED events in ME region over last 7 days
-Peace Score = max(0, 100 - (events × normalization_factor))
-```
-
-ACLED classifies events into types: Battles, Violence against civilians, Explosions/Remote violence, Riots, Strategic developments. We weight them differently:
-
-| Event Type | Weight | Rationale |
-|-----------|--------|-----------|
-| Battles | 2.0 | Direct combat |
-| Violence vs civilians | 3.0 | Worst signal |
-| Explosions | 1.5 | Indirect violence |
-| Riots | 0.5 | Internal unrest, not interstate |
-| Strategic developments | 0.0 | Neutral (could be peace or war) |
-
-**Weight in master score:** 8–10% — replaces Gulf Shipping as a more direct peace/conflict indicator.
+**Weight in master score:** 8% — replaces Gulf Shipping as a more direct peace/conflict indicator.
 
 ---
 

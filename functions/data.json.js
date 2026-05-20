@@ -277,7 +277,7 @@ const FALLBACK_SIGNALS = {
   credit:      { label: "Credit Ratings",       icon: "🏛", weight: 0.10, score: 50, history: [45,45,46,46,47,47,48,49,49,50], status: "Delayed", detail: "Israel: A-; Lebanon: C; Saudi: A" },
   travel:      { label: "Travel Advisories",    icon: "🛂", weight: 0.10, score: 30, history: [15,18,20,22,24,25,26,27,28,30], status: "Live",    detail: "US Level 3-4 avg; UK Level 3" },
   thinktank:   { label: "Think Tank & Expert",  icon: "🧠", weight: 0.10, score: 52, history: [30,32,35,38,40,44,47,49,50,52], status: "Live",    detail: "Mitvim: normalization framework paper" },
-  shipping:    { label: "Gulf Shipping",        icon: "🚢", weight: 0.07, score: 55, history: [30,32,35,38,40,42,45,48,52,55], status: "Live",    detail: "2 safe passages, 1 attack (7 days)" },
+  conflict:    { label: "Conflict Events",      icon: "💥", weight: 0.08, score: 45, history: [30,32,35,38,40,42,45,48,50,45], status: "Delayed", detail: "GDELT: 12 hostile / 28 constructive / 40 total" },
   views:       { label: "VIEWS AI Forecast",    icon: "🌍", weight: 0.05, score: 62, history: [55,56,57,58,59,60,60,61,61,62], status: "Delayed", detail: "Declining predicted fatalities" },
   humanitarian:{ label: "Humanitarian",         icon: "🏥", weight: 0.01, score: 35, history: [10,12,15,18,20,22,25,28,32,35], status: "Live",    detail: "2 aid corridors, 1 prisoner swap" }
 };
@@ -322,10 +322,30 @@ export async function onRequest(context) {
       newsStatus = 'Delayed';
     }
 
+    // Compute conflict events signal from GDELT
+    let conflictScore, conflictDetail, conflictStatus;
+    if (gdeltData && gdeltData.eventCount > 0) {
+      // Violent event ratio: hostile events vs total, mapped to peace score
+      // More hostile events = lower score
+      const hostileRatio = gdeltData.eventCount > 0
+        ? gdeltData.hostileEvents / gdeltData.eventCount
+        : 0;
+      // Invert: high hostile ratio → low peace score
+      // 0 hostile → 100, 0.5 hostile → 50, 1.0 hostile → 0
+      conflictScore = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
+      conflictDetail = `${gdeltData.hostileEvents} hostile / ${gdeltData.constructiveEvents} constructive / ${gdeltData.eventCount} total`;
+      conflictStatus = 'Live';
+    } else {
+      conflictScore = FALLBACK_SIGNALS.conflict.score;
+      conflictDetail = FALLBACK_SIGNALS.conflict.detail;
+      conflictStatus = 'Delayed';
+    }
+
     // Merge computed signals into fallback data
     const signals = { ...FALLBACK_SIGNALS };
     signals.tone = { ...signals.tone, score: toneScore, detail: toneDetail, status: toneStatus };
     signals.news = { ...signals.news, score: newsScore, detail: newsDetail, status: newsStatus };
+    signals.conflict = { ...signals.conflict, score: conflictScore, detail: conflictDetail, status: conflictStatus };
 
     const masterScore = calcMaster(signals);
 

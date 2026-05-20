@@ -209,11 +209,24 @@ Update the `detail` fields for `tone` and `news` to reflect GDELT-based methodol
 
 ---
 
-## Phase 2 — Add ACLED Conflict Events Signal
+## Phase 2 — Add Conflict Events Signal ✅ COMPLETE
 
-**Goal:** Replace "Gulf Shipping" (7%) with "Conflict Events" (8%) — direct violence measurement using ACLED data.
+**Status: Implemented 2026-05-20 (v2.1.0)**
 
-### 2A: Add ACLED API integration
+**Goal:** Replace "Gulf Shipping" (7%) with "Conflict Events" (8%) — direct violence measurement.
+
+**Decision: GDELT instead of ACLED**
+- ACLED requires OAuth tokens that expire every 24 hours (not viable for serverless edge)
+- GDELT already integrated, provides hostile vs constructive event counts
+- Same data source, no additional auth needed
+
+**Implementation details:**
+- Replaced `shipping` with `conflict` signal everywhere (backend, frontend, translations, mock data)
+- Scoring: `100 - (hostileRatio × 100)` where `hostileRatio = hostileEvents / eventCount`
+- Weight increased from 7% → 8% to reflect importance of direct violence tracking
+- Refresh interval changed from 30 min → 15 min
+
+### 2A: Add Conflict Events computation to `functions/data.json.js` ✅
 
 **File:** `functions/data.json.js`
 
