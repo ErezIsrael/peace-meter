@@ -11,6 +11,7 @@ const LANG = {
     pubTitle: '📚 Recent Think Tank Publications',
     footer1: 'Peace Meter is an experimental project for informational purposes only.',
     footer2: 'Scores are algorithmic aggregations of publicly available data, not predictions.',
+    donate: '☕ Buy Me Coffee',
     close: 'Close',
 
     levels: {
@@ -122,6 +123,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     pubTitle: '📚 פרסומים אחרונים של מכונים',
     footer1: 'מדד השלום הוא פרויקט ניסיוני למטרות מידע בלבד.',
     footer2: 'הציונים הם אגרגציה אלגוריתמית של נתונים ציבוריים, לא תחזיות.',
+    donate: '☕ תרמו קפה',
     close: 'סגור',
 
     levels: {
@@ -259,10 +261,10 @@ function applyTranslations() {
   if (footer[0]) footer[0].textContent = L.footer1;
   if (footer[1]) footer[1].textContent = L.footer2;
 
-  // Translate footer links (skip #versionTag — it's the 4th element, index 3)
+  // Translate footer links (skip #versionTag)
   const linkLabels = currentLang === 'en'
-    ? ['Privacy Policy', 'Terms of Service', 'Accessibility', '🐛 Report a Bug']
-    : ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות', '🐛 דווח על באג'];
+    ? ['Privacy Policy', 'Terms of Service', 'Accessibility', '🐛 Report a Bug', '☕ Buy Me Coffee']
+    : ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות', '🐛 דווח על באג', '☕ תרמו קפה'];
   const links = document.querySelectorAll('.footer-links .footer-link');
   links.forEach((el, i) => {
     // Skip the version badge
