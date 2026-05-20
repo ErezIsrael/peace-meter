@@ -259,12 +259,16 @@ function applyTranslations() {
   if (footer[0]) footer[0].textContent = L.footer1;
   if (footer[1]) footer[1].textContent = L.footer2;
 
-  // Translate footer links
+  // Translate footer links (skip #versionTag — it's the 4th element, index 3)
   const linkLabels = currentLang === 'en'
     ? ['Privacy Policy', 'Terms of Service', 'Accessibility', '🐛 Report a Bug']
     : ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות', '🐛 דווח על באג'];
   const links = document.querySelectorAll('.footer-links .footer-link');
-  links.forEach((el, i) => { if (i < linkLabels.length) el.textContent = linkLabels[i]; });
+  links.forEach((el, i) => {
+    // Skip the version badge
+    if (el.id === 'versionTag') return;
+    if (i < linkLabels.length) el.textContent = linkLabels[i];
+  });
 }
 
 window.LANG = LANG;

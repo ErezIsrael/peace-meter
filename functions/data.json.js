@@ -5,8 +5,8 @@ const CACHE_TTL = 60; // 1 min
 /* ── RSS feeds (must be reachable from Cloudflare edge) ── */
 const RSS_FEEDS = [
   { url: 'https://mitvim.org.il/en/feed/',    source: 'Mitvim',   alwaysInclude: false },
+  { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', alwaysInclude: true },
   { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', alwaysInclude: true },
-  { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', alwaysInclude: false },
 ];
 
 /* Middle East relevance keywords */
@@ -96,7 +96,8 @@ async function fetchPublications() {
       if (!res.ok) continue;
       const xml = await res.text();
       const items = parseRSS(xml, feed.source, feed.alwaysInclude || false);
-      allItems.push(...items);
+      // Cap each source at 4 to prevent one feed from dominating
+      allItems.push(...items.slice(0, 4));
     } catch { /* skip on error */ }
   }
 
@@ -117,7 +118,7 @@ async function fetchPublications() {
 /* ── Fallback mock data ────────────────────────────────── */
 const FALLBACK_PUBLICATIONS = [
   { source: "Mitvim", title: "Normalization Through Strength? A Dual Israeli–Saudi Examination", link: "https://mitvim.org.il/en/normalization-through-strength-a-dual-israeli-saudi-examination-of-power-perception-and-the-limits-of-military-centric/", date: "2026-04-20", sentiment: "peace" },
-  { source: "ICT", title: "Operations Epic Fury & Roaring Lion", link: "https://ict.org.il/operations-epic-fury-roaring-lion/", date: "2026-03-18", sentiment: "war" },
+  { source: "Times of Israel", title: "Israel-UAE Relations: A Strategic Partnership", link: "https://www.timesofisrael.com/", date: "2026-04-15", sentiment: "peace" },
   { source: "Mitvim", title: "IMEC 2.0: A New Regional Vision After the Gaza War", link: "https://mitvim.org.il/en/imec-2-0-a-new-regional-vision-after-the-gaza-war/", date: "2026-03-10", sentiment: "peace" }
 ];
 

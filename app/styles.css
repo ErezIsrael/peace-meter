@@ -339,14 +339,6 @@ html[dir="rtl"] .gauge-card {
   opacity: 1;
   text-decoration: underline;
 }
-#versionTag {
-  font-size: 10px;
-  color: #334155;
-  background: #1e293b;
-  padding: 2px 8px;
-  border-radius: 4px;
-  opacity: 0.8;
-}
 
 /* ── Modal ───────────────────────────────────────────── */
 .modal-overlay {
