@@ -261,15 +261,28 @@ function applyTranslations() {
   if (footer[0]) footer[0].textContent = L.footer1;
   if (footer[1]) footer[1].textContent = L.footer2;
 
-  // Translate footer links (skip #versionTag)
-  const linkLabels = currentLang === 'en'
-    ? ['Privacy Policy', 'Terms of Service', 'Accessibility', '🐛 Report a Bug', '☕ Buy Me Coffee']
-    : ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות', '🐛 דווח על באג', '☕ תרמו קפה'];
-  const links = document.querySelectorAll('.footer-links .footer-link');
-  links.forEach((el, i) => {
-    // Skip the version badge
+  // Translate footer links by href/data attribute (skip #versionTag)
+  const linkMap = currentLang === 'en'
+    ? {
+        '#': ['Privacy Policy', 'Terms of Service', 'Accessibility'], // privacy, terms, accessibility
+        'https://github.com/ErezIsrael/peace-meter/issues': '🐛 Report a Bug',
+        'https://ko-fi.com/erezse': '☕ Buy Me Coffee',
+      }
+    : {
+        '#': ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות'],
+        'https://github.com/ErezIsrael/peace-meter/issues': '🐛 דווח על באג',
+        'https://ko-fi.com/erezse': '☕ תרמו קפה',
+      };
+  const links = document.querySelectorAll('.footer-links a.footer-link');
+  const hashCounter = { count: 0 };
+  links.forEach((el) => {
     if (el.id === 'versionTag') return;
-    if (i < linkLabels.length) el.textContent = linkLabels[i];
+    const href = el.getAttribute('href');
+    if (href === '#') {
+      el.textContent = linkMap['#'][hashCounter.count++];
+    } else {
+      el.textContent = linkMap[href];
+    }
   });
 }
 
