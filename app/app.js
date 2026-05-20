@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.7.5 */
+/* VERSION: 2.7.6 */
 
-const APP_VERSION = '2.7.5'; // 2026-05-20: Fixed getLevelLabel typo
+const APP_VERSION = '2.7.6'; // 2026-05-20: Fixed tooltip undefined score
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -350,7 +350,8 @@ function overlayMapDots(svgContent, pairs, large) {
       score = data.score;
     }
     overlay += `<circle cx="${pair.cx}" cy="${pair.cy}" r="${dotR + 4}" fill="${color}" opacity="0.1"/>`;
-    const tooltip = score !== null ? `${pair.name}\nScore: ${score} (${getLevel(score).label})` : pair.name;
+    const levelLabel = score !== null ? getLevel(score).cls : '';
+    const tooltip = score !== null ? `${pair.name}\nScore: ${score} (${levelLabel})` : pair.name;
     overlay += `<g class="map-dot-group" data-pair="${pair.id}">`;
     overlay += `<title>${tooltip}</title>`;
     overlay += `<circle class="map-dot" cx="${pair.cx}" cy="${pair.cy}" r="${dotR}" fill="${color}" fill-opacity="0.2" stroke="${color}" stroke-width="2" stroke-opacity="0.9"/>`;
