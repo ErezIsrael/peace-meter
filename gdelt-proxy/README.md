@@ -1,15 +1,40 @@
 # GDELT Proxy Worker
 
-Queries the GDELT 2.0 BigQuery dataset for Middle East peace metrics and caches results in Cloudflare KV.
+Queries the GDELT 2.0 BigQuery dataset and computes the full Peace Meter dashboard data. Caches results in Cloudflare KV.
 
 ## Why This Exists
 
 Cloudflare Workers cannot reach `data.gdeltproject.org` due to egress routing restrictions to Google Cloud IPs. The BigQuery REST API is accessible from Cloudflare's edge, so this Worker:
 
 1. Authenticates to BigQuery via Google Service Account (JWT Bearer flow)
-2. Runs targeted SQL against `gdelt_biq.gdelt_v2.events` (partitioned, 7-day window)
-3. Caches results in Cloudflare KV (15-minute TTL)
-4. Returns structured JSON to the Peace Meter dashboard
+2. Runs targeted SQL against `` `gdelt-bq.gdeltv2.events_partitioned` `` (partitioned, 1-day window)
+3. Fetches 6 RSS feeds, computes 12 signals + master score + 6 pair scores
+4. Caches GDELT metrics in `GDELT_CACHE` KV (60 min TTL)
+5. Caches full `/data.json` payload in `PEACE_CACHE` KV (60 min TTL)
+6. Returns structured JSON to the Peace Meter Pages Function
+
+## Endpoints
+
+### `GET /peace-metrics` — GDELT metrics only (legacy)
+
+Returns tone, news, conflict scores from BigQuery. Cached 60 min in `GDELT_CACHE`.
+
+### `GET /data` — Full `/data.json` payload
+
+Computes everything: GDELT signals + RSS publications + 12 signals + master score + 6 pair scores. Cached 60 min in `PEACE_CACHE`. This is what the Pages Function calls.
+
+### `GET /debug` — Auth & API diagnostics
+
+Tests JWT auth and BigQuery connectivity. Returns token status and any API errors.
+
+## Architecture
+
+```
+Browser → Pages Function → Worker /data → KV cache (60 min)
+                                      ↘ BigQuery + RSS (on miss)
+```
+
+The Pages Function is a thin proxy (~20 lines). All computation lives in the Worker.
 
 ## Setup
 
@@ -18,7 +43,9 @@ Cloudflare Workers cannot reach `data.gdeltproject.org` due to egress routing re
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or use an existing one
 3. Go to **IAM & Admin → Service Accounts** → **Create Service Account**
-4. Grant role: **BigQuery Data Viewer** (`roles/bigquery.dataViewer`)
+4. Grant roles:
+   - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`)
+   - **BigQuery Job User** (`roles/bigquery.jobUser`) — required to execute queries
 5. Create a **JSON key** and download it
 
 ### 2. Deploy the Worker
@@ -37,56 +64,23 @@ npx wrangler deploy --project-name=gdelt-proxy
 ### 3. Verify
 
 ```bash
-curl https://gdelt-proxy.erez4free.workers.dev/peace-metrics
+curl https://gdelt-proxy.erez4free.workers.dev/data
 ```
 
-Expected response:
-```json
-{
-  "tone": 60,
-  "news": 65,
-  "conflict": 45,
-  "eventCount": 12345,
-  "constructiveEvents": 7500,
-  "hostileEvents": 4845,
-  "diplomaticEvents": 2300,
-  "avgGoldstein": "0.523",
-  "timestamp": "2026-05-20T16:30:00Z",
-  "cached": false
-}
-```
+Expected response: Full JSON payload matching the `/data.json` format.
 
-Subsequent calls within 60 minutes return `"cached": true`.
+## KV Namespaces
 
-## BigQuery Query
+Two KV bindings share the same namespace ID (they can coexist):
 
-The Worker runs this SQL against the partitioned events table:
-
-```sql
-SELECT
-  AVG(GoldsteinScale) AS avg_goldstein,
-  COUNT(*) AS total_events,
-  SUM(CASE WHEN GoldsteinScale > 0 THEN 1 ELSE 0 END) AS constructive,
-  SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) AS hostile,
-  SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59')
-    THEN 1 ELSE 0 END) AS diplomatic
-FROM `gdelt_biq.gdelt_v2.events_partitioned`
-WHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '1' DAY)
-  AND (
-    Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
-    OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
-    OR Actor1Code = 'USA' OR Actor2Code = 'USA'
-  )
-  AND GoldsteinScale != 0
-```
-
-**Optimized for zero cost**: Only scans 1 day of partitions, ME countries only, non-neutral events.
+| Binding | Purpose | TTL |
+|---------|---------|-----|
+| `GDELT_CACHE` | BigQuery access token + GDELT metrics | 60 min |
+| `PEACE_CACHE` | Full `/data.json` payload | 60 min |
 
 ## Cost — Zero-Cost Configuration
 
 BigQuery free tier: **1 TB query processing per month**.
-
-### Cost optimization strategy:
 
 | Parameter | Value | Why |
 |---|---|---|
