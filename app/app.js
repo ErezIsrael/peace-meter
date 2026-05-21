@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.7.6 */
+/* VERSION: 2.8.0 */
 
-const APP_VERSION = '2.7.6'; // 2026-05-20: Fixed tooltip undefined score
+const APP_VERSION = '2.8.0'; // 2026-05-21: Accurate fetch timestamps via proxy
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -477,7 +477,8 @@ function renderPublications(pubs) {
 
 /* ── Timestamps — client local time ───────────────────── */
 function updateTimestamps(data) {
-  const ts = new Date(data.timestamp);
+  // Use fetchedAt (when the proxy pulled data) if available; fall back to data.timestamp
+  const ts = data.fetchedAt ? new Date(data.fetchedAt) : new Date(data.timestamp);
   const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const shortTz = tzName.split('/').pop().replace(/_/g, ' ');
 
@@ -490,8 +491,9 @@ function updateTimestamps(data) {
   document.getElementById('lastUpdate').textContent = ts.toLocaleTimeString(locale, fmtOpts);
   document.getElementById('timezone').textContent = shortTz;
 
-  const next = new Date(ts.getTime() + UPDATE_INTERVAL);
-  document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + next.toLocaleTimeString(locale, fmtOpts);
+  // Use nextRefreshAt from proxy if available; fall back to data.timestamp + UPDATE_INTERVAL
+  const nextTs = data.nextRefreshAt ? new Date(data.nextRefreshAt) : new Date(ts.getTime() + UPDATE_INTERVAL);
+  document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + nextTs.toLocaleTimeString(locale, fmtOpts);
 }
 
 /* ── Modal ────────────────────────────────────────────── */
