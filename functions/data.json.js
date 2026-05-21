@@ -15,12 +15,6 @@ export async function onRequest(context) {
     const res = await fetch(PROXY_URL, { signal: AbortSignal.timeout(10000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    // Inject accurate timestamps: when this proxy fetched the data,
-    // and when the next refresh cycle will occur (Worker KV cache TTL)
-    const fetchedAt = new Date().toISOString();
-    const nextRefreshAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 60 min KV TTL
-    data.fetchedAt = fetchedAt;
-    data.nextRefreshAt = nextRefreshAt;
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
         "Content-Type": "application/json; charset=utf-8",

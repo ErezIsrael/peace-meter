@@ -453,8 +453,12 @@ async function buildFullPayload(env) {
   const masterScore = calcMaster(signals);
   const pairs = PAIR_DEFS.map(pair => computePairScore(pair, gdeltData));
 
+  const computedAt = new Date().toISOString();
+  const nextRefreshAt = new Date(Date.now() + CACHE_TTL_SECONDS * 1000).toISOString();
+
   return {
-    timestamp: new Date().toISOString(),
+    computedAt,
+    nextRefreshAt,
     master: {
       score: masterScore,
       level: masterScore <= 25 ? 'Frozen' : masterScore <= 50 ? 'Thawing' : masterScore <= 75 ? 'Growing' : 'Flourishing',
@@ -563,7 +567,8 @@ export default {
         console.error('Data build error:', err.message);
         // Return fallback payload
         const fallback = {
-          timestamp: new Date().toISOString(),
+          computedAt: new Date().toISOString(),
+          nextRefreshAt: new Date(Date.now() + CACHE_TTL_SECONDS * 1000).toISOString(),
           master: { score: 58, level: "Thawing", trend: "rising" },
           signals: FALLBACK_SIGNALS,
           history: { labels: ["14:02","13:32","13:02"], scores: [55,57,58] },

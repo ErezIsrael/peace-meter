@@ -477,8 +477,9 @@ function renderPublications(pubs) {
 
 /* ── Timestamps — client local time ───────────────────── */
 function updateTimestamps(data) {
-  // Use fetchedAt (when the proxy pulled data) if available; fall back to data.timestamp
-  const ts = data.fetchedAt ? new Date(data.fetchedAt) : new Date(data.timestamp);
+  // computedAt = when the Worker actually queried BigQuery (stored in KV cache)
+  // nextRefreshAt = 60 min after computedAt (when KV cache expires)
+  const ts = data.computedAt ? new Date(data.computedAt) : new Date(data.timestamp);
   const tzName = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const shortTz = tzName.split('/').pop().replace(/_/g, ' ');
 
@@ -491,7 +492,6 @@ function updateTimestamps(data) {
   document.getElementById('lastUpdate').textContent = ts.toLocaleTimeString(locale, fmtOpts);
   document.getElementById('timezone').textContent = shortTz;
 
-  // Use nextRefreshAt from proxy if available; fall back to data.timestamp + UPDATE_INTERVAL
   const nextTs = data.nextRefreshAt ? new Date(data.nextRefreshAt) : new Date(ts.getTime() + UPDATE_INTERVAL);
   document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + nextTs.toLocaleTimeString(locale, fmtOpts);
 }

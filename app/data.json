@@ -1,6 +1,7 @@
 {
   "_version": "2.8.0",
-  "timestamp": "2026-05-20T14:32:00Z",
+  "computedAt": "2026-05-20T14:32:00Z",
+  "nextRefreshAt": "2026-05-20T15:32:00Z",
   "master": { "score": 54, "level": "Growing", "trend": "rising" },
   "signals": {
     "tone": { "label": "Political Tone", "icon": "🤝", "weight": 0.20, "score": 60, "history": [45,48,50,52,53,55,56,57,59,60], "status": "Delayed", "detail": "GDELT: 142 events, tone +2.1, 18 diplomatic" },
