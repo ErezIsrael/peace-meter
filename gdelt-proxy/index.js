@@ -23,7 +23,9 @@ const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplificati
 const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
 const RECENT_WEIGHT = 0.6; // weight for 6h recent window vs 24h window
 const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
-const SIGNAL_HISTORY_WINDOW = 20; // keep last 20 per-signal readings
+const SIGNAL_HISTORY_WINDOW = 192; // keep 7d of per-signal readings (15min cadence)
+const SIGNAL_DISPLAY_STABLE = 192;  // 7d window when stable
+const SIGNAL_DISPLAY_VOLATILE = 96; // 24h window when volatile
 
 /* ── Aviation estimation note ────────────────────────────────────────── */
 // opensky-network.org is unreachable from Cloudflare Workers (egress block)
@@ -761,21 +763,23 @@ async function buildFullPayload(env) {
     if (signalHistories[key].length > SIGNAL_HISTORY_WINDOW)
       signalHistories[key] = signalHistories[key].slice(-SIGNAL_HISTORY_WINDOW);
   }
-  await env.PEACE_CACHE.put('signal_history', JSON.stringify(signalHistories), { expirationTtl: CACHE_TTL_SECONDS * SIGNAL_HISTORY_WINDOW });
-
-  // ── Inject real history arrays into each signal ────────────────────
-  for (const key of signalKeys) {
-    const arr = signalHistories[key] || FALLBACK_SIGNALS[key].history;
-    signals[key].history = arr;
-  }
+  await env.PEACE_CACHE.put('signal_history', JSON.stringify(signalHistories), { expirationTtl: 8 * 3600 }); // 8d TTL
 
   // Compute momentum from history over ~12h window
   const twelveHoursAgo = Date.now() - 12 * 3600 * 1000;
   const oldPoint = scoreHistory.find(p => p.ts <= twelveHoursAgo);
   const change12h = oldPoint ? masterScore - oldPoint.score : 0;
   let trendDir = '→';
-  if (change12h > 1) trendDir = '↑';
-  else if (change12h < -1) trendDir = '↓';
+  if (change12h > 2) trendDir = '↑';
+  else if (change12h < -2) trendDir = '↓';
+
+  // ── Inject real history arrays into each signal (adaptive window) ──
+  const isVolatile = Math.abs(change12h) >= 3;
+  const displayWindow = isVolatile ? SIGNAL_DISPLAY_VOLATILE : SIGNAL_DISPLAY_STABLE;
+  for (const key of signalKeys) {
+    const full = signalHistories[key] || FALLBACK_SIGNALS[key].history;
+    signals[key].history = full.slice(-displayWindow);
+  }
 
   // Build labels/scores for trend chart from history
   const historyLabels = scoreHistory.map(p => {
