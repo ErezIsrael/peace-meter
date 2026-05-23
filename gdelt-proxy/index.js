@@ -331,8 +331,10 @@ function parseRSS(xml, sourceName, feedType) {
   const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g);
   if (!itemMatches) return items;
 
-  const peaceW = ['peace','normalize','dialogue','deal','agreement','negotiat','ceasefire','truce','aid','corridor','swap','release','reconstruction','framework','vision','integration','cooperation','rebuild','resolution','humanitarian','mediation'];
-  const warW   = ['attack','strike','deadly','killed','rocket','missile','drone','assassin','fury','lion','bombing','war','conflict','escalat','hijack','seized','casualt','sitrep','operation','target','threat','proxy'];
+  const peaceW = ['peace','normalize','dialogue','deal','agreement','negotiat','ceasefire','truce','aid','corridor','swap','release','reconstruction','framework','integration','cooperation','rebuild','resolution','humanitarian','mediation','progress','dovetail'];
+  const warW   = ['attack','strike','deadly','killed','rocket','missile','drone','assassin','bombing','escalat','hijack','seized','casualt','operation','target','threat','proxy'];
+  // Negators: if present alongside a war word, it flips to positive
+  const warNegators = ['end','ending','stop','stopping','halt','halting','conclude','concluded','resolve','resolved','avoid','prevent','de-escalat','reduce','reduc'];
 
   for (const block of itemMatches) {
     const titleMatch = block.match(/<title>([\s\S]*?)<\/title>/);
@@ -360,11 +362,18 @@ function parseRSS(xml, sourceName, feedType) {
       if (primaryHits < 1) continue;
     }
 
-    // Sentiment scoring
+    // Context-aware sentiment scoring
     const lower = title.toLowerCase();
     let score = 0;
     for (const w of peaceW) if (lower.includes(w)) score++;
-    for (const w of warW)   if (lower.includes(w)) score--;
+    // War words only penalize if no negator is present
+    for (const w of warW) {
+      if (lower.includes(w)) {
+        let negated = false;
+        for (const neg of warNegators) { if (lower.includes(neg)) { negated = true; break; } }
+        if (!negated) score--;
+      }
+    }
     const sentiment = score > 0 ? 'peace' : score < 0 ? 'war' : 'neutral';
 
     items.push({
