@@ -110,7 +110,9 @@ These are temporary — they make the score dynamic until real APIs are implemen
 - Store last 3 tone scores in KV (`tone_history`) for trend computation
 
 **Verification:**
-- All 12 signals should now have `status: "Live"` or `"Cached"` (never static fallback)
+- Aviation and remaining static signals now show `status: "Estimated"`
+- All 12 signals now have dynamic scores derived from GDELT or live APIs
+- No hardcoded static scores remain in the live data path"Live"` or `"Cached"` (never static fallback)
 - Credit, VIEWS, Humanitarian scores should vary when GDELT data changes
 - No hardcoded static scores remain in the live data path
 
@@ -139,6 +141,31 @@ These are temporary — they make the score dynamic until real APIs are implemen
 - ✅ `master.momentum` and `master.trend` in `/data` payload
 - ⏳ Arrow changes direction when score trends change (needs 2+ cycles to verify)
 - ⏳ Hebrew translation (future)
+
+---
+
+## Path D: Trend-Based Estimates for Remaining Static Signals
+
+**Goal:** Replace all remaining hardcoded fallback scores with GDELT-derived estimates.
+
+**Signals converted:**
+- **Aviation** (12%): constructive ratio × 100 + diplomatic ratio × 30
+- **Credit** (10%): constructive ratio × 60 + diplomatic ratio × 40
+- **Travel** (10%): hostile ratio inverse (100 - hostile% × 100)
+- **Think Tank** (10%): tone × 0.6 + diplomatic ratio × 0.4
+- **VIEWS** (5%): tone score + history trend adjustment
+- **Humanitarian** (1%): news × 0.7 + diplomatic boost
+
+**Status label:** All estimated signals show `Estimated` (blue badge)
+
+**Files changed:**
+- `gdelt-proxy/index.js` — `estimateAviation()`, Path D estimates block
+- `app/lang.js` — added `estimated` translation (EN/HE)
+- `app/styles.css` — `.signal-status.estimated` styling
+
+**Verification:**
+- ✅ All 12 signals now have dynamic scores
+- ✅ No hardcoded static scores remain in the live data path
 
 ---
 
