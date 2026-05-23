@@ -23,6 +23,7 @@ const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplificati
 const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
 const RECENT_WEIGHT = 0.6; // weight for 6h recent window vs 24h window
 const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
+const SIGNAL_HISTORY_WINDOW = 20; // keep last 20 per-signal readings
 
 /* ── Aviation estimation note ────────────────────────────────────────── */
 // opensky-network.org is unreachable from Cloudflare Workers (egress block)
@@ -682,6 +683,16 @@ async function buildFullPayload(env) {
     if (raw) scoreHistory = JSON.parse(raw);
   } catch { scoreHistory = []; }
 
+  // ── Load per-signal history ────────────────────────────────────────
+  let signalHistories = {};
+  try {
+    const sRaw = await env.PEACE_CACHE.get('signal_history');
+    if (sRaw) signalHistories = JSON.parse(sRaw);
+  } catch { signalHistories = {}; }
+
+  // Signal keys we track
+  const signalKeys = ['tone','news','aviation','prediction','credit','travel','thinktank','conflict','views','normalization','economic','humanitarian'];
+
   // ── Path D: Trend-Based Estimates for remaining static signals ────
   if (gdeltData && gdeltData.eventCount > 0) {
     // Credit: derived from constructive ratio + diplomatic ratio
@@ -738,12 +749,25 @@ async function buildFullPayload(env) {
 
   const masterScore = calcMaster(signals);
 
-  // Append current score to history
+  // Append current master score to history
   scoreHistory.push({ score: masterScore, ts: Date.now() });
-  // Keep last N readings
   if (scoreHistory.length > SCORE_HISTORY_WINDOW) scoreHistory = scoreHistory.slice(-SCORE_HISTORY_WINDOW);
-  // Store back
   await env.PEACE_CACHE.put('score_history', JSON.stringify(scoreHistory), { expirationTtl: CACHE_TTL_SECONDS * SCORE_HISTORY_WINDOW });
+
+  // ── Append per-signal scores to history ───────────────────────────
+  for (const key of signalKeys) {
+    if (!signalHistories[key]) signalHistories[key] = [];
+    signalHistories[key].push(signals[key].score);
+    if (signalHistories[key].length > SIGNAL_HISTORY_WINDOW)
+      signalHistories[key] = signalHistories[key].slice(-SIGNAL_HISTORY_WINDOW);
+  }
+  await env.PEACE_CACHE.put('signal_history', JSON.stringify(signalHistories), { expirationTtl: CACHE_TTL_SECONDS * SIGNAL_HISTORY_WINDOW });
+
+  // ── Inject real history arrays into each signal ────────────────────
+  for (const key of signalKeys) {
+    const arr = signalHistories[key] || FALLBACK_SIGNALS[key].history;
+    signals[key].history = arr;
+  }
 
   // Compute momentum from history over ~12h window
   const twelveHoursAgo = Date.now() - 12 * 3600 * 1000;
