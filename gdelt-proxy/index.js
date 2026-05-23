@@ -18,12 +18,16 @@ import { jwtClient } from './jwt-client.js';
 
 const CACHE_TTL_SECONDS = 60 * 60; // 60 minutes — stays within BigQuery free tier
 const BIGQUERY_PROJECT = 'peace-meter';
+const BASELINE_WINDOW = 12; // number of cache cycles to average for baseline
+const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplification
+const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
+const RECENT_WEIGHT = 0.6; // weight for 3-hour window vs 24h window
 
 /* ────────────────────────────────────────────────────────────────────── */
 /*  GDELT BigQuery helpers                                                */
 /* ────────────────────────────────────────────────────────────────────── */
 
-const ME_EVENTS_QUERY = `
+const ME_EVENTS_QUERY_24H = `
 SELECT
   AVG(GoldsteinScale) AS avg_goldstein,
   COUNT(*) AS total_events,
@@ -33,6 +37,25 @@ SELECT
 FROM \`gdelt-bq.gdeltv2.events_partitioned\`
 WHERE
   _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '1' DAY)
+  AND (
+    Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
+    OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
+    OR Actor1Code = 'USA' OR Actor2Code = 'USA'
+  )
+  AND GoldsteinScale != 0
+`;
+
+const ME_EVENTS_QUERY_3H = `
+SELECT
+  AVG(GoldsteinScale) AS avg_goldstein,
+  COUNT(*) AS total_events,
+  SUM(CASE WHEN GoldsteinScale > 0 THEN 1 ELSE 0 END) AS constructive,
+  SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) AS hostile,
+  SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS diplomatic
+FROM \`gdelt-bq.gdeltv2.events_partitioned\`
+WHERE
+  _PARTITIONTIME = CAST(CURRENT_TIMESTAMP() AS DATE)
+  AND event_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '3' HOUR)
   AND (
     Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
     OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
@@ -82,13 +105,39 @@ function computeMetrics(rows) {
   };
 }
 
-function scoreFromMetrics(metrics) {
+function scoreFromMetrics(metrics, volatilityMultiplier = 1.0) {
   if (!metrics) return null;
   return {
-    tone:     Math.round(Math.max(0, Math.min(100, 50 + (metrics.avgGoldstein / 10) * 50))),
+    tone:     (() => { const base = 50 + (metrics.avgGoldstein / 10) * 50; const shift = base - 50; return Math.round(Math.max(0, Math.min(100, 50 + shift * volatilityMultiplier))); })(),
     news:     Math.round(Math.max(3, Math.min(95, Math.pow(metrics.constructiveRatio, 2) * 150))),
     conflict: Math.round(Math.max(0, Math.min(100, 100 - (metrics.hostileRatio * 100)))),
   };
+}
+
+/**
+ * Compute volatility multiplier from event count vs rolling baseline.
+ * When event volume spikes (active conflict), amplify tone changes.
+ * During calm periods, multiplier = 1.0 (no change).
+ */
+async function computeVolMultiplier(env, currentEventCount) {
+  let baselineHistory = [];
+  try {
+    const raw = await env.GDELT_CACHE.get('event_baseline');
+    if (raw) baselineHistory = JSON.parse(raw);
+  } catch {}
+
+  baselineHistory.push(currentEventCount);
+  if (baselineHistory.length > BASELINE_WINDOW) baselineHistory = baselineHistory.slice(-BASELINE_WINDOW);
+  await env.GDELT_CACHE.put('event_baseline', JSON.stringify(baselineHistory), { expirationTtl: CACHE_TTL_SECONDS * BASELINE_WINDOW });
+
+  const pastReadings = baselineHistory.slice(0, -1);
+  const baseline = pastReadings.length > 0 ? pastReadings.reduce((a, b) => a + b, 0) / pastReadings.length : currentEventCount;
+  if (baseline === 0) return { multiplier: 1.0, ratio: 1.0, baseline: 0 };
+  const ratio = currentEventCount / baseline;
+
+  if (ratio <= VOLATILITY_THRESHOLD) return { multiplier: 1.0, ratio, baseline };
+  const excess = (ratio - VOLATILITY_THRESHOLD) / (1 + VOLATILITY_THRESHOLD);
+  return { multiplier: Math.min(VOLATILITY_MAX, 1.0 + excess), ratio, baseline: Math.round(baseline) };
 }
 
 async function fetchGDELT(env) {
@@ -100,18 +149,54 @@ async function fetchGDELT(env) {
   }
 
   try {
-    const result = await queryBigQuery(env, ME_EVENTS_QUERY);
-    const metrics = computeMetrics(result.rows);
-    const scores = scoreFromMetrics(metrics);
+    // Query 24h window (required)
+    const result24h = await queryBigQuery(env, ME_EVENTS_QUERY_24H);
+    const metrics24h = computeMetrics(result24h.rows);
+
+    // Query 3h window (optional — may fail if GDELT hasn't updated)
+    let metrics3h = null;
+    try {
+      const result3h = await queryBigQuery(env, ME_EVENTS_QUERY_3H);
+      metrics3h = computeMetrics(result3h.rows);
+    } catch {
+      // 3h query failed — use 24h only
+    }
+
+    // If 3h window has no data (GDELT processing delay or query failed), use 24h only
+    const hasRecent = metrics3h && metrics3h.totalEvents > 0;
+    const recentW = hasRecent ? RECENT_WEIGHT : 0;
+    const longW = 1 - recentW;
+
+    // Blend: recent events weighted more heavily
+    const m3 = metrics3h || { avgGoldstein: 0, constructiveRatio: 0.5, hostileRatio: 0, totalEvents: 0 };
+    const blended = {
+      avgGoldstein: (m3.avgGoldstein * recentW) + (metrics24h.avgGoldstein * longW),
+      constructiveRatio: (m3.constructiveRatio * recentW) + (metrics24h.constructiveRatio * longW),
+      hostileRatio: (m3.hostileRatio * recentW) + (metrics24h.hostileRatio * longW),
+      totalEvents: metrics24h.totalEvents,
+      constructive: metrics24h.constructive,
+      hostile: metrics24h.hostile,
+      diplomatic: metrics24h.diplomatic,
+      _recentEventCount: hasRecent ? metrics3h.totalEvents : 0,
+    };
+
+    // Compute volatility multiplier from 24h event count vs baseline
+    const volInfo = await computeVolMultiplier(env, blended.totalEvents);
+    const scores = scoreFromMetrics(blended, volInfo.multiplier);
+
     const response = {
       tone: scores ? scores.tone : 60,
       news: scores ? scores.news : 65,
       conflict: scores ? scores.conflict : 45,
-      eventCount: metrics?.totalEvents || 0,
-      constructiveEvents: metrics?.constructive || 0,
-      hostileEvents: metrics?.hostile || 0,
-      diplomaticEvents: metrics?.diplomatic || 0,
-      avgGoldstein: metrics?.avgGoldstein?.toFixed(3) || '0',
+      eventCount: blended.totalEvents,
+      constructiveEvents: blended.constructive,
+      hostileEvents: blended.hostile,
+      diplomaticEvents: blended.diplomatic,
+      avgGoldstein: blended.avgGoldstein.toFixed(3),
+      recentEventCount: blended._recentEventCount,
+      volMultiplier: volInfo.multiplier.toFixed(2),
+      volRatio: volInfo.ratio.toFixed(2),
+      volBaseline: volInfo.baseline,
       timestamp: new Date().toISOString(),
       cached: false,
     };
@@ -132,6 +217,10 @@ function parseGDELTResponse(data) {
     constructiveRatio: (data.constructiveEvents + data.hostileEvents) > 0
       ? data.constructiveEvents / (data.constructiveEvents + data.hostileEvents) : 0.5,
     cached: data.cached,
+    recentEventCount: parseInt(data.recentEventCount || 0),
+    volMultiplier: parseFloat(data.volMultiplier || 1.0),
+    volRatio: parseFloat(data.volRatio || 1.0),
+    volBaseline: parseInt(data.volBaseline || 0),
   };
 }
 
@@ -402,11 +491,16 @@ async function buildFullPayload(env) {
   const gdeltData = await fetchGDELT(env);
   const publications = await fetchPublications();
 
+  // Volatility multiplier (already computed in fetchGDELT)
+  const volMultiplier = gdeltData ? gdeltData.volMultiplier : 1.0;
+
   // Compute tone from GDELT
   let toneScore, toneDetail, toneStatus;
   if (gdeltData && gdeltData.eventCount > 0) {
-    toneScore = Math.round(clamp(0, 100, 50 + (gdeltData.avgGoldstein / 10) * 50));
-    toneDetail = `${gdeltData.eventCount} events, tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic`;
+    const baseTone = 50 + (gdeltData.avgGoldstein / 10) * 50;
+    const toneShift = baseTone - 50;
+    toneScore = Math.round(clamp(0, 100, 50 + toneShift * volMultiplier));
+    toneDetail = `${gdeltData.eventCount} events (3h: ${gdeltData.recentEventCount}), tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic, vol ×${volMultiplier.toFixed(1)}`;
     toneStatus = gdeltData.cached ? 'Cached' : 'Live';
   } else {
     toneScore = FALLBACK_SIGNALS.tone.score;
@@ -430,8 +524,10 @@ async function buildFullPayload(env) {
   let conflictScore, conflictDetail, conflictStatus;
   if (gdeltData && gdeltData.eventCount > 0) {
     const hostileRatio = gdeltData.eventCount > 0 ? gdeltData.hostileEvents / gdeltData.eventCount : 0;
-    conflictScore = Math.round(clamp(0, 100, 100 - (hostileRatio * 100)));
-    conflictDetail = `${gdeltData.hostileEvents} hostile / ${gdeltData.constructiveEvents} constructive / ${gdeltData.eventCount} total`;
+    const baseConflict = 100 - (hostileRatio * 100);
+    const conflictShift = baseConflict - 50;
+    conflictScore = Math.round(clamp(0, 100, 50 + conflictShift * volMultiplier));
+    conflictDetail = `${gdeltData.hostileEvents} hostile / ${gdeltData.constructiveEvents} constructive / ${gdeltData.eventCount} total, vol ×${volMultiplier.toFixed(1)}`;
     conflictStatus = gdeltData.cached ? 'Cached' : 'Live';
   } else {
     conflictScore = FALLBACK_SIGNALS.conflict.score;
@@ -451,6 +547,24 @@ async function buildFullPayload(env) {
   signals.economic = { ...signals.economic, score: econData.score, detail: econData.detail, status: 'Live' };
 
   const masterScore = calcMaster(signals);
+
+  // Momentum: compare with previous master score from KV
+  let momentum = { direction: '→', change: 0 };
+  try {
+    const prevRaw = await env.PEACE_CACHE.get('last_master');
+    if (prevRaw) {
+      const prevScore = parseInt(prevRaw);
+      if (!isNaN(prevScore)) {
+        momentum.change = masterScore - prevScore;
+        if (momentum.change > 1) momentum.direction = '↑';
+        else if (momentum.change < -1) momentum.direction = '↓';
+        else momentum.direction = '→';
+      }
+    }
+  } catch {}
+  // Store current master score for next comparison
+  await env.PEACE_CACHE.put('last_master', String(masterScore), { expirationTtl: CACHE_TTL_SECONDS * 24 }); // 24h
+
   const pairs = PAIR_DEFS.map(pair => computePairScore(pair, gdeltData));
 
   const computedAt = new Date().toISOString();
@@ -462,7 +576,8 @@ async function buildFullPayload(env) {
     master: {
       score: masterScore,
       level: masterScore <= 25 ? 'Frozen' : masterScore <= 50 ? 'Thawing' : masterScore <= 75 ? 'Growing' : 'Flourishing',
-      trend: 'rising',
+      trend: momentum.direction,
+      momentum: momentum.change,
     },
     signals,
     history: {
@@ -471,6 +586,7 @@ async function buildFullPayload(env) {
     },
     publications,
     pairs,
+    volMultiplier: parseFloat(volMultiplier.toFixed(2)),
   };
 }
 
@@ -508,8 +624,14 @@ export default {
           }
         );
         const errText = await resp.text();
+        let baselineHist = [];
+        try {
+          const raw = await env.GDELT_CACHE.get('event_baseline');
+          if (raw) baselineHist = JSON.parse(raw);
+        } catch {}
         return new Response(JSON.stringify({
           tokenOk: !!tokenData.access_token, status: resp.status, error: errText, clientEmail: saKey.client_email,
+          baselineHistory: baselineHist,
         }), { headers: { 'Content-Type': 'application/json' } });
       } catch (e) {
         return new Response(JSON.stringify({ error: e.message }), { headers: { 'Content-Type': 'application/json' } });
@@ -525,7 +647,7 @@ export default {
       }
 
       try {
-        const result = await queryBigQuery(env, ME_EVENTS_QUERY);
+        const result = await queryBigQuery(env, ME_EVENTS_QUERY_24H);
         const metrics = computeMetrics(result.rows);
         const scores = scoreFromMetrics(metrics);
         const response = {
@@ -555,8 +677,8 @@ export default {
     if (url.pathname === '/data' && request.method === 'GET') {
       const cached = await env.PEACE_CACHE.get('data');
       if (cached) {
-        const data = JSON.parse(cached);
-        return jsonResp({ ...data, cached: true });
+        // Return cached data — computedAt already reflects actual query time
+        return jsonResp(JSON.parse(cached));
       }
 
       try {

@@ -52,6 +52,22 @@ function renderGauge(score) {
   statusEl.textContent = level.label;
   statusEl.className = `status-label ${level.cls}`;
 
+  // Momentum arrow
+  const momEl = document.getElementById('momentumArrow');
+  if (momEl && lastData && lastData.master) {
+    const mom = lastData.master.momentum;
+    const dir = lastData.master.trend || '→';
+    if (mom !== undefined && Math.abs(mom) > 1) {
+      momEl.textContent = `${dir} ${mom > 0 ? '+' : ''}${mom}`;
+      momEl.style.display = 'inline';
+      momEl.style.color = mom > 0 ? '#4ade80' : '#f87171';
+    } else {
+      momEl.textContent = '→ 0';
+      momEl.style.display = 'inline';
+      momEl.style.color = '#64748b';
+    }
+  }
+
   // R4: announce to screen readers
   if (srEl) srEl.textContent = `Peace score: ${score} out of 100. Status: ${level.label}`;
 }
@@ -213,6 +229,18 @@ function renderSignals(signals) {
       if (container) renderSparklineSvg(container, s.history, level.color);
     });
   });
+}
+
+/* ── Volatility indicator ─────────────────────────────── */
+function renderVolatility() {
+  const badge = document.getElementById('volBadge');
+  if (!badge || !lastData) return;
+  const vol = lastData.volMultiplier;
+  if (!vol) { badge.textContent = '⚡ Volatility: ×1.0 (normal)'; return; }
+  if (vol > 1.2) badge.textContent = `⚡ Volatility: ×${vol.toFixed(1)} (AMPLIFIED)`;
+  else if (vol > 1.0) badge.textContent = `⚡ Volatility: ×${vol.toFixed(1)} (elevated)`;
+  else badge.textContent = `⚡ Volatility: ×${vol.toFixed(1)} (normal)`;
+  badge.style.borderColor = vol > 1.2 ? '#f59e0b' : vol > 1.0 ? '#eab308' : '';
 }
 
 /* ── Signal detail modal ──────────────────────────────── */
@@ -492,6 +520,18 @@ function updateTimestamps(data) {
   document.getElementById('lastUpdate').textContent = ts.toLocaleTimeString(locale, fmtOpts);
   document.getElementById('timezone').textContent = shortTz;
 
+  // Show cache age if data was served from KV cache
+  const cacheEl = document.getElementById('cacheStatus');
+  if (cacheEl) {
+    if (data.cached) {
+      const ageMin = Math.round((Date.now() - ts.getTime()) / 60000);
+      cacheEl.textContent = currentLang === 'he' ? `מאגר (${ageMin} ד')` : `Cached (${ageMin}m ago)`;
+      cacheEl.style.display = 'inline';
+    } else {
+      cacheEl.style.display = 'none';
+    }
+  }
+
   const nextTs = data.nextRefreshAt ? new Date(data.nextRefreshAt) : new Date(ts.getTime() + UPDATE_INTERVAL);
   document.getElementById('nextUpdate').textContent = t('nextUpdate') + ' ' + nextTs.toLocaleTimeString(locale, fmtOpts);
 }
@@ -522,6 +562,7 @@ function renderAll(data) {
   renderGauge(data.master.score);
   renderSignals(data.signals);
   renderTrend(data.history);
+  renderVolatility();
   renderPairs(data.pairs || []);
   renderMap(data.pairs || []);
   renderPublications(data.publications || []);

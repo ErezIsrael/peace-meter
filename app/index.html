@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERSION: 2.7.6 -->
+<!-- VERSION: 2.8.1 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,8 +14,8 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☮️</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js removed — using inline SVG sparklines -->
-    <link rel="stylesheet" href="styles.css?v=2.8.0">
-    <script src="lang.js?v=2.8.0"></script>
+    <link rel="stylesheet" href="styles.css?v=2.8.1">
+    <script src="lang.js?v=2.8.1"></script>
 </head>
 <body>
     <div class="app" role="main" aria-label="Peace Meter dashboard">
@@ -39,6 +39,7 @@
         <!-- ── Timestamp bar ─────────────────────────── -->
         <div class="timestamp-bar">
             <span id="updatedLabel">Updated</span> <span class="time" id="lastUpdate">--:--</span> <span class="tz" id="timezone"></span>
+            <span id="cacheStatus" class="cache-badge" style="display:none"></span>
             <span id="nextUpdate"></span>
         </div>
 
@@ -68,6 +69,7 @@
                 </svg>
             </div>
             <div class="gauge-score" id="gaugeScore">--</div>
+            <div class="gauge-momentum" id="momentumArrow" style="display:none;font-size:13px;margin-top:2px;font-weight:600;"></div>
             <div class="status-label thawing" id="statusLabel">Loading...</div>
         </section>
 
@@ -80,6 +82,11 @@
         <!-- ── Signal Cards ──────────────────────────── -->
         <section class="signal-grid" id="signalGrid" aria-label="Signal indicators">
             <!-- Rendered by JS -->
+        </section>
+
+        <!-- ── Volatility Indicator ──────────────────── -->
+        <section class="vol-card" id="volCard" aria-label="Volatility indicator">
+            <div class="vol-badge" id="volBadge">⚡ Volatility: ×1.0 (normal)</div>
         </section>
 
         <!-- ── Conflict Pairs ────────────────────────── -->
@@ -129,6 +136,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=2.8.0"></script>
+    <script src="app.js?v=2.8.1"></script>
 </body>
 </html>
