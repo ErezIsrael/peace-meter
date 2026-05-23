@@ -130,7 +130,7 @@ function renderTrend(history) {
   if (titleEl && lastData) {
     const rq = lastData.recentQueryStatus || 'no-data';
     const rqIcon = rq === 'live' ? '🟢' : rq === 'no-data' ? '🟡' : '🔴';
-    const wh = lastData.master?.windowHours || lastData?.signals?.tone?.windowHours || 0;
+    const wh = lastData.windowHours || lastData.master?.windowHours || lastData?.signals?.tone?.windowHours || 0;
     const whLabel = wh > 0 ? `${wh}h` : '?h';
     const rqLabel = rq === 'live' ? `${whLabel} data live` : rq.includes('no-data') ? `${whLabel} no data` : 'query failed';
     titleEl.textContent = `📈 Trend (${scores.length} pts) ${rqIcon} ${rqLabel}`;
