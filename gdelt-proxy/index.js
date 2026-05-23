@@ -22,10 +22,10 @@ const BASELINE_WINDOW = 12; // number of cache cycles to average for baseline
 const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplification
 const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
 const RECENT_WEIGHT = 0.6; // weight for 6h recent window vs 24h window
-const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
-const SIGNAL_HISTORY_WINDOW = 192; // keep 7d of per-signal readings (15min cadence)
-const SIGNAL_DISPLAY_STABLE = 192;  // 7d window when stable
-const SIGNAL_DISPLAY_VOLATILE = 96; // 24h window when volatile
+const SCORE_HISTORY_WINDOW = 72; // keep last 72 readings (~3d at 1h cadence)
+const SIGNAL_HISTORY_WINDOW = 72;  // keep 72 readings (3d at 1h cadence)
+const SIGNAL_DISPLAY_STABLE = 72;  // 3d window when stable
+const SIGNAL_DISPLAY_VOLATILE = 24; // 24h window when volatile
 
 /* ── Aviation estimation note ────────────────────────────────────────── */
 // opensky-network.org is unreachable from Cloudflare Workers (egress block)

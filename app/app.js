@@ -83,8 +83,8 @@ function renderGauge(score) {
 
 /* ── SVG Sparkline (no dependencies) ──────────────────── */
 function renderSparklineSvg(container, data, color) {
-  // Subsample to max 60 points for readability on a 140px sparkline
-  const maxPts = 60;
+  // Subsample to max 50 points for readability on a 140px sparkline
+  const maxPts = 50;
   if (data.length > maxPts) {
     const step = (data.length - 1) / (maxPts - 1);
     data = Array.from({ length: maxPts }, (_, i) => data[Math.round(i * step)]);
