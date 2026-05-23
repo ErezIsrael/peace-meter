@@ -331,10 +331,41 @@ function parseRSS(xml, sourceName, feedType) {
   const itemMatches = xml.match(/<item>([\s\S]*?)<\/item>/g);
   if (!itemMatches) return items;
 
-  const peaceW = ['peace','normalize','dialogue','deal','agreement','negotiat','ceasefire','truce','aid','corridor','swap','release','reconstruction','framework','integration','cooperation','rebuild','resolution','humanitarian','mediation','progress','dovetail'];
-  const warW   = ['attack','strike','deadly','killed','rocket','missile','drone','assassin','bombing','escalat','hijack','seized','casualt','operation','target','threat','proxy'];
-  // Negators: if present alongside a war word, it flips to positive
-  const warNegators = ['end','ending','stop','stopping','halt','halting','conclude','concluded','resolve','resolved','avoid','prevent','de-escalat','reduce','reduc'];
+  // Positive (peace) indicators — weighted by signal strength
+  const peaceWords = [
+    { w: 'ceasefire', s: 3 }, { w: 'truce', s: 3 }, { w: 'peace deal', s: 3 },
+    { w: 'normalization', s: 2 }, { w: 'normalize', s: 2 },
+    { w: 'diplomat', s: 2 }, { w: 'mediation', s: 2 }, { w: 'dialogue', s: 2 },
+    { w: 'agreement', s: 2 }, { w: 'framework', s: 1 }, { w: 'cooperation', s: 2 },
+    { w: 'progress', s: 1 }, { w: 'talks', s: 1 }, { w: 'rebuild', s: 1 },
+    { w: 'reconstruction', s: 1 }, { w: 'humanitarian', s: 1 }, { w: 'aid', s: 1 },
+    { w: 'corridor', s: 1 }, { w: 'swap', s: 1 }, { w: 'release', s: 1 },
+    { w: 'confederation', s: 2 },
+  ];
+  // Negative (war) indicators — weighted by severity
+  const warWords = [
+    { w: 'attack', s: 3 }, { w: 'strike', s: 3 }, { w: 'deadly', s: 3 },
+    { w: 'killed', s: 3 }, { w: 'rocket', s: 2 }, { w: 'missile', s: 2 },
+    { w: 'drone', s: 2 }, { w: 'assassin', s: 3 }, { w: 'bombing', s: 3 },
+    { w: 'bomb', s: 2 }, { w: 'raid', s: 2 }, { w: 'invasion', s: 3 },
+    { w: 'offensive', s: 2 }, { w: 'offensiv', s: 2 }, { w: 'operation', s: 1 },
+    { w: 'casualt', s: 2 }, { w: 'injure', s: 2 }, { w: 'injuri', s: 2 },
+    { w: 'detain', s: 1 }, { w: 'detaine', s: 1 }, { w: 'ban', s: 2 },
+    { w: 'banned', s: 2 }, { w: 'sanction', s: 2 }, { w: 'expel', s: 2 },
+    { w: 'expelle', s: 2 }, { w: 'condemn', s: 1 }, { w: 'taunt', s: 1 },
+    { w: 'abuse', s: 2 }, { w: 'violence', s: 2 }, { w: 'hostilit', s: 2 },
+    { w: 'proxy', s: 2 }, { w: 'threat', s: 1 }, { w: 'seize', s: 2 },
+    { w: 'seized', s: 2 }, { w: 'hijack', s: 3 }, { w: 'war', s: 2 },
+    { w: 'conflict', s: 2 }, { w: 'hits', s: 2 }, { w: 'disarm', s: 2 },
+    { w: 'control', s: 1 }, { w: 'claim to', s: 1 }, { w: 'escalat', s: 2 },
+  ];
+  // War negators: "ending war" → peace (phrase-level, not single words)
+  const warNegators = ['end of war', 'ending war', 'end of conflict', 'ending conflict',
+                       'end hostilities', 'ending hostilities', 'stop war', 'stop conflict',
+                       'de-escalat', 'withdraw from'];
+  // Peace phrases that are actually negative outcomes
+  const peaceNegators = ['fail', 'failed', 'fails', 'collapse', 'collaps', 'stall', 'stalle',
+                         'breakdown', 'no deal', 'no agreement', 'deadlock', 'dead lock'];
 
   for (const block of itemMatches) {
     const titleMatch = block.match(/<title>([\s\S]*?)<\/title>/);
@@ -362,19 +393,28 @@ function parseRSS(xml, sourceName, feedType) {
       if (primaryHits < 1) continue;
     }
 
-    // Context-aware sentiment scoring
+    // Weighted context-aware sentiment scoring
     const lower = title.toLowerCase();
-    let score = 0;
-    for (const w of peaceW) if (lower.includes(w)) score++;
-    // War words only penalize if no negator is present
-    for (const w of warW) {
-      if (lower.includes(w)) {
+    let peaceScore = 0;
+    let warScore = 0;
+
+    for (const kw of peaceWords) if (lower.includes(kw.w)) peaceScore += kw.s;
+    for (const kw of warWords) {
+      if (lower.includes(kw.w)) {
         let negated = false;
         for (const neg of warNegators) { if (lower.includes(neg)) { negated = true; break; } }
-        if (!negated) score--;
+        if (!negated) warScore += kw.s;
       }
     }
-    const sentiment = score > 0 ? 'peace' : score < 0 ? 'war' : 'neutral';
+    // Peace phrases that failed → subtract peace, add war
+    for (const neg of peaceNegators) {
+      if (lower.includes(neg)) {
+        peaceScore = Math.max(0, peaceScore - 2);
+        warScore += 2;
+      }
+    }
+
+    const sentiment = peaceScore > warScore ? 'peace' : warScore > peaceScore ? 'war' : 'neutral';
 
     items.push({
       source: sourceName, title, link: linkMatch[1],
