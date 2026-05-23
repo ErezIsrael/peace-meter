@@ -601,7 +601,7 @@ async function buildFullPayload(env) {
     const baseTone = 50 + (gdeltData.avgGoldstein / 10) * 50;
     const toneShift = baseTone - 50;
     toneScore = Math.round(clamp(0, 100, 50 + toneShift * volMultiplier));
-    toneDetail = `${gdeltData.eventCount} events (${gdeltData.windowHours || '?'}h: ${gdeltData.recentEventCount}), tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic, vol ×${volMultiplier.toFixed(1)}`;
+    toneDetail = `${gdeltData.eventCount} events (${gdeltData.windowHours ? gdeltData.windowHours + 'h' : '24h-only'}: ${gdeltData.recentEventCount}), tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic, vol ×${volMultiplier.toFixed(1)}`;
     toneStatus = gdeltData.cached ? 'Cached' : 'Live';
   } else {
     toneScore = FALLBACK_SIGNALS.tone.score;

@@ -129,11 +129,15 @@ function renderTrend(history) {
   const titleEl = document.querySelector('.chart-card h3');
   if (titleEl && lastData) {
     const rq = lastData.recentQueryStatus || 'no-data';
-    const rqIcon = rq === 'live' ? '🟢' : rq === 'no-data' ? '🟡' : '🔴';
+    const rqIcon = rq === 'live' ? '🟢' : rq.includes('no-data') ? '🟡' : '🔴';
     const wh = lastData.windowHours || lastData.master?.windowHours || lastData?.signals?.tone?.windowHours || 0;
-    const whLabel = wh > 0 ? `${wh}h` : '?h';
-    const rqLabel = rq === 'live' ? `${whLabel} data live` : rq.includes('no-data') ? `${whLabel} no data` : 'query failed';
-    titleEl.textContent = `📈 Trend (${scores.length} pts) ${rqIcon} ${rqLabel}`;
+    if (rq === 'live' && wh > 0) {
+      titleEl.textContent = `📈 Trend (${scores.length} pts) ${rqIcon} ${wh}h data live`;
+    } else if (rq.includes('no-data')) {
+      titleEl.textContent = `📈 Trend (${scores.length} pts) ${rqIcon} GDELT ingestion lag (using 24h data)`;
+    } else {
+      titleEl.textContent = `📈 Trend (${scores.length} pts) ${rqIcon} query failed`;
+    }
   }
   const lastScore = scores.length > 0 ? scores[scores.length - 1] : 50;
   const level = getLevel(lastScore);
