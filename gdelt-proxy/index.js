@@ -24,6 +24,12 @@ const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
 const RECENT_WEIGHT = 0.6; // weight for 6h recent window vs 24h window
 const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
 
+/* ── OpenSky Aviation constants ──────────────────────────────────────── */
+const OPENSKY_TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+const OPENSKY_STATES_URL = 'https://opensky-network.org/api/states/v3';
+// ME bounding box: covers Israel, Lebanon, Syria, Egypt, Saudi, Jordan, Iran
+const OPENSKY_BOUNDS = { lamin: 22, lomin: 33, lamax: 43, lomax: 64 };
+
 /* ────────────────────────────────────────────────────────────────────── */
 /*  GDELT BigQuery helpers                                                */
 /* ────────────────────────────────────────────────────────────────────── */
@@ -399,6 +405,80 @@ async function fetchPublications() {
 }
 
 /* ────────────────────────────────────────────────────────────────────── */
+/*  Aviation: OpenSky API (OAuth2 client credentials)                     */
+/* ────────────────────────────────────────────────────────────────────── */
+
+async function fetchOpenSkyToken(env) {
+  if (!env.OPENSKY_CLIENT_ID || !env.OPENSKY_CLIENT_SECRET) return null;
+  const cached = await env.GDELT_CACHE.get('opensky_token');
+  if (cached) {
+    const tok = JSON.parse(cached);
+    if (tok.expires_at > Date.now()) return tok.access_token;
+  }
+  const resp = await fetch(OPENSKY_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=client_credentials&client_id=${encodeURIComponent(env.OPENSKY_CLIENT_ID)}&client_secret=${encodeURIComponent(env.OPENSKY_CLIENT_SECRET)}`,
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  const token = { access_token: data.access_token, expires_at: Date.now() + (data.expires_in || 3600) * 1000 };
+  await env.GDELT_CACHE.put('opensky_token', JSON.stringify(token), { expirationTtl: token.expires_in - 60 });
+  return token.access_token;
+}
+
+async function fetchAviation(env) {
+  const token = await fetchOpenSkyToken(env);
+  if (!token) return null;
+  const { lamin, lomin, lamax, lomax } = OPENSKY_BOUNDS;
+  const url = `${OPENSKY_STATES_URL}?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
+  try {
+    const resp = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return { aircraftCount: (data.states || []).length };
+  } catch { return null; }
+}
+
+/* ────────────────────────────────────────────────────────────────────── */
+/*  Prediction Markets: Polymarket Gamma API (no auth)                    */
+/* ────────────────────────────────────────────────────────────────────── */
+
+async function fetchPredictionMarkets() {
+  // Polymarket search is unreliable — fetch politics category and filter for ME keywords
+  try {
+    const resp = await fetch('https://gamma-api.polymarket.com/events?active=true&closed=false&category=politics&limit=50', {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!resp.ok) return null;
+    const events = await resp.json();
+    const meKeywords = ['israel', 'palestine', 'iran', 'gaza', 'ceasefire', 'middle east', 'lebanon', 'syria', 'iraq', 'yemen', 'saudi', 'hamas', 'hezbollah'];
+    const markets = events.filter(e => meKeywords.some(k => (e.title || '').toLowerCase().includes(k)));
+    if (markets.length === 0) return null;
+    // Extract Yes-side probability from each market
+    const probs = [];
+    for (const m of markets) {
+      for (const mkt of m.markets || []) {
+        if (mkt.closed) continue;
+        const outcomes = typeof mkt.outcomes === 'string' ? JSON.parse(mkt.outcomes) : (mkt.outcomes || []);
+        const prices = typeof mkt.outcomePrices === 'string' ? JSON.parse(mkt.outcomePrices) : (mkt.outcomePrices || []);
+        const yesIdx = outcomes.indexOf('Yes');
+        if (yesIdx >= 0 && prices[yesIdx] !== undefined) {
+          probs.push({ slug: m.slug, probability: parseFloat(prices[yesIdx]), marketName: mkt.question });
+        }
+      }
+    }
+    if (probs.length === 0) return null;
+    const avgProb = probs.reduce((s, p) => s + p.probability, 0) / probs.length;
+    return { probs, avgProb };
+  } catch { return null; }
+}
+
+/* ────────────────────────────────────────────────────────────────────── */
 /*  Signal computation helpers                                            */
 /* ────────────────────────────────────────────────────────────────────── */
 
@@ -590,6 +670,37 @@ async function buildFullPayload(env) {
 
   const econData = computeEconomic();
   signals.economic = { ...signals.economic, score: econData.score, detail: econData.detail, status: 'Live' };
+
+  // ── Path B1: Live Aviation (OpenSky) ──────────────────────────────
+  const aviationData = await fetchAviation(env);
+  if (aviationData) {
+    const BASELINE_AIRCRAFT = 80;
+    const avScore = clamp(0, 100, (aviationData.aircraftCount / BASELINE_AIRCRAFT) * 50);
+    signals.aviation = {
+      ...signals.aviation,
+      score: Math.round(avScore),
+      detail: `${aviationData.aircraftCount} aircraft in ME airspace`,
+      status: 'Live',
+    };
+  } else {
+    signals.aviation.status = 'Unavailable';
+  }
+
+  // ── Path B2: Live Prediction Markets (Polymarket) ────────────────
+  const predData = await fetchPredictionMarkets();
+  if (predData) {
+    const predScore = Math.round(predData.avgProb * 100);
+    const topMarkets = predData.probs.sort((a, b) => b.probability - a.probability).slice(0, 2);
+    const marketNames = topMarkets.map(m => m.marketName).join('; ');
+    signals.prediction = {
+      ...signals.prediction,
+      score: predScore,
+      detail: `Avg: ${predScore}% (${topMarkets.length} markets: ${marketNames})`,
+      status: 'Live',
+    };
+  } else {
+    signals.prediction.status = 'Unavailable';
+  }
 
   const masterScore = calcMaster(signals);
 

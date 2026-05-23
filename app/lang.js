@@ -27,7 +27,7 @@ const LANG = {
       growing: '🌱 Growing',
       flourishing: '🕊 Flourishing'
     },
-    status: { live: 'Live', delayed: 'Delayed' },
+    status: { live: 'Live', delayed: 'Delayed', unavailable: 'Unavailable' },
 
     signals: {
       tone:        { icon:'🤝', name:'Political Tone',        weight:'20%', summary:'GDELT event tone scoring',             detail:'Uses GDELT 2.0 Event Database. Goldstein Scale (-10 to +10) per event. Score = 50 + (avgGoldstein/10)×50, clamped 0–100. Falls back to RSS sentiment if GDELT unavailable.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },

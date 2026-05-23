@@ -280,6 +280,7 @@ html[dir="rtl"] .gauge-card {
 .signal-status.live    { color: var(--growing); background: rgba(74,222,128,0.1); }
 .signal-status.cached  { color: var(--growing); background: rgba(74,222,128,0.1); }
 .signal-status.delayed { color: var(--flourishing); background: rgba(251,191,36,0.1); }
+.signal-status.unavailable { color: #94a3b8; background: rgba(148,163,184,0.1); }
 
 /* ── Conflict Pairs ──────────────────────────────────── */
 .pairs-card {
