@@ -22,6 +22,7 @@ const BASELINE_WINDOW = 12; // number of cache cycles to average for baseline
 const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplification
 const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
 const RECENT_WEIGHT = 0.6; // weight for 3-hour window vs 24h window
+const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
 
 /* ────────────────────────────────────────────────────────────────────── */
 /*  GDELT BigQuery helpers                                                */
@@ -155,11 +156,13 @@ async function fetchGDELT(env) {
 
     // Query 3h window (optional — may fail if GDELT hasn't updated)
     let metrics3h = null;
+    let recentQueryStatus = 'no-data'; // 'live', 'no-data', 'failed'
     try {
       const result3h = await queryBigQuery(env, ME_EVENTS_QUERY_3H);
       metrics3h = computeMetrics(result3h.rows);
+      if (metrics3h && metrics3h.totalEvents > 0) recentQueryStatus = 'live';
     } catch {
-      // 3h query failed — use 24h only
+      recentQueryStatus = 'failed';
     }
 
     // If 3h window has no data (GDELT processing delay or query failed), use 24h only
@@ -197,6 +200,7 @@ async function fetchGDELT(env) {
       volMultiplier: volInfo.multiplier.toFixed(2),
       volRatio: volInfo.ratio.toFixed(2),
       volBaseline: volInfo.baseline,
+      recentQueryStatus,
       timestamp: new Date().toISOString(),
       cached: false,
     };
@@ -221,6 +225,7 @@ function parseGDELTResponse(data) {
     volMultiplier: parseFloat(data.volMultiplier || 1.0),
     volRatio: parseFloat(data.volRatio || 1.0),
     volBaseline: parseInt(data.volBaseline || 0),
+    recentQueryStatus: data.recentQueryStatus || 'no-data',
   };
 }
 
@@ -548,22 +553,34 @@ async function buildFullPayload(env) {
 
   const masterScore = calcMaster(signals);
 
-  // Momentum: compare with previous master score from KV
-  let momentum = { direction: '→', change: 0 };
+  // Load score history from KV (array of {score, ts})
+  let scoreHistory = [];
   try {
-    const prevRaw = await env.PEACE_CACHE.get('last_master');
-    if (prevRaw) {
-      const prevScore = parseInt(prevRaw);
-      if (!isNaN(prevScore)) {
-        momentum.change = masterScore - prevScore;
-        if (momentum.change > 1) momentum.direction = '↑';
-        else if (momentum.change < -1) momentum.direction = '↓';
-        else momentum.direction = '→';
-      }
-    }
-  } catch {}
-  // Store current master score for next comparison
-  await env.PEACE_CACHE.put('last_master', String(masterScore), { expirationTtl: CACHE_TTL_SECONDS * 24 }); // 24h
+    const raw = await env.PEACE_CACHE.get('score_history');
+    if (raw) scoreHistory = JSON.parse(raw);
+  } catch { scoreHistory = []; }
+
+  // Append current score
+  scoreHistory.push({ score: masterScore, ts: Date.now() });
+  // Keep last N readings
+  if (scoreHistory.length > SCORE_HISTORY_WINDOW) scoreHistory = scoreHistory.slice(-SCORE_HISTORY_WINDOW);
+  // Store back
+  await env.PEACE_CACHE.put('score_history', JSON.stringify(scoreHistory), { expirationTtl: CACHE_TTL_SECONDS * SCORE_HISTORY_WINDOW });
+
+  // Compute momentum from history over ~12h window
+  const twelveHoursAgo = Date.now() - 12 * 3600 * 1000;
+  const oldPoint = scoreHistory.find(p => p.ts <= twelveHoursAgo);
+  const change12h = oldPoint ? masterScore - oldPoint.score : 0;
+  let trendDir = '→';
+  if (change12h > 1) trendDir = '↑';
+  else if (change12h < -1) trendDir = '↓';
+
+  // Build labels/scores for trend chart from history
+  const historyLabels = scoreHistory.map(p => {
+    const d = new Date(p.ts);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  });
+  const historyScores = scoreHistory.map(p => p.score);
 
   const pairs = PAIR_DEFS.map(pair => computePairScore(pair, gdeltData));
 
@@ -576,17 +593,18 @@ async function buildFullPayload(env) {
     master: {
       score: masterScore,
       level: masterScore <= 25 ? 'Frozen' : masterScore <= 50 ? 'Thawing' : masterScore <= 75 ? 'Growing' : 'Flourishing',
-      trend: momentum.direction,
-      momentum: momentum.change,
+      trend: trendDir,
+      momentum: change12h,
     },
     signals,
     history: {
-      labels: ["14:02","13:32","13:02","12:32","12:02","11:32","11:02","10:32","10:02","9:32","9:02","8:32"],
-      scores: [42,44,46,47,49,50,52,53,55,56,57,58],
+      labels: historyLabels,
+      scores: historyScores,
     },
     publications,
     pairs,
     volMultiplier: parseFloat(volMultiplier.toFixed(2)),
+    recentQueryStatus: gdeltData ? gdeltData.recentQueryStatus : 'no-data',
   };
 }
 

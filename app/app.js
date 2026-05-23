@@ -52,17 +52,26 @@ function renderGauge(score) {
   statusEl.textContent = level.label;
   statusEl.className = `status-label ${level.cls}`;
 
+  // Volatility icon (next to main score)
+  const volIcon = document.getElementById('volIcon');
+  if (volIcon && lastData) {
+    const vol = lastData.volMultiplier || 1;
+    if (vol > 1.2) { volIcon.textContent = '🔴'; volIcon.title = `Volatility ×${vol.toFixed(1)} — AMPLIFIED`; }
+    else if (vol > 1.0) { volIcon.textContent = '🟠'; volIcon.title = `Volatility ×${vol.toFixed(1)} — elevated`; }
+    else { volIcon.textContent = '🔵'; volIcon.title = `Volatility ×${vol.toFixed(1)} — normal`; }
+  }
+
   // Momentum arrow
   const momEl = document.getElementById('momentumArrow');
   if (momEl && lastData && lastData.master) {
-    const mom = lastData.master.momentum;
+    const mom = lastData.master.momentum || 0;
     const dir = lastData.master.trend || '→';
-    if (mom !== undefined && Math.abs(mom) > 1) {
-      momEl.textContent = `${dir} ${mom > 0 ? '+' : ''}${mom}`;
+    if (Math.abs(mom) > 1) {
+      momEl.textContent = `${dir} ${mom > 0 ? '+' : ''}${mom} pts / 12h`;
       momEl.style.display = 'inline';
       momEl.style.color = mom > 0 ? '#4ade80' : '#f87171';
     } else {
-      momEl.textContent = '→ 0';
+      momEl.textContent = `${dir} stable`;
       momEl.style.display = 'inline';
       momEl.style.color = '#64748b';
     }
@@ -113,9 +122,18 @@ function renderSparklineSvg(container, data, color) {
 /* ── SVG Trend Chart (no dependencies) ───────────────── */
 function renderTrend(history) {
   const svgEl = document.getElementById('trendSvg');
-  const scores = history.scores;
-  const labels = history.labels;
-  const lastScore = scores[scores.length - 1];
+  const scores = history.scores || [];
+  const labels = history.labels || [];
+
+  // Update chart title with recent query status
+  const titleEl = document.querySelector('.chart-card h3');
+  if (titleEl && lastData) {
+    const rq = lastData.recentQueryStatus || 'no-data';
+    const rqIcon = rq === 'live' ? '🟢' : rq === 'no-data' ? '🟡' : '🔴';
+    const rqLabel = rq === 'live' ? '3h data live' : rq === 'no-data' ? '3h no data' : '3h failed';
+    titleEl.textContent = `📈 Trend (${scores.length} pts) ${rqIcon} ${rqLabel}`;
+  }
+  const lastScore = scores.length > 0 ? scores[scores.length - 1] : 50;
   const level = getLevel(lastScore);
 
   const W = 600, H = 200;
@@ -155,8 +173,12 @@ function renderTrend(history) {
     svgEl.appendChild(text);
   }
 
-  const pts = scores.map((s, i) => {
-    const x = padL + (i / (scores.length - 1)) * chartW;
+  // Need at least 2 points to draw a line; if only 1, duplicate it
+  const chartScores = scores.length < 2 ? [lastScore, lastScore] : scores;
+  const chartLabels = labels.length < 2 ? ['now', 'now'] : labels;
+
+  const pts = chartScores.map((s, i) => {
+    const x = padL + (i / (chartScores.length - 1)) * chartW;
     const y = padT + chartH - (s / 100) * chartH;
     return { x, y };
   });
@@ -190,7 +212,7 @@ function renderTrend(history) {
       text.setAttribute('x', p.x); text.setAttribute('y', padT + chartH + 18);
       text.setAttribute('text-anchor', 'middle');
       text.setAttribute('fill', '#64748b'); text.setAttribute('font-size', '9');
-      text.textContent = labels[labels.length - 1 - i] || '';
+      text.textContent = chartLabels[chartLabels.length - 1 - i] || '';
       svgEl.appendChild(text);
     }
   });
@@ -232,16 +254,8 @@ function renderSignals(signals) {
 }
 
 /* ── Volatility indicator ─────────────────────────────── */
-function renderVolatility() {
-  const badge = document.getElementById('volBadge');
-  if (!badge || !lastData) return;
-  const vol = lastData.volMultiplier;
-  if (!vol) { badge.textContent = '⚡ Volatility: ×1.0 (normal)'; return; }
-  if (vol > 1.2) badge.textContent = `⚡ Volatility: ×${vol.toFixed(1)} (AMPLIFIED)`;
-  else if (vol > 1.0) badge.textContent = `⚡ Volatility: ×${vol.toFixed(1)} (elevated)`;
-  else badge.textContent = `⚡ Volatility: ×${vol.toFixed(1)} (normal)`;
-  badge.style.borderColor = vol > 1.2 ? '#f59e0b' : vol > 1.0 ? '#eab308' : '';
-}
+/* Moved into renderGauge() as an icon next to the main score */
+function renderVolatility() { /* no-op */ }
 
 /* ── Signal detail modal ──────────────────────────────── */
 function showSignalDetail(key) {

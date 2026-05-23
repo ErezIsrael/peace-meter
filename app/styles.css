@@ -204,19 +204,9 @@ html[dir="rtl"] .gauge-card {
   margin-bottom: 8px;
 }
 
-/* ── Volatility Card ──────────────────────────────────── */
-.vol-card {
-    max-width: 800px; margin: 0.8rem auto; padding: 0 1rem;
-}
-.vol-badge {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    text-align: center;
+/* ── Gauge Meta (volatility icon + momentum) ─────────── */
+.gauge-meta {
     color: var(--text-muted);
-    font-family: var(--font-mono);
 }
 
 /* ── Signal Grid ─────────────────────────────────────── */

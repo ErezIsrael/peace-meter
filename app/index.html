@@ -69,7 +69,10 @@
                 </svg>
             </div>
             <div class="gauge-score" id="gaugeScore">--</div>
-            <div class="gauge-momentum" id="momentumArrow" style="display:none;font-size:13px;margin-top:2px;font-weight:600;"></div>
+            <div class="gauge-meta" id="gaugeMeta" style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:12px;font-weight:600;font-family:var(--font-mono);">
+                <span class="vol-icon" id="volIcon" title="Volatility" style="cursor:default;font-size:16px;">🔵</span>
+                <span class="momentum-arrow" id="momentumArrow" style="display:none;"></span>
+            </div>
             <div class="status-label thawing" id="statusLabel">Loading...</div>
         </section>
 
@@ -84,12 +87,7 @@
             <!-- Rendered by JS -->
         </section>
 
-        <!-- ── Volatility Indicator ──────────────────── -->
-        <section class="vol-card" id="volCard" aria-label="Volatility indicator">
-            <div class="vol-badge" id="volBadge">⚡ Volatility: ×1.0 (normal)</div>
-        </section>
-
-        <!-- ── Conflict Pairs ────────────────────────── -->
+                <!-- ── Conflict Pairs ────────────────────────── -->
         <section class="pairs-card" aria-label="Conflict pair scores">
             <h3 class="pairs-toggle" onclick="togglePairs()">⚔️ Conflict Pairs <span class="toggle-arrow" id="pairArrow">▼</span></h3>
             <div id="pairsGrid" class="pairs-grid" style="display:none">
