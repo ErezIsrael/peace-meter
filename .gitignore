@@ -6,6 +6,7 @@ dist/
 .wrangler/
 app/.wrangler/
 gdelt-proxy/*.json
+credentials.json
 # Internal dev docs — not part of the published site
 CONCEPT.md
 IMPLEMENTATION_PLAN_V4.md

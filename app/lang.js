@@ -27,7 +27,7 @@ const LANG = {
       growing: '🌱 Growing',
       flourishing: '🕊 Flourishing'
     },
-    status: { live: 'Live', delayed: 'Delayed', unavailable: 'Unavailable' },
+    status: { live: 'Live', delayed: 'Delayed', unavailable: 'Unavailable', estimated: 'Estimated' },
 
     signals: {
       tone:        { icon:'🤝', name:'Political Tone',        weight:'20%', summary:'GDELT event tone scoring',             detail:'Uses GDELT 2.0 Event Database. Goldstein Scale (-10 to +10) per event. Score = 50 + (avgGoldstein/10)×50, clamped 0–100. Falls back to RSS sentiment if GDELT unavailable.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
@@ -201,7 +201,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
       growing: '🌱 צומח',
       flourishing: '🕊 פורח'
     },
-    status: { live: 'בשידור חי', delayed: 'מושהה' },
+    status: { live: 'בשידור חי', delayed: 'מושהה', unavailable: 'לא זמין', estimated: 'מוערך' },
 
     signals: {
       tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'20%', summary:'ניקוד רגש אירועים GDELT',         detail:'משתמש במסד GDELT 2.0. סולם גולדשטיין (-10 עד +10) לאירוע. ציון = 50 + (ממוצעGoldstein/10)×50, חתוך 0-100. חוזר ל-RSS אם GDELT לא זמין.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },

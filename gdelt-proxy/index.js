@@ -24,11 +24,9 @@ const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
 const RECENT_WEIGHT = 0.6; // weight for 6h recent window vs 24h window
 const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
 
-/* ── OpenSky Aviation constants ──────────────────────────────────────── */
-const OPENSKY_TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
-const OPENSKY_STATES_URL = 'https://opensky-network.org/api/states/v3';
-// ME bounding box: covers Israel, Lebanon, Syria, Egypt, Saudi, Jordan, Iran
-const OPENSKY_BOUNDS = { lamin: 22, lomin: 33, lamax: 43, lomax: 64 };
+/* ── Aviation estimation note ────────────────────────────────────────── */
+// opensky-network.org is unreachable from Cloudflare Workers (egress block)
+// Aviation score is estimated from GDELT constructive/diplomatic ratios
 
 /* ────────────────────────────────────────────────────────────────────── */
 /*  GDELT BigQuery helpers                                                */
@@ -405,43 +403,20 @@ async function fetchPublications() {
 }
 
 /* ────────────────────────────────────────────────────────────────────── */
-/*  Aviation: OpenSky API (OAuth2 client credentials)                     */
+/*  Aviation: estimated from GDELT diplomatic/constructive activity       */
+/*  Note: opensky-network.org is unreachable from Cloudflare Workers     */
+/*  (timeout/egress block). We estimate aviation from GDELT signals.     */
 /* ────────────────────────────────────────────────────────────────────── */
 
-async function fetchOpenSkyToken(env) {
-  if (!env.OPENSKY_CLIENT_ID || !env.OPENSKY_CLIENT_SECRET) return null;
-  const cached = await env.GDELT_CACHE.get('opensky_token');
-  if (cached) {
-    const tok = JSON.parse(cached);
-    if (tok.expires_at > Date.now()) return tok.access_token;
-  }
-  const resp = await fetch(OPENSKY_TOKEN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `grant_type=client_credentials&client_id=${encodeURIComponent(env.OPENSKY_CLIENT_ID)}&client_secret=${encodeURIComponent(env.OPENSKY_CLIENT_SECRET)}`,
-    signal: AbortSignal.timeout(10000),
-  });
-  if (!resp.ok) return null;
-  const data = await resp.json();
-  const token = { access_token: data.access_token, expires_at: Date.now() + (data.expires_in || 3600) * 1000 };
-  await env.GDELT_CACHE.put('opensky_token', JSON.stringify(token), { expirationTtl: token.expires_in - 60 });
-  return token.access_token;
-}
-
-async function fetchAviation(env) {
-  const token = await fetchOpenSkyToken(env);
-  if (!token) return null;
-  const { lamin, lomin, lamax, lomax } = OPENSKY_BOUNDS;
-  const url = `${OPENSKY_STATES_URL}?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
-  try {
-    const resp = await fetch(url, {
-      headers: { 'Authorization': `Bearer ${token}` },
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    return { aircraftCount: (data.states || []).length };
-  } catch { return null; }
+function estimateAviation(gdeltData) {
+  if (!gdeltData || gdeltData.eventCount === 0) return null;
+  // Higher constructive/diplomatic ratio → more open airspace → higher aviation
+  const constructiveRatio = gdeltData.constructiveRatio;
+  const diplomaticRatio = gdeltData.eventCount > 0 ? gdeltData.diplomaticCount / gdeltData.eventCount : 0;
+  // Base score from constructive ratio (0-100), boosted by diplomatic activity
+  const base = constructiveRatio * 100;
+  const boost = diplomaticRatio * 30; // up to +30 boost
+  return { score: clamp(0, 100, base + boost) };
 }
 
 /* ────────────────────────────────────────────────────────────────────── */
@@ -671,16 +646,14 @@ async function buildFullPayload(env) {
   const econData = computeEconomic();
   signals.economic = { ...signals.economic, score: econData.score, detail: econData.detail, status: 'Live' };
 
-  // ── Path B1: Live Aviation (OpenSky) ──────────────────────────────
-  const aviationData = await fetchAviation(env);
-  if (aviationData) {
-    const BASELINE_AIRCRAFT = 80;
-    const avScore = clamp(0, 100, (aviationData.aircraftCount / BASELINE_AIRCRAFT) * 50);
+  // ── Path B1: Aviation (estimated from GDELT, OpenSky unreachable from CF) ─
+  const aviationEst = estimateAviation(gdeltData);
+  if (aviationEst) {
     signals.aviation = {
       ...signals.aviation,
-      score: Math.round(avScore),
-      detail: `${aviationData.aircraftCount} aircraft in ME airspace`,
-      status: 'Live',
+      score: Math.round(aviationEst.score),
+      detail: `Estimated from GDELT: constructive ${Math.round(gdeltData.constructiveRatio * 100)}%, diplomatic ${gdeltData.diplomaticCount} events`,
+      status: 'Estimated',
     };
   } else {
     signals.aviation.status = 'Unavailable';
