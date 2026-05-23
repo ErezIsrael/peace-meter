@@ -55,8 +55,8 @@ SELECT
   SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS diplomatic
 FROM \`gdelt-bq.gdeltv2.events_partitioned\`
 WHERE
-  _PARTITIONTIME = CAST(CURRENT_TIMESTAMP() AS DATE)
-  AND event_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '3' HOUR)
+  _PARTITIONTIME >= CAST(CURRENT_DATE() AS TIMESTAMP)
+  AND _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '3' HOUR)
   AND (
     Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
     OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
@@ -161,8 +161,10 @@ async function fetchGDELT(env) {
       const result3h = await queryBigQuery(env, ME_EVENTS_QUERY_3H);
       metrics3h = computeMetrics(result3h.rows);
       if (metrics3h && metrics3h.totalEvents > 0) recentQueryStatus = 'live';
-    } catch {
-      recentQueryStatus = 'failed';
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : (typeof e === 'string' ? e : JSON.stringify(e));
+      recentQueryStatus = `failed:${(msg || 'unknown').substring(0, 100)}`;
+      console.error('3h query failed:', msg, e);
     }
 
     // If 3h window has no data (GDELT processing delay or query failed), use 24h only
