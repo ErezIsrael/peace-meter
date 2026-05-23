@@ -21,42 +21,34 @@ const BIGQUERY_PROJECT = 'peace-meter';
 const BASELINE_WINDOW = 12; // number of cache cycles to average for baseline
 const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplification
 const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
-const RECENT_WEIGHT = 0.6; // weight for 3-hour window vs 24h window
+const RECENT_WEIGHT = 0.6; // weight for 6h recent window vs 24h window
 const SCORE_HISTORY_WINDOW = 24; // keep last 24 readings (~24h at 1h intervals)
 
 /* ────────────────────────────────────────────────────────────────────── */
 /*  GDELT BigQuery helpers                                                */
 /* ────────────────────────────────────────────────────────────────────── */
 
-const ME_EVENTS_QUERY_24H = `
+/*
+ * Single-query approach: fetches both 24h and recent-window metrics in one BigQuery call.
+ * This saves a query (free tier: 1 TB/month) and avoids the ingestion-delay problem.
+ * The 'recent' window uses _PARTITIONTIME >= 6h ago to account for GDELT's ~15-30min ingestion lag.
+ */
+const ME_EVENTS_QUERY = `
 SELECT
   AVG(GoldsteinScale) AS avg_goldstein,
   COUNT(*) AS total_events,
   SUM(CASE WHEN GoldsteinScale > 0 THEN 1 ELSE 0 END) AS constructive,
   SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) AS hostile,
-  SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS diplomatic
+  SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS diplomatic,
+  -- Recent window metrics (events ingested within last 6h to account for ingestion delay)
+  AVG(CASE WHEN _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '6' HOUR) THEN GoldsteinScale END) AS recent_avg_goldstein,
+  COUNT(CASE WHEN _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '6' HOUR) THEN 1 END) AS recent_total_events,
+  SUM(CASE WHEN _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '6' HOUR) AND GoldsteinScale > 0 THEN 1 ELSE 0 END) AS recent_constructive,
+  SUM(CASE WHEN _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '6' HOUR) AND GoldsteinScale < 0 THEN 1 ELSE 0 END) AS recent_hostile,
+  SUM(CASE WHEN _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '6' HOUR) AND EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS recent_diplomatic
 FROM \`gdelt-bq.gdeltv2.events_partitioned\`
 WHERE
   _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '1' DAY)
-  AND (
-    Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
-    OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
-    OR Actor1Code = 'USA' OR Actor2Code = 'USA'
-  )
-  AND GoldsteinScale != 0
-`;
-
-const ME_EVENTS_QUERY_3H = `
-SELECT
-  AVG(GoldsteinScale) AS avg_goldstein,
-  COUNT(*) AS total_events,
-  SUM(CASE WHEN GoldsteinScale > 0 THEN 1 ELSE 0 END) AS constructive,
-  SUM(CASE WHEN GoldsteinScale < 0 THEN 1 ELSE 0 END) AS hostile,
-  SUM(CASE WHEN EventRootCode IN ('13','22','23','24','26','27','40','41','42','43','45','52','58','59') THEN 1 ELSE 0 END) AS diplomatic
-FROM \`gdelt-bq.gdeltv2.events_partitioned\`
-WHERE
-  _PARTITIONTIME >= CAST(CURRENT_DATE() AS TIMESTAMP)
-  AND _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL '3' HOUR)
   AND (
     Actor1CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
     OR Actor2CountryCode IN ('ISR','PSE','LBN','SYR','IRN','YEM','IRQ','SAU','ARE','BHR','EGY','TUN','MAR','JOR','OMN','QAT','KWT')
@@ -90,9 +82,7 @@ async function queryBigQuery(env, sql) {
   return response.json();
 }
 
-function computeMetrics(rows) {
-  if (!rows || rows.length === 0) return null;
-  const row = rows[0];
+function computeMetrics(row) {
   const avgGoldstein = parseFloat(row.f[0]?.v || 0);
   const totalEvents = parseInt(row.f[1]?.v || 0);
   const constructive = parseInt(row.f[2]?.v || 0);
@@ -103,6 +93,20 @@ function computeMetrics(rows) {
     constructiveRatio: (constructive + hostile) > 0 ? constructive / (constructive + hostile) : 0.5,
     hostileRatio: totalEvents > 0 ? hostile / totalEvents : 0,
     totalEvents, constructive, hostile, diplomatic,
+  };
+}
+
+function computeRecentMetrics(row) {
+  const recentAvg = parseFloat(row.f[5]?.v || null);
+  const recentTotal = parseInt(row.f[6]?.v || 0);
+  const recentConstructive = parseInt(row.f[7]?.v || 0);
+  const recentHostile = parseInt(row.f[8]?.v || 0);
+  if (recentTotal === 0) return null;
+  return {
+    avgGoldstein: recentAvg,
+    constructiveRatio: (recentConstructive + recentHostile) > 0 ? recentConstructive / (recentConstructive + recentHostile) : 0.5,
+    hostileRatio: recentTotal > 0 ? recentHostile / recentTotal : 0,
+    totalEvents: recentTotal, constructive: recentConstructive, hostile: recentHostile, diplomatic: 0,
   };
 }
 
@@ -150,39 +154,36 @@ async function fetchGDELT(env) {
   }
 
   try {
-    // Query 24h window (required)
-    const result24h = await queryBigQuery(env, ME_EVENTS_QUERY_24H);
-    const metrics24h = computeMetrics(result24h.rows);
-
-    // Query 3h window (optional — may fail if GDELT hasn't updated)
-    let metrics3h = null;
-    let recentQueryStatus = 'no-data'; // 'live', 'no-data', 'failed'
-    try {
-      const result3h = await queryBigQuery(env, ME_EVENTS_QUERY_3H);
-      metrics3h = computeMetrics(result3h.rows);
-      if (metrics3h && metrics3h.totalEvents > 0) recentQueryStatus = 'live';
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : (typeof e === 'string' ? e : JSON.stringify(e));
-      recentQueryStatus = `failed:${(msg || 'unknown').substring(0, 100)}`;
-      console.error('3h query failed:', msg, e);
+    // Single query: fetches 24h + 6h recent window in one BigQuery call
+    const result = await queryBigQuery(env, ME_EVENTS_QUERY);
+    const row = result.rows[0];
+    const metrics24h = computeMetrics(row);
+    let metricsRecent = computeRecentMetrics(row);
+    let recentQueryStatus = 'live';
+    if (!metricsRecent) {
+      recentQueryStatus = 'no-data';
+      metricsRecent = {
+        avgGoldstein: metrics24h.avgGoldstein,
+        constructiveRatio: metrics24h.constructiveRatio,
+        hostileRatio: metrics24h.hostileRatio,
+        totalEvents: 0, constructive: 0, hostile: 0, diplomatic: 0,
+      };
     }
 
-    // If 3h window has no data (GDELT processing delay or query failed), use 24h only
-    const hasRecent = metrics3h && metrics3h.totalEvents > 0;
+    const hasRecent = metricsRecent.totalEvents > 0;
     const recentW = hasRecent ? RECENT_WEIGHT : 0;
     const longW = 1 - recentW;
 
     // Blend: recent events weighted more heavily
-    const m3 = metrics3h || { avgGoldstein: 0, constructiveRatio: 0.5, hostileRatio: 0, totalEvents: 0 };
     const blended = {
-      avgGoldstein: (m3.avgGoldstein * recentW) + (metrics24h.avgGoldstein * longW),
-      constructiveRatio: (m3.constructiveRatio * recentW) + (metrics24h.constructiveRatio * longW),
-      hostileRatio: (m3.hostileRatio * recentW) + (metrics24h.hostileRatio * longW),
+      avgGoldstein: (metricsRecent.avgGoldstein * recentW) + (metrics24h.avgGoldstein * longW),
+      constructiveRatio: (metricsRecent.constructiveRatio * recentW) + (metrics24h.constructiveRatio * longW),
+      hostileRatio: (metricsRecent.hostileRatio * recentW) + (metrics24h.hostileRatio * longW),
       totalEvents: metrics24h.totalEvents,
       constructive: metrics24h.constructive,
       hostile: metrics24h.hostile,
       diplomatic: metrics24h.diplomatic,
-      _recentEventCount: hasRecent ? metrics3h.totalEvents : 0,
+      _recentEventCount: hasRecent ? metricsRecent.totalEvents : 0,
     };
 
     // Compute volatility multiplier from 24h event count vs baseline
@@ -507,7 +508,7 @@ async function buildFullPayload(env) {
     const baseTone = 50 + (gdeltData.avgGoldstein / 10) * 50;
     const toneShift = baseTone - 50;
     toneScore = Math.round(clamp(0, 100, 50 + toneShift * volMultiplier));
-    toneDetail = `${gdeltData.eventCount} events (3h: ${gdeltData.recentEventCount}), tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic, vol ×${volMultiplier.toFixed(1)}`;
+    toneDetail = `${gdeltData.eventCount} events (6h: ${gdeltData.recentEventCount}), tone ${gdeltData.avgGoldstein > 0 ? '+' : ''}${gdeltData.avgGoldstein.toFixed(2)}, ${gdeltData.diplomaticCount} diplomatic, vol ×${volMultiplier.toFixed(1)}`;
     toneStatus = gdeltData.cached ? 'Cached' : 'Live';
   } else {
     toneScore = FALLBACK_SIGNALS.tone.score;
@@ -667,8 +668,8 @@ export default {
       }
 
       try {
-        const result = await queryBigQuery(env, ME_EVENTS_QUERY_24H);
-        const metrics = computeMetrics(result.rows);
+        const result = await queryBigQuery(env, ME_EVENTS_QUERY);
+        const metrics = computeMetrics(result.rows[0]);
         const scores = scoreFromMetrics(metrics);
         const response = {
           tone: scores ? scores.tone : 60,
