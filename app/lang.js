@@ -1,5 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
-/* VERSION: 2.8.0 */
+/* VERSION: 2.8.2 */
 
 const LANG = {
   en: {
@@ -30,6 +30,7 @@ const LANG = {
     status: { live: 'Live', delayed: 'Delayed', unavailable: 'Unavailable', estimated: 'Estimated' },
 
     signals: {
+      master:      { icon:'☮️', name:'Peace Score',          weight:'100%', summary:'Weighted average of 12 signals', detail:'Each of the 12 signals is scored 0–100 independently. The master score is the weighted sum: Tone×20% + News×15% + Aviation×12% + Prediction×10% + Credit×10% + Travel×10% + Think Tank×10% + Conflict×8% + VIEWS×5% + Normalization×4% + Economic×3% + Humanitarian×1%.\n\nAn asymmetric EMA is applied: peace rises fast (3h half-life) but decays slowly (12h half-life).\n\nA Volatility Multiplier (up to 1.5×) amplifies score shifts during event spikes, making the score responsive to sudden changes in conflict or diplomacy.', sources:['GDELT 2.0 Event Database','RSS feeds','OpenSky API','Polymarket API','VIEWS API','Foreign ministry advisories','Credit rating agencies'], update:'Every 15 min' },
       tone:        { icon:'🤝', name:'Political Tone',        weight:'20%', summary:'GDELT event tone scoring',             detail:'Uses GDELT 2.0 Event Database. Goldstein Scale (-10 to +10) per event. Score = 50 + (avgGoldstein/10)×50, clamped 0–100. Falls back to RSS sentiment if GDELT unavailable.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
       news:        { icon:'📰', name:'Diplomatic News',       weight:'15%', summary:'CAMEO diplomatic event ratio',        detail:'Counts CAMEO diplomatic event codes vs. total events in GDELT. Score = (constructiveRatio)² × 150, clamped 3–95. Falls back to RSS headline analysis.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
       aviation:     { icon:'✈️', name:'Commercial Aviation',    weight:'12%', summary:'Flight volume + airline policy',      detail:'40% flight count vs. pre-2023 baseline, 60% airline policy changes (route resumptions, overflight permissions).', sources:['OpenSky Network API','Airline press releases + RSS'], update:'Every 30 min' },
@@ -204,6 +205,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
     status: { live: 'בשידור חי', delayed: 'מושהה', unavailable: 'לא זמין', estimated: 'מוערך' },
 
     signals: {
+      master:      { icon:'☮️', name:'ציון שלום',           weight:'100%', summary:'ממוצע משוקלל של 12 אותות', detail:'כל אחד מ-12 האותות מצורב 0-100 באופן עצמאי. הציון הראשי הוא סכום משוקלל: גוון×20% + חדשות×15% + תעופה×12% + תחזית×10% + אשראי×10% + נסיעות×10% + מכונים×10% + קונפליקט×8% + VIEWS×5% + נרמול×4% + כלכלי×3% + הומניטרי×1%.\n\nמיושמת EMA א-סימטרית: שלום עולה מהר (חצי חיים 3 שעות) אבל דועך לאט (חצי חיים 12 שעות).\n\nמכפיל תנודתיות (עד 1.5×) ממגנט שינויי ציון בזריקות אירועים, ומגביר את רגישות הציון לשינויים פתאומיים בקונפליקט או בדיפלומטיה.', sources:['GDELT 2.0 Event Database','RSS feeds','OpenSky API','Polymarket API','VIEWS API','משרדי חוץ','סוכויות דירוג אשראי'], update:'כל 15 דקות' },
       tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'20%', summary:'ניקוד רגש אירועים GDELT',         detail:'משתמש במסד GDELT 2.0. סולם גולדשטיין (-10 עד +10) לאירוע. ציון = 50 + (ממוצעGoldstein/10)×50, חתוך 0-100. חוזר ל-RSS אם GDELT לא זמין.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
       news:         { icon:'📰', name:'חדשות דיפלומטיות',    weight:'15%', summary:'יחס אירועים דיפלומטיים CAMEO', detail:'סופר קודי אירועים דיפלומטיים CAMEO לעומת סך האירועים ב-GDELT. ציון = (יחסבני)² × 150, חתוך 3-95. חוזר לניתוח כותרות RSS.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
       aviation:      { icon:'✈️', name:'תעופה מסחרית',        weight:'12%', summary:'נפח טיסות + מדיניות חברות תעופה', detail:'40% ספירת טיסות מול קו בסיס 2023, 60% שינויי מדיניות (החזרת מסלולים, רשות מעבר אווירי).', sources:['API של OpenSky Network','הצהרות לעיתונות של חברות תעופה + RSS'], update:'כל 30 דקות' },

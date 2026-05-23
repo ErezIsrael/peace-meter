@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.8.0 */
+/* VERSION: 2.8.2 */
 
-const APP_VERSION = '2.8.0'; // 2026-05-21: Accurate fetch timestamps via proxy
+const APP_VERSION = '2.8.2'; // 2026-05-21: Accurate fetch timestamps via proxy
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -281,12 +281,15 @@ function showSignalDetail(key) {
 
   if (!sigInfo) return;
 
+  const sig = lastData?.signals?.[key];
+  const level = sig ? getLevel(sig.score) : null;
   const sourcesList = sigInfo.sources.map(src =>
     `<li>${src}</li>`
   ).join('');
 
   content.innerHTML = `
     <h2>${sigInfo.icon} ${sigInfo.name}</h2>
+    ${sig ? `<div style="font-family:var(--font-heading);font-size:36px;font-weight:700;color:${level?.color || '#fff'};margin:8px 0;">${sig.score}</div>` : ''}
     <p><strong>Weight:</strong> ${sigInfo.weight}</p>
     <p>${sigInfo.summary}</p>
     <h3>Methodology</h3>
@@ -294,6 +297,119 @@ function showSignalDetail(key) {
     <h3>Sources</h3>
     <ul>${sourcesList}</ul>
     <p style="font-size:11px;color:#64748b;">🔄 ${sigInfo.update}</p>
+  `;
+  overlay.classList.add('active');
+}
+
+/* ── Peace Score detail modal ─────────────────────────── */
+function showPeaceScoreDetail() {
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+  const sigInfo = LANG[currentLang].signals['master'];
+
+  if (!sigInfo || !lastData) return;
+
+  const score = lastData.master.score;
+  const level = getLevel(score);
+  const signals = lastData.signals || {};
+  const sigInfoMap = LANG[currentLang].signals;
+
+  // Build breakdown table
+  let rows = '';
+  const entries = Object.entries(signals).sort((a, b) => {
+    const wa = (sigInfoMap[a[0]]?.weight || '0%').replace('%', '');
+    const wb = (sigInfoMap[b[0]]?.weight || '0%').replace('%', '');
+    return parseFloat(wb) - parseFloat(wa);
+  });
+  for (const [key, sig] of entries) {
+    const info = sigInfoMap[key];
+    const name = info ? info.name : sig.label;
+    const w = info?.weight || '?';
+    const contr = sig.score * parseFloat(w) / 100;
+    rows += `<tr>
+      <td>${info?.icon || ''} ${name}</td>
+      <td style="text-align:center">${sig.score}</td>
+      <td style="text-align:center">${w}</td>
+      <td style="text-align:center;color:${level.color}">+${contr.toFixed(1)}</td>
+    </tr>`;
+  }
+
+  const sourcesList = sigInfo.sources.map(src => `<li>${src}</li>`).join('');
+
+  content.innerHTML = `
+    <h2>☮️ ${sigInfo.name}</h2>
+    <div style="font-family:var(--font-heading);font-size:48px;font-weight:700;color:${level.color};margin:8px 0;">${score}</div>
+    <p style="color:${level.color};font-weight:600;">${level.label}</p>
+    <p>${sigInfo.summary}</p>
+    <h3>Signal Breakdown</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0;">
+      <thead><tr style="border-bottom:1px solid var(--border);">
+        <th style="text-align:left;padding:4px">Signal</th>
+        <th style="text-align:center;padding:4px">Score</th>
+        <th style="text-align:center;padding:4px">Weight</th>
+        <th style="text-align:center;padding:4px">Contribution</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <h3>Methodology</h3>
+    <p style="white-space:pre-line">${sigInfo.detail}</p>
+    <h3>Sources</h3>
+    <ul>${sourcesList}</ul>
+    <p style="font-size:11px;color:#64748b;">🔄 ${sigInfo.update}</p>
+  `;
+  overlay.classList.add('active');
+}
+
+/* ── Trend detail modal ───────────────────────────────── */
+function showTrendDetail(e) {
+  if (e) { e.stopPropagation(); e.preventDefault(); }
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+
+  if (!lastData) return;
+
+  const history = lastData.history || {};
+  const scores = history.scores || [];
+  const labels = history.labels || [];
+  const master = lastData.master || {};
+  const score = master.score || '--';
+  const level = getLevel(typeof score === 'number' ? score : 50);
+
+  // Stats
+  const nums = scores.filter(v => typeof v === 'number' && !isNaN(v));
+  const min = nums.length ? Math.min(...nums) : '--';
+  const max = nums.length ? Math.max(...nums) : '--';
+  const avg = nums.length ? (nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(1) : '--';
+  const change = nums.length >= 2 ? (nums[nums.length-1] - nums[0]).toFixed(1) : '--';
+  const changeSign = parseFloat(change) > 0 ? '+' : '';
+
+  const mom = master.momentum || 0;
+  const momSign = mom > 0 ? '+' : '';
+  const dir = master.trend || '→';
+
+  content.innerHTML = `
+    <h2>📈 ${LANG[currentLang].trendTitle}</h2>
+    <p>${LANG[currentLang].trendTitle.replace('📈 ','')}</p>
+    <h3>Statistics</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;">
+      <div style="background:var(--bg-dark);padding:10px;border-radius:8px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);">Current</div>
+        <div style="font-size:24px;font-weight:700;color:${level.color};">${score}</div>
+      </div>
+      <div style="background:var(--bg-dark);padding:10px;border-radius:8px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);">Change</div>
+        <div style="font-size:24px;font-weight:700;color:${parseFloat(change)>0?'#4ade80':parseFloat(change)<0?'#f87171':'#64748b'};">${changeSign}${change}</div>
+      </div>
+      <div style="background:var(--bg-dark);padding:10px;border-radius:8px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);">Range</div>
+        <div style="font-size:24px;font-weight:700;color:#94a3b8;">${min}–${max}</div>
+      </div>
+      <div style="background:var(--bg-dark);padding:10px;border-radius:8px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);">12h Momentum</div>
+        <div style="font-size:24px;font-weight:700;color:${mom>0?'#4ade80':mom<0?'#f87171':'#64748b'};">${dir} ${momSign}${mom}</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);">${scores.length} data points · Avg: ${avg}</p>
   `;
   overlay.classList.add('active');
 }

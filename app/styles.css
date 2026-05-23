@@ -195,6 +195,10 @@ html[dir="rtl"] .gauge-card {
   padding: 14px 16px;
   margin-bottom: 16px;
 }
+.gauge-card:hover, .trend-clickable:hover {
+  border-color: var(--thawing);
+  transition: border-color 0.2s ease;
+}
 .chart-card h3 {
   font-size: 13px;
   font-weight: 600;
