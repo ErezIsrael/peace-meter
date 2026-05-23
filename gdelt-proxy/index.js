@@ -675,16 +675,70 @@ async function buildFullPayload(env) {
     signals.prediction.status = 'Unavailable';
   }
 
-  const masterScore = calcMaster(signals);
-
-  // Load score history from KV (array of {score, ts})
+  // ── Load score history (needed for VIEWS estimate & momentum) ─────
   let scoreHistory = [];
   try {
     const raw = await env.PEACE_CACHE.get('score_history');
     if (raw) scoreHistory = JSON.parse(raw);
   } catch { scoreHistory = []; }
 
-  // Append current score
+  // ── Path D: Trend-Based Estimates for remaining static signals ────
+  if (gdeltData && gdeltData.eventCount > 0) {
+    // Credit: derived from constructive ratio + diplomatic ratio
+    const creditScore = clamp(0, 100, gdeltData.constructiveRatio * 60 + gdeltData.diplomaticCount / gdeltData.eventCount * 40);
+    signals.credit = {
+      ...signals.credit,
+      score: Math.round(creditScore),
+      detail: `Estimated: constructive ${Math.round(gdeltData.constructiveRatio * 100)}%, diplomatic ${gdeltData.diplomaticCount}/${gdeltData.eventCount}`,
+      status: 'Estimated',
+    };
+
+    // Travel: derived from hostile ratio (more hostile → lower travel score)
+    const hostileRatio = gdeltData.hostileEvents / gdeltData.eventCount;
+    const travelScore = clamp(0, 100, 100 - hostileRatio * 100);
+    signals.travel = {
+      ...signals.travel,
+      score: Math.round(travelScore),
+      detail: `Estimated: hostile ${Math.round(hostileRatio * 100)}% of ${gdeltData.eventCount} events`,
+      status: 'Estimated',
+    };
+
+    // Think Tank: derived from tone + diplomatic activity
+    const ttScore = clamp(0, 100, toneScore * 0.6 + (gdeltData.diplomaticCount / gdeltData.eventCount) * 100 * 0.4);
+    signals.thinktank = {
+      ...signals.thinktank,
+      score: Math.round(ttScore),
+      detail: `Estimated: tone ${toneScore} × 0.6 + diplomatic ${Math.round(gdeltData.diplomaticCount / gdeltData.eventCount * 100)}% × 0.4`,
+      status: 'Estimated',
+    };
+
+    // VIEWS: derived from tone trend (history-based momentum)
+    let viewsScore = toneScore;
+    if (scoreHistory.length >= 2) {
+      const recent2 = scoreHistory.slice(-2);
+      const toneTrend = recent2[1].score - recent2[0].score;
+      viewsScore = clamp(0, 100, toneScore + toneTrend * 2);
+    }
+    signals.views = {
+      ...signals.views,
+      score: Math.round(viewsScore),
+      detail: `Estimated from tone: ${toneScore} + trend adjustment`,
+      status: 'Estimated',
+    };
+
+    // Humanitarian: derived from diplomatic activity
+    const humScore = clamp(0, 100, newsScore * 0.7 + gdeltData.diplomaticCount / gdeltData.eventCount * 30);
+    signals.humanitarian = {
+      ...signals.humanitarian,
+      score: Math.round(humScore),
+      detail: `Estimated: news ${newsScore} × 0.7 + diplomatic boost ${Math.round(gdeltData.diplomaticCount / gdeltData.eventCount * 30)}`,
+      status: 'Estimated',
+    };
+  }
+
+  const masterScore = calcMaster(signals);
+
+  // Append current score to history
   scoreHistory.push({ score: masterScore, ts: Date.now() });
   // Keep last N readings
   if (scoreHistory.length > SCORE_HISTORY_WINDOW) scoreHistory = scoreHistory.slice(-SCORE_HISTORY_WINDOW);
