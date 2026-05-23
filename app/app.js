@@ -83,6 +83,10 @@ function renderGauge(score) {
 
 /* ── SVG Sparkline (no dependencies) ──────────────────── */
 function renderSparklineSvg(container, data, color) {
+  // Guard against empty or invalid data
+  data = data.filter(v => typeof v === 'number' && !isNaN(v));
+  if (data.length < 2) { container.innerHTML = ''; return; }
+
   // Subsample to max 50 points for readability on a 140px sparkline
   const maxPts = 50;
   if (data.length > maxPts) {
