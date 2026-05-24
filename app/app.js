@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.8.2 */
+/* VERSION: 2.9.0 */
 
-const APP_VERSION = '2.8.2'; // 2026-05-21: Accurate fetch timestamps via proxy
+const APP_VERSION = '2.9.0'; // 2026-05-24: Customizable signal weights
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -316,29 +316,37 @@ function showPeaceScoreDetail() {
 
   // Build breakdown table
   let rows = '';
+  const useCustom = activeCustomWeights !== null;
+  const weights = useCustom ? activeCustomWeights : null;
   const entries = Object.entries(signals).sort((a, b) => {
-    const wa = (sigInfoMap[a[0]]?.weight || '0%').replace('%', '');
-    const wb = (sigInfoMap[b[0]]?.weight || '0%').replace('%', '');
-    return parseFloat(wb) - parseFloat(wa);
+    const wa = useCustom ? (weights[a[0]] || 0) : (parseFloat((sigInfoMap[a[0]]?.weight || '0%').replace('%', '')) / 100);
+    const wb = useCustom ? (weights[b[0]] || 0) : (parseFloat((sigInfoMap[b[0]]?.weight || '0%').replace('%', '')) / 100);
+    return wb - wa;
   });
   for (const [key, sig] of entries) {
     const info = sigInfoMap[key];
     const name = info ? info.name : sig.label;
-    const w = info?.weight || '?';
-    const contr = sig.score * parseFloat(w) / 100;
+    const wPct = useCustom ? Math.round((weights[key] || 0) * 1000) / 10 + '%' : (info?.weight || '?');
+    const wVal = useCustom ? (weights[key] || 0) : (parseFloat((info?.weight || '0%').replace('%', '')) / 100);
+    const contr = sig.score * wVal;
     rows += `<tr>
       <td>${info?.icon || ''} ${name}</td>
       <td style="text-align:center">${sig.score}</td>
-      <td style="text-align:center">${w}</td>
+      <td style="text-align:center">${wPct}</td>
       <td style="text-align:center;color:${level.color}">+${contr.toFixed(1)}</td>
     </tr>`;
   }
 
   const sourcesList = sigInfo.sources.map(src => `<li>${src}</li>`).join('');
 
+  const customNote = activeCustomWeights
+    ? `<p style="color:var(--accent);font-size:12px;font-weight:600;margin:4px 0;">⚙️ Custom weights active (Default: ${lastData.master.score})</p>`
+    : '';
+
   content.innerHTML = `
     <h2>☮️ ${sigInfo.name}</h2>
     <div style="font-family:var(--font-heading);font-size:48px;font-weight:700;color:${level.color};margin:8px 0;">${score}</div>
+    ${customNote}
     <p style="color:${level.color};font-weight:600;">${level.label}</p>
     <p>${sigInfo.summary}</p>
     <h3>Signal Breakdown</h3>
@@ -700,12 +708,361 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
 });
 
+/* ── Custom Weights ───────────────────────────────────── */
+const SIGNAL_KEYS = ['tone','news','aviation','prediction','credit','travel','thinktank','conflict','views','normalization','economic','humanitarian'];
+const DEFAULT_WEIGHTS = { tone:0.20, news:0.15, aviation:0.12, prediction:0.10, credit:0.10, travel:0.10, thinktank:0.10, conflict:0.08, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.01 };
+const BUILT_IN_PRESETS = {
+  default:   { ...DEFAULT_WEIGHTS },
+  conflict:  { tone:0.30, news:0.08, aviation:0.06, prediction:0.05, credit:0.05, travel:0.05, thinktank:0.05, conflict:0.15, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.04 },
+  diplomacy: { tone:0.15, news:0.20, aviation:0.06, prediction:0.05, credit:0.05, travel:0.10, thinktank:0.15, conflict:0.06, views:0.05, normalization:0.10, economic:0.03, humanitarian:0.05 },
+};
+
+let activeCustomWeights = null; // null = using defaults
+
+function loadPresets() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('pm-weight-presets'));
+    return { ...BUILT_IN_PRESETS, ...(stored || {}) };
+  } catch { return { ...BUILT_IN_PRESETS }; }
+}
+
+function savePresets(presets) {
+  const userPresets = { ...presets };
+  for (const key of Object.keys(BUILT_IN_PRESETS)) delete userPresets[key];
+  localStorage.setItem('pm-weight-presets', JSON.stringify(userPresets));
+}
+
+function loadWeights() {
+  // 1. Check URL param ?w=...
+  const params = new URLSearchParams(window.location.search);
+  const wParam = params.get('w');
+  if (wParam) {
+    const parsed = parseWeightParam(wParam);
+    if (parsed) {
+      activeCustomWeights = parsed;
+      localStorage.setItem('pm-weights', JSON.stringify(parsed));
+      showToast(t('weights.customLoaded'));
+      return parsed;
+    }
+  }
+  // 2. Check localStorage
+  try {
+    const stored = JSON.parse(localStorage.getItem('pm-weights'));
+    if (stored && Object.keys(stored).length === SIGNAL_KEYS.length) {
+      activeCustomWeights = stored;
+      return stored;
+    }
+  } catch {}
+  activeCustomWeights = null;
+  return null;
+}
+
+function parseWeightParam(str) {
+  try {
+    const weights = {};
+    const pairs = str.split(',');
+    let total = 0;
+    for (const pair of pairs) {
+      const [key, val] = pair.split(':');
+      if (key && val != null) {
+        weights[key.trim()] = parseFloat(val) / 100;
+        total += weights[key.trim()];
+      }
+    }
+    if (Object.keys(weights).length === SIGNAL_KEYS.length && Math.abs(total - 1.0) < 0.01) {
+      return weights;
+    }
+  } catch {}
+  return null;
+}
+
+function encodeWeightParam(weights) {
+  return SIGNAL_KEYS.map(k => `${k}:${Math.round(weights[k] * 100)}`).join(',');
+}
+
+function recalcMaster(weights, signals) {
+  let score = 0;
+  for (const key of SIGNAL_KEYS) {
+    score += (signals[key]?.score || 0) * (weights[key] || 0);
+  }
+  return Math.round(score);
+}
+
+function autoNormalize(changedKey, newValue, currentWeights) {
+  // newValue is integer percent (1-50)
+  const newVal = newValue / 100;
+  const oldVal = currentWeights[changedKey];
+  const remaining = 1 - newVal;
+  const oldRemaining = 1 - oldVal;
+  const result = { ...currentWeights };
+  result[changedKey] = newVal;
+
+  if (oldRemaining > 0) {
+    for (const key of SIGNAL_KEYS) {
+      if (key === changedKey) continue;
+      result[key] = result[key] * (remaining / oldRemaining);
+    }
+  }
+
+  // Enforce 1% floor
+  const floor = 0.01;
+  let deficit = 0;
+  const belowFloor = [];
+  for (const key of SIGNAL_KEYS) {
+    if (key === changedKey) continue;
+    if (result[key] < floor) {
+      deficit += result[key] - floor;
+      belowFloor.push(key);
+      result[key] = floor;
+    }
+  }
+  if (deficit < 0) {
+    // Redistribute deficit among non-floor signals (excluding changedKey)
+    const others = SIGNAL_KEYS.filter(k => k !== changedKey && !belowFloor.includes(k));
+    const totalOther = others.reduce((s, k) => s + result[k], 0);
+    for (const key of others) {
+      result[key] += result[key] * (deficit / totalOther);
+    }
+  }
+
+  // Round to 1 decimal place
+  for (const key of SIGNAL_KEYS) {
+    result[key] = Math.round(result[key] * 1000) / 1000;
+  }
+
+  // Fix rounding drift — add remainder to largest non-changed signal
+  let total = 0;
+  for (const key of SIGNAL_KEYS) total += result[key];
+  const remainder = 1 - total;
+  if (Math.abs(remainder) > 0.0001) {
+    let maxKey = null, maxVal = 0;
+    for (const key of SIGNAL_KEYS) {
+      if (key !== changedKey && result[key] > maxVal) { maxVal = result[key]; maxKey = key; }
+    }
+    if (maxKey) result[maxKey] = Math.round((result[maxKey] + remainder) * 1000) / 1000;
+  }
+
+  return result;
+}
+
+function applyCustomWeights() {
+  if (!activeCustomWeights || !lastData) return;
+  const score = recalcMaster(activeCustomWeights, lastData.signals);
+  renderGauge(score);
+}
+
+function showToast(message) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2800);
+}
+
+/* ── Weight Editor Modal ──────────────────────────────── */
+let currentPresetName = 'default';
+
+function showWeightEditor() {
+  const overlay = document.getElementById('weightModalOverlay');
+  const content = document.getElementById('weightModalContent');
+  const presets = loadPresets();
+  const weights = activeCustomWeights || DEFAULT_WEIGHTS;
+
+  // Determine which preset name best matches current weights
+  currentPresetName = 'default';
+  for (const [name, w] of Object.entries(presets)) {
+    if (JSON.stringify(w) === JSON.stringify(weights)) {
+      currentPresetName = name;
+      break;
+    }
+  }
+
+  // Build preset options
+  let options = '';
+  for (const [name, w] of Object.entries(presets)) {
+    const labelKey = `weights.presets.${name}`;
+    const label = t(labelKey) !== labelKey ? t(labelKey) : name;
+    const selected = name === currentPresetName ? ' selected' : '';
+    options += `<option value="${name}"${selected}>${label}</option>`;
+  }
+
+  // Build signal sliders
+  const L = LANG[currentLang];
+  let sliders = '';
+  for (const key of SIGNAL_KEYS) {
+    const sigInfo = L.signals[key];
+    const name = sigInfo ? sigInfo.name : key;
+    const icon = sigInfo?.icon || '';
+    const pct = Math.round(weights[key] * 100 * 10) / 10;
+    sliders += `
+      <div class="weight-row">
+        <label for="ws-${key}">${icon} ${name}</label>
+        <input type="range" id="ws-${key}" min="1" max="50" step="0.1" value="${pct}" oninput="onSliderChange('${key}', this.value)">
+        <span class="weight-val" id="wv-${key}">${pct}%</span>
+      </div>
+    `;
+  }
+
+  content.innerHTML = `
+    <h2>⚙️ ${t('weights.title')}</h2>
+    <div class="weight-preset-row">
+      <select class="preset-select" id="presetSelect" onchange="onPresetChange(this.value)">
+        ${options}
+      </select>
+      <button onclick="onNewPreset()">${t('weights.newPreset')}</button>
+      <button onclick="onShareWeights()">${t('weights.share')}</button>
+    </div>
+    <div class="weight-slider-list">${sliders}</div>
+    <div class="weight-total ok" id="weightTotal">${t('weights.total')}: 100.0% ✓</div>
+    <div class="weight-actions">
+      <button class="primary" onclick="onSavePreset()">${t('weights.save')}</button>
+      <button onclick="onSaveAsPreset()">${t('weights.saveAs')}</button>
+      <button onclick="onResetWeights()">${t('weights.reset')}</button>
+    </div>
+  `;
+  overlay.classList.add('active');
+}
+
+function hideWeightEditor() {
+  document.getElementById('weightModalOverlay').classList.remove('active');
+}
+
+function getEditorWeights() {
+  const weights = {};
+  for (const key of SIGNAL_KEYS) {
+    const slider = document.getElementById(`ws-${key}`);
+    weights[key] = slider ? parseFloat(slider.value) / 100 : (activeCustomWeights?.[key] ?? DEFAULT_WEIGHTS[key]);
+  }
+  return weights;
+}
+
+function updateEditorUI(weights) {
+  let total = 0;
+  for (const key of SIGNAL_KEYS) {
+    total += weights[key];
+    const valEl = document.getElementById(`wv-${key}`);
+    const slider = document.getElementById(`ws-${key}`);
+    const pct = Math.round(weights[key] * 1000) / 10;
+    if (valEl) valEl.textContent = `${pct}%`;
+    if (slider) slider.value = pct;
+  }
+  const totalEl = document.getElementById('weightTotal');
+  if (totalEl) {
+    const totalPct = Math.round(total * 1000) / 10;
+    if (Math.abs(total - 1.0) < 0.005) {
+      totalEl.textContent = `${t('weights.total')}: ${totalPct}% ✓`;
+      totalEl.className = 'weight-total ok';
+    } else if (Math.abs(total - 1.0) < 0.02) {
+      totalEl.textContent = `${t('weights.total')}: ${totalPct}% ⚠`;
+      totalEl.className = 'weight-total warn';
+    } else {
+      totalEl.textContent = `${t('weights.total')}: ${totalPct}% ✗`;
+      totalEl.className = 'weight-total error';
+    }
+  }
+}
+
+function onSliderChange(changedKey, newValue) {
+  const currentWeights = getEditorWeights();
+  const newVal = parseFloat(newValue);
+  currentWeights[changedKey] = newVal / 100;
+  const normalized = autoNormalize(changedKey, newVal, currentWeights);
+  activeCustomWeights = normalized;
+  updateEditorUI(normalized);
+  applyCustomWeights();
+}
+
+function onPresetChange(presetName) {
+  const presets = loadPresets();
+  const weights = presets[presetName];
+  if (!weights) return;
+  currentPresetName = presetName;
+  activeCustomWeights = { ...weights };
+  localStorage.setItem('pm-weights', JSON.stringify(activeCustomWeights));
+  updateEditorUI(activeCustomWeights);
+  applyCustomWeights();
+}
+
+function onSavePreset() {
+  const weights = getEditorWeights();
+  const presets = loadPresets();
+  presets[currentPresetName] = { ...weights };
+  savePresets(presets);
+  activeCustomWeights = { ...weights };
+  localStorage.setItem('pm-weights', JSON.stringify(activeCustomWeights));
+  applyCustomWeights();
+  updateEditorUI(weights);
+  showToast(t('weights.saved'));
+}
+
+function onSaveAsPreset() {
+  const name = prompt(t('weights.saveAs').replace('...','') + ':');
+  if (!name) return;
+  const weights = getEditorWeights();
+  const presets = loadPresets();
+  presets[name.toLowerCase().replace(/\s+/g, '-')] = { ...weights };
+  savePresets(presets);
+  currentPresetName = name.toLowerCase().replace(/\s+/g, '-');
+  activeCustomWeights = { ...weights };
+  localStorage.setItem('pm-weights', JSON.stringify(activeCustomWeights));
+  applyCustomWeights();
+  updateEditorUI(weights);
+  // Refresh preset dropdown
+  const sel = document.getElementById('presetSelect');
+  if (sel) {
+    sel.value = currentPresetName;
+    // Add new option
+    const opt = document.createElement('option');
+    opt.value = currentPresetName;
+    opt.textContent = name;
+    opt.selected = true;
+    sel.appendChild(opt);
+  }
+  showToast(t('weights.saved'));
+}
+
+function onResetWeights() {
+  activeCustomWeights = null;
+  localStorage.removeItem('pm-weights');
+  currentPresetName = 'default';
+  updateEditorUI(DEFAULT_WEIGHTS);
+  if (lastData) renderGauge(lastData.master.score);
+}
+
+function onNewPreset() {
+  onSaveAsPreset();
+}
+
+function onShareWeights() {
+  const weights = activeCustomWeights || DEFAULT_WEIGHTS;
+  const encoded = encodeWeightParam(weights);
+  const url = `${window.location.origin}${window.location.pathname}?w=${encoded}`;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast(t('weights.shared'));
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast(t('weights.shared'));
+  });
+}
+
 /* ── Master render ────────────────────────────────────── */
 let lastData = null;
 
 function renderAll(data) {
   lastData = data;
-  renderGauge(data.master.score);
+  let score = data.master.score;
+  if (activeCustomWeights) {
+    score = recalcMaster(activeCustomWeights, data.signals);
+  }
+  renderGauge(score);
   renderSignals(data.signals);
   renderTrend(data.history);
   renderVolatility();
@@ -763,6 +1120,9 @@ async function loadAndRender() {
     document.getElementById('statusLabel').textContent = 'Offline';
   }
 }
+
+// Load custom weights from URL or localStorage before rendering
+loadWeights();
 
 loadAndRender();
 setInterval(loadAndRender, UPDATE_INTERVAL);

@@ -1,5 +1,5 @@
 /* ── Peace Meter — i18n (EN / HE) ──────────────────────── */
-/* VERSION: 2.8.2 */
+/* VERSION: 2.9.0 */
 
 const LANG = {
   en: {
@@ -160,7 +160,28 @@ const LANG = {
 <h3>Scoring</h3>
 <p>Each signal scored 0–100. Master score = weighted average. Asymmetric EMA: peace rises fast, decays slowly.</p>`,
 
-    calc: `<h2>How the Score Is Calculated</h2>
+    weights: {
+      title: 'Customize Weights',
+      preset: 'Preset',
+      total: 'Total',
+      save: 'Save',
+      saveAs: 'Save As...',
+      reset: 'Reset to Default',
+      share: 'Share',
+      newPreset: '+ New Preset',
+      deletePreset: 'Delete',
+      customLoaded: 'Custom weights loaded from URL',
+      saved: 'Saved!',
+      shared: 'Link copied!',
+      presets: {
+        default: 'Default',
+        conflict: 'Conflict-Focused',
+        diplomacy: 'Diplomacy-Focused',
+      },
+    },
+
+    calc: `<h2>How the Score Is Calculated</h2>`,
+
 <p><strong>Formula:</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;">
 Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Conflict×0.08 + VIEWS×0.05 + Humanitarian×0.01
@@ -336,7 +357,28 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
 <h3>ציון</h3>
 <p>כל אות נצרב 0-100. הציון הראשי הוא ממוצע משוקלל. EMA א-סימטרית: שלום עולה מהר, דועך לאט.</p>`,
 
-    calc: `<h2>איך הציון מחושב</h2>
+    weights: {
+      title: 'התאמת משקלים',
+      preset: 'תבנית',
+      total: 'סה"כ',
+      save: 'שמור',
+      saveAs: 'שמור בשם...',
+      reset: 'אפס לברירת מחדל',
+      share: 'שתף',
+      newPreset: '+ תבנית חדשה',
+      deletePreset: 'מחק',
+      customLoaded: 'משקלים מותאמים נטענו מקישור',
+      saved: 'נשמר!',
+      shared: 'הקישור הועתק!',
+      presets: {
+        default: 'ברירת מחדל',
+        conflict: 'מקופל קונפליקט',
+        diplomacy: 'מקופל דיפלומטיה',
+      },
+    },
+
+    calc: `<h2>איך הציון מחושב</h2>`,
+
 <p><strong>נוסחה:</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;direction:ltr;text-align:left;">
 Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Conflict×0.08 + VIEWS×0.05 + Humanitarian×0.01
