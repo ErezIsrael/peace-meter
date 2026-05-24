@@ -439,7 +439,7 @@ function applyTranslations() {
   document.querySelector('.pub-card h3').textContent = L.pubTitle;
   document.getElementById('modalClose').textContent = L.close;
   const langBtn = document.getElementById('langToggle');
-  if (langBtn) langBtn.textContent = currentLang === 'en' ? 'EN' : 'HE';
+  if (langBtn) langBtn.textContent = currentLang === 'en' ? 'א' : 'EN';
   document.getElementById('retryBtn').textContent = L.retry;
   const footer = document.querySelectorAll('.footer p');
   if (footer[0]) footer[0].textContent = L.footer1;
