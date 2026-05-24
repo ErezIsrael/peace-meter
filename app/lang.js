@@ -180,8 +180,7 @@ const LANG = {
       },
     },
 
-    calc: `<h2>How the Score Is Calculated</h2>`,
-
+    calc: `<h2>How the Score Is Calculated</h2>
 <p><strong>Formula:</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;">
 Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Conflict×0.08 + VIEWS×0.05 + Humanitarian×0.01
@@ -377,8 +376,7 @@ Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 
       },
     },
 
-    calc: `<h2>איך הציון מחושב</h2>`,
-
+    calc: `<h2>איך הציון מחושב</h2>
 <p><strong>נוסחה:</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;direction:ltr;text-align:left;">
 Score = Tone×0.20 + News×0.15 + Aviation×0.12 + Predict×0.10 + Credit×0.10 + Travel×0.10 + ThinkTank×0.10 + Conflict×0.08 + VIEWS×0.05 + Humanitarian×0.01
