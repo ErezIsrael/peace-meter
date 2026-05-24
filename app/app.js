@@ -13,7 +13,7 @@ const RETRY_DELAY = [1000, 2000, 4000]; // L1: exponential backoff
 function toggleLang() {
   const next = currentLang === 'en' ? 'he' : 'en';
   setLanguage(next);
-  document.getElementById('langToggle').textContent = next === 'en' ? 'א' : 'En';
+  document.getElementById('langToggle').textContent = next === 'en' ? 'EN' : 'HE';
   // re-render everything in new language
   lastData && renderAll(lastData);
 }
