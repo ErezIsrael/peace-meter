@@ -18,6 +18,13 @@ import { jwtClient } from './jwt-client.js';
 
 const CACHE_TTL_SECONDS = 60 * 60; // 60 minutes — stays within BigQuery free tier
 const BIGQUERY_PROJECT = 'peace-meter';
+
+/* ── Rate limiting ───────────────────────────────────── */
+// Sliding-window rate limit via RATE_LIMIT KV namespace
+// 30 requests per minute per IP for /data and /peace-metrics
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 min
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_TTL_SECONDS = 300; // 5 min — covers 5 windows for sliding
 const BASELINE_WINDOW = 12; // number of cache cycles to average for baseline
 const VOLATILITY_THRESHOLD = 1.5; // ratio above baseline to trigger amplification
 const VOLATILITY_MAX = 1.5; // maximum amplification multiplier
@@ -512,18 +519,18 @@ async function fetchPredictionMarkets() {
 function clamp(min, max, val) { return Math.max(min, Math.min(max, val)); }
 
 const FALLBACK_SIGNALS = {
-  tone:          { label: "Political Tone",      icon: "🤝", weight: 0.20, score: 60, history: [45,48,50,52,53,55,56,57,59,60], status: "Delayed", detail: "GDELT: 142 events, tone +2.1, 18 diplomatic" },
-  news:          { label: "Diplomatic News",     icon: "📰", weight: 0.15, score: 65, history: [42,45,48,50,52,55,58,60,62,65], status: "Delayed", detail: "18 diplomatic events / 142 total" },
-  aviation:      { label: "Commercial Aviation",  icon: "✈️", weight: 0.12, score: 48, history: [35,37,39,40,42,43,45,46,47,48], status: "Live",    detail: "72 aircraft in ME airspace; Turkish Airlines resumed Beirut route" },
-  prediction:    { label: "Prediction Markets",   icon: "💰", weight: 0.10, score: 41, history: [20,22,25,28,30,33,35,37,39,41], status: "Live",    detail: "Israel-Iran ceasefire odds: 41% (Polymarket)" },
-  credit:        { label: "Credit Ratings",       icon: "🏛", weight: 0.10, score: 50, history: [45,45,46,46,47,47,48,49,49,50], status: "Delayed", detail: "Israel: A- stable; Lebanon: C stable; Saudi: A stable" },
-  travel:        { label: "Travel Advisories",    icon: "🛂", weight: 0.10, score: 30, history: [15,18,20,22,24,25,26,27,28,30], status: "Live",    detail: "US Level 3-4 avg; UK Level 3; Israel NSC Level 4 for Gaza" },
-  thinktank:     { label: "Think Tank & Expert",  icon: "🧠", weight: 0.10, score: 52, history: [30,32,35,38,40,44,47,49,50,52], status: "Live",    detail: "Mitvim: normalization framework paper published" },
-  conflict:      { label: "Conflict Events",      icon: "💥", weight: 0.08, score: 45, history: [30,32,35,38,40,42,45,48,50,45], status: "Delayed", detail: "GDELT: 12 hostile / 28 constructive / 40 total" },
-  views:         { label: "VIEWS AI Forecast",    icon: "🌍", weight: 0.05, score: 62, history: [55,56,57,58,59,60,60,61,61,62], status: "Delayed", detail: "VIEWS predicts declining fatalities for Israel, Lebanon" },
-  normalization: { label: "Normalization",        icon: "🔗", weight: 0.04, score: 55, history: [40,42,45,48,50,51,52,53,54,55], status: "Live",    detail: "Embassy openings, visa deals, route resumptions (180d window)" },
-  economic:      { label: "Economic",             icon: "📊", weight: 0.03, score: 42, history: [25,28,30,32,35,37,39,40,41,42], status: "Live",    detail: "Trade agreements, corridors, port deals (365d window)" },
-  humanitarian:  { label: "Humanitarian",         icon: "🏥", weight: 0.01, score: 35, history: [10,12,15,18,20,22,25,28,32,35], status: "Live",    detail: "2 aid corridors, 1 prisoner swap" },
+  tone:          { label: "Political Tone",      icon: "🤝", weight: 0.184, score: 60, history: [45,48,50,52,53,55,56,57,59,60], status: "Delayed", detail: "GDELT: 142 events, tone +2.1, 18 diplomatic" },
+  news:          { label: "Diplomatic News",     icon: "📰", weight: 0.139, score: 65, history: [42,45,48,50,52,55,58,60,62,65], status: "Delayed", detail: "18 diplomatic events / 142 total" },
+  aviation:      { label: "Commercial Aviation",  icon: "✈️", weight: 0.111, score: 48, history: [35,37,39,40,42,43,45,46,47,48], status: "Live",    detail: "72 aircraft in ME airspace; Turkish Airlines resumed Beirut route" },
+  prediction:    { label: "Prediction Markets",   icon: "💰", weight: 0.093, score: 41, history: [20,22,25,28,30,33,35,37,39,41], status: "Live",    detail: "Israel-Iran ceasefire odds: 41% (Polymarket)" },
+  credit:        { label: "Credit Ratings",       icon: "🏛", weight: 0.093, score: 50, history: [45,45,46,46,47,47,48,49,49,50], status: "Delayed", detail: "Israel: A- stable; Lebanon: C stable; Saudi: A stable" },
+  travel:        { label: "Travel Advisories",    icon: "🛂", weight: 0.093, score: 30, history: [15,18,20,22,24,25,26,27,28,30], status: "Live",    detail: "US Level 3-4 avg; UK Level 3; Israel NSC Level 4 for Gaza" },
+  thinktank:     { label: "Think Tank & Expert",  icon: "🧠", weight: 0.093, score: 52, history: [30,32,35,38,40,44,47,49,50,52], status: "Live",    detail: "Mitvim: normalization framework paper published" },
+  conflict:      { label: "Conflict Events",      icon: "💥", weight: 0.074, score: 45, history: [30,32,35,38,40,42,45,48,50,45], status: "Delayed", detail: "GDELT: 12 hostile / 28 constructive / 40 total" },
+  views:         { label: "VIEWS AI Forecast",    icon: "🌍", weight: 0.046, score: 62, history: [55,56,57,58,59,60,60,61,61,62], status: "Delayed", detail: "VIEWS predicts declining fatalities for Israel, Lebanon" },
+  normalization: { label: "Normalization",        icon: "🔗", weight: 0.037, score: 55, history: [40,42,45,48,50,51,52,53,54,55], status: "Live",    detail: "Embassy openings, visa deals, route resumptions (180d window)" },
+  economic:      { label: "Economic",             icon: "📊", weight: 0.028, score: 42, history: [25,28,30,32,35,37,39,40,41,42], status: "Live",    detail: "Trade agreements, corridors, port deals (365d window)" },
+  humanitarian:  { label: "Humanitarian",         icon: "🏥", weight: 0.009, score: 35, history: [10,12,15,18,20,22,25,28,32,35], status: "Live",    detail: "2 aid corridors, 1 prisoner swap" },
 };
 
 const FALLBACK_PUBLICATIONS = [
@@ -876,39 +883,44 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
-          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Origin': 'https://peace-meter.pages.dev',
           'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
         },
       });
     }
 
-    // Debug endpoint
-    if (url.pathname === '/debug') {
+    // ── Rate limiting (sliding window via KV) ──────────────
+    const rateLimitNamespace = env.RATE_LIMIT;
+    if (rateLimitNamespace) {
+      const clientIP = request.headers.get('cf-connecting-ip')
+        || request.headers.get('x-forwarded-for')
+        || 'unknown';
+      const rateKey = `rate:${clientIP}`;
+
       try {
-        const saKey = JSON.parse(env.GDELT_SA_KEY);
-        const tokenData = await jwtClient(saKey, 'https://www.googleapis.com/auth/bigquery');
-        const resp = await fetch(
-          `https://bigquery.googleapis.com/bigquery/v2/projects/${BIGQUERY_PROJECT}/queries`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenData.access_token}` },
-            body: JSON.stringify({ query: 'SELECT 1', useLegacySql: false, location: 'US' }),
-            signal: AbortSignal.timeout(30000),
-          }
-        );
-        const errText = await resp.text();
-        let baselineHist = [];
-        try {
-          const raw = await env.GDELT_CACHE.get('event_baseline');
-          if (raw) baselineHist = JSON.parse(raw);
-        } catch {}
-        return new Response(JSON.stringify({
-          tokenOk: !!tokenData.access_token, status: resp.status, error: errText, clientEmail: saKey.client_email,
-          baselineHistory: baselineHist,
-        }), { headers: { 'Content-Type': 'application/json' } });
-      } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { headers: { 'Content-Type': 'application/json' } });
+        const current = await rateLimitNamespace.get(rateKey, 'json');
+        const now = Date.now();
+        let entries = current ? current.entries : [];
+        // Remove entries outside the sliding window
+        entries = entries.filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
+        if (entries.length >= RATE_LIMIT_MAX) {
+          return new Response(JSON.stringify({ error: 'Rate limit exceeded. Try again later.' }), {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'Retry-After': '60',
+              'Access-Control-Allow-Origin': 'https://peace-meter.pages.dev',
+            },
+          });
+        }
+        entries.push(now);
+        await rateLimitNamespace.put(rateKey, JSON.stringify({ entries, updated: now }),
+          { expirationTtl: RATE_LIMIT_TTL_SECONDS });
+      } catch {
+        // KV unavailable — proceed without rate limiting
       }
     }
 
@@ -939,7 +951,7 @@ export default {
         await env.GDELT_CACHE.put('peace_metrics', JSON.stringify(response), { expirationTtl: CACHE_TTL_SECONDS });
         return jsonResp(response);
       } catch (err) {
-        console.error('BigQuery error:', err.message);
+        console.error('BigQuery error');
         return jsonResp(502, {
           error: 'BigQuery unavailable', tone: 60, news: 65, conflict: 45,
           timestamp: new Date().toISOString(), cached: false, status: 'Delayed',
@@ -960,7 +972,7 @@ export default {
         await env.PEACE_CACHE.put('data', JSON.stringify(payload), { expirationTtl: CACHE_TTL_SECONDS });
         return jsonResp(payload);
       } catch (err) {
-        console.error('Data build error:', err.message);
+        console.error('Data build error');
         // Return fallback payload
         const fallback = {
           computedAt: new Date().toISOString(),
@@ -985,13 +997,25 @@ function jsonResp(status, body) {
   if (typeof status === 'number') {
     return new Response(JSON.stringify(body), {
       status,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://peace-meter.pages.dev',
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+      },
     });
   }
   body = status;
   status = 200;
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': 'https://peace-meter.pages.dev',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
   });
 }

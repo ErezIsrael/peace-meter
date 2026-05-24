@@ -9,7 +9,11 @@ id = "ba57ba1748094576ac58cfd8dae26ae7"
 
 [[kv_namespaces]]
 binding = "PEACE_CACHE"
-id = "ba57ba1748094576ac58cfd8dae26ae7"
+id = "214f6f1d47bb4486b068bdc372c8f282"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "c17646490c48400990afd336062c0646"
 
 # Service account key stored as a secret:
 #   npx wrangler secret put GDELT_SA_KEY

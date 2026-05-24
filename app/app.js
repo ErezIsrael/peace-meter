@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.9.0 */
+/* VERSION: 2.10.0 */
 
-const APP_VERSION = '2.9.0'; // 2026-05-24: Customizable signal weights
+const APP_VERSION = '2.10.0'; // 2026-05-24: Security hardening, self-hosted fonts, weight normalization
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -646,7 +646,12 @@ function renderPublications(pubs) {
     div.style.cursor = 'pointer';
     div.onclick = () => { if (p.link) window.open(p.link, '_blank'); };
 
-    const titleEl = p.link ? `<a href="${p.link}" target="_blank" rel="noopener">${p.title}</a>` : p.title;
+    // Sanitize URL to prevent injection from RSS feeds
+    let safeLink = '#';
+    if (p.link) {
+      try { safeLink = new URL(p.link).href; } catch { safeLink = '#'; }
+    }
+    const titleEl = safeLink !== '#' ? `<a href="${safeLink}" target="_blank" rel="noopener">${p.title}</a>` : p.title;
     const sentimentLabel = p.sentiment === 'peace' ? '🕊 peace' : p.sentiment === 'war' ? '⚔ war' : '⚖ neutral';
     div.innerHTML = `
       <div class="pub-source">${p.source}</div>
@@ -710,7 +715,7 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 
 /* ── Custom Weights ───────────────────────────────────── */
 const SIGNAL_KEYS = ['tone','news','aviation','prediction','credit','travel','thinktank','conflict','views','normalization','economic','humanitarian'];
-const DEFAULT_WEIGHTS = { tone:0.20, news:0.15, aviation:0.12, prediction:0.10, credit:0.10, travel:0.10, thinktank:0.10, conflict:0.08, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.01 };
+const DEFAULT_WEIGHTS = { tone:0.184, news:0.139, aviation:0.111, prediction:0.093, credit:0.093, travel:0.093, thinktank:0.093, conflict:0.074, views:0.046, normalization:0.037, economic:0.028, humanitarian:0.009 };
 const BUILT_IN_PRESETS = {
   default:   { ...DEFAULT_WEIGHTS },
   conflict:  { tone:0.30, news:0.08, aviation:0.06, prediction:0.05, credit:0.05, travel:0.05, thinktank:0.05, conflict:0.15, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.04 },

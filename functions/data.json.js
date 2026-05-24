@@ -19,7 +19,10 @@ export async function onRequest(context) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "public, max-age=60, s-maxage=60",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://peace-meter.pages.dev",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
       },
     });
   } catch {
@@ -28,7 +31,8 @@ export async function onRequest(context) {
       status: 502,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://peace-meter.pages.dev",
+        "X-Content-Type-Options": "nosniff",
       },
     });
   }

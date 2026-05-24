@@ -7,6 +7,11 @@ dist/
 app/.wrangler/
 gdelt-proxy/*.json
 credentials.json
+tempdata.json
+# Secrets — never commit
+**/*-sa-key*.json
+**/service-account*.json
+**/credentials*.json
 # Internal dev docs — not part of the published site
 CONCEPT.md
 IMPLEMENTATION_PLAN_V4.md

@@ -1,5 +1,5 @@
 /* ── Reset & Variables ─────────────────────────────────── */
-/* VERSION: 2.9.0 */
+/* VERSION: 2.10.0 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -17,6 +17,22 @@
   --flourishing:#fbbf24;
 
   --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+
+/* ── Self-hosted Fonts (variable fonts — one file per family) ──── */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('fonts/inter-variable.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('fonts/space-grotesk-variable.ttf') format('truetype');
+}
   --font-heading: 'Space Grotesk', sans-serif;
 }
 
