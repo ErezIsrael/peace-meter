@@ -30,19 +30,19 @@ const LANG = {
     status: { live: 'Live', delayed: 'Delayed', unavailable: 'Unavailable', estimated: 'Estimated' },
 
     signals: {
-      master:      { icon:'☮️', name:'Peace Score',          weight:'100%', summary:'Weighted average of 12 signals', detail:'Each of the 12 signals is scored 0–100 independently. The master score is the weighted sum: Tone×18.4% + News×13.9% + Aviation×11.1% + Prediction×9.3% + Credit×9.3% + Travel×9.3% + Think Tank×9.3% + Conflict×7.4% + VIEWS×4.6% + Normalization×3.7% + Economic×2.8% + Humanitarian×0.9%.\n\nAn asymmetric EMA is applied: peace rises fast (3h half-life) but decays slowly (12h half-life).\n\nA Volatility Multiplier (up to 1.5×) amplifies score shifts during event spikes, making the score responsive to sudden changes in conflict or diplomacy.', sources:['GDELT 2.0 Event Database','RSS feeds','OpenSky API','Polymarket API','VIEWS API','Foreign ministry advisories','Credit rating agencies'], update:'Every 15 min' },
-      tone:        { icon:'🤝', name:'Political Tone',        weight:'18.4%', summary:'GDELT event tone scoring',             detail:'Uses GDELT 2.0 Event Database. Goldstein Scale (-10 to +10) per event. Score = 50 + (avgGoldstein/10)×50, clamped 0–100. Falls back to RSS sentiment if GDELT unavailable.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
-      news:        { icon:'📰', name:'Diplomatic News',       weight:'13.9%', summary:'CAMEO diplomatic event ratio',        detail:'Counts CAMEO diplomatic event codes vs. total events in GDELT. Score = (constructiveRatio)² × 150, clamped 3–95. Falls back to RSS headline analysis.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
-      aviation:     { icon:'✈️', name:'Commercial Aviation',    weight:'11.1%', summary:'Flight volume + airline policy',      detail:'40% flight count vs. pre-2023 baseline, 60% airline policy changes (route resumptions, overflight permissions).', sources:['OpenSky Network API','Airline press releases + RSS'], update:'Every 30 min' },
-      prediction:   { icon:'💰', name:'Prediction Markets',     weight:'9.3%', summary:'Ceasefire odds on Polymarket',        detail:'Averages "Yes" probability across all active ceasefire/peace markets. Aggregated wisdom of thousands.', sources:['Polymarket API'], update:'Every hour' },
-      credit:       { icon:'🏛', name:'Credit Ratings',         weight:'9.3%', summary:'Sovereign credit rating direction',   detail:'Tracks upgrades, downgrades, outlook changes. Direction matters more than absolute level — B+ → BB- is a peace signal.', sources:['Fitch Ratings',"S&P Global Ratings","Moody's",'Trading Economics'], update:'Weekly' },
-      travel:       { icon:'🛂', name:'Travel Advisories',      weight:'9.3%', summary:'Foreign ministry risk levels',        detail:'Aggregates advisory levels (1-4) from multiple foreign ministries. Downward movement = peace. Score = (4 - avg)/3 × 100.', sources:['US State Department','UK FCDO','Government of Canada','Israel NSC'], update:'Daily' },
-      thinktank:    { icon:'🧠', name:'Think Tank & Expert',    weight:'9.3%', summary:'Policy sentiment & consensus',        detail:'NLP sentiment scoring on publications, weighted by institute reliability. Note: reflects recommendations, not predictions.', sources:['Mitvim RSS','EcoPeace RSS','JISS RSS'], update:'Every 30 min' },
-      conflict:     { icon:'💥', name:'Conflict Events',        weight:'7.4%',  summary:'Violence vs. diplomacy ratio',         detail:'Uses GDELT 2.0 Event Database. Counts hostile events vs. constructive events. Inverted: more hostility = lower peace score. 0 hostile → 100, all hostile → 0.', sources:['GDELT 2.0 Event Database'], update:'Every 15 min' },
-      views:        { icon:'🌍', name:'VIEWS AI Forecast',      weight:'4.6%',  summary:'AI conflict prediction',              detail:'VIEWS uses AI to predict fatalities 1–36 months ahead. Declining predicted fatalities = peace signal.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'Monthly' },
-      normalization:{ icon:'🔗', name:'Normalization',          weight:'3.7%',  summary:'Diplomatic normalization events',   detail:'Tracks visa openings, direct flight routes, embassy openings, trade agreements, and formal normalization deals. Events decay over 180 days. Curated list updated manually.', sources:['Foreign ministry press releases','IATA route data','Embassy opening announcements'], update:'Weekly' },
-      economic:     { icon:'📊', name:'Economic',               weight:'2.8%',  summary:'Trade & economic integration',    detail:'Tracks FTAs, trade milestones, economic corridors, port agreements, and cargo routes. 365-day window with exponential decay. Curated list updated manually.', sources:['Ministry of Economy press releases','World Bank trade data','Port authority announcements'], update:'Monthly' },
-      humanitarian: { icon:'🏥', name:'Humanitarian',           weight:'0.9%',  summary:'Aid corridors & prisoner swaps',      detail:'Counts events: aid openings, releases, hospital access, refugee returns. Lagging indicator — happens after political decisions.', sources:['UN OCHA reports','ReliefWeb RSS','BBC/Al Jazeera humanitarian keywords'], update:'Daily' }
+      master:      { icon:'☮️', name:'Peace Score',          weight:'100%', summary:'Weighted average of 12 signals', detail:'Each of the 12 signals is scored 0–100 independently. The master score is the weighted sum: Tone×18% + News×14% + Aviation×11% + Prediction×9% + Credit×9% + Travel×9% + Think Tank×9% + Conflict×8% + VIEWS×5% + Normalization×4% + Economic×3% + Humanitarian×1%.\n\nAn asymmetric EMA is applied: peace rises fast (3h half-life) but decays slowly (12h half-life).\n\nA Volatility Multiplier (up to 1.5×) amplifies score shifts during event spikes, making the score responsive to sudden changes in conflict or diplomacy.', sources:['GDELT 2.0 Event Database','RSS feeds','OpenSky API','Polymarket API','VIEWS API','Foreign ministry advisories','Credit rating agencies'], update:'Every 15 min' },
+      tone:        { icon:'🤝', name:'Political Tone',        weight:'18%', summary:'GDELT event tone scoring',             detail:'Uses GDELT 2.0 Event Database. Goldstein Scale (-10 to +10) per event. Score = 50 + (avgGoldstein/10)×50, clamped 0–100. Falls back to RSS sentiment if GDELT unavailable.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
+      news:        { icon:'📰', name:'Diplomatic News',       weight:'14%', summary:'CAMEO diplomatic event ratio',        detail:'Counts CAMEO diplomatic event codes vs. total events in GDELT. Score = (constructiveRatio)² × 150, clamped 3–95. Falls back to RSS headline analysis.', sources:['GDELT 2.0 Event Database','RSS feeds (fallback)'], update:'Every 15 min' },
+      aviation:     { icon:'✈️', name:'Commercial Aviation',    weight:'11%', summary:'Flight volume + airline policy',      detail:'40% flight count vs. pre-2023 baseline, 60% airline policy changes (route resumptions, overflight permissions).', sources:['OpenSky Network API','Airline press releases + RSS'], update:'Every 30 min' },
+      prediction:   { icon:'💰', name:'Prediction Markets',     weight:'9%', summary:'Ceasefire odds on Polymarket',        detail:'Averages "Yes" probability across all active ceasefire/peace markets. Aggregated wisdom of thousands.', sources:['Polymarket API'], update:'Every hour' },
+      credit:       { icon:'🏛', name:'Credit Ratings',         weight:'9%', summary:'Sovereign credit rating direction',   detail:'Tracks upgrades, downgrades, outlook changes. Direction matters more than absolute level — B+ → BB- is a peace signal.', sources:['Fitch Ratings',"S&P Global Ratings","Moody's",'Trading Economics'], update:'Weekly' },
+      travel:       { icon:'🛂', name:'Travel Advisories',      weight:'9%', summary:'Foreign ministry risk levels',        detail:'Aggregates advisory levels (1-4) from multiple foreign ministries. Downward movement = peace. Score = (4 - avg)/3 × 100.', sources:['US State Department','UK FCDO','Government of Canada','Israel NSC'], update:'Daily' },
+      thinktank:    { icon:'🧠', name:'Think Tank & Expert',    weight:'9%', summary:'Policy sentiment & consensus',        detail:'NLP sentiment scoring on publications, weighted by institute reliability. Note: reflects recommendations, not predictions.', sources:['Mitvim RSS','EcoPeace RSS','JISS RSS'], update:'Every 30 min' },
+      conflict:     { icon:'💥', name:'Conflict Events',        weight:'8%',  summary:'Violence vs. diplomacy ratio',         detail:'Uses GDELT 2.0 Event Database. Counts hostile events vs. constructive events. Inverted: more hostility = lower peace score. 0 hostile → 100, all hostile → 0.', sources:['GDELT 2.0 Event Database'], update:'Every 15 min' },
+      views:        { icon:'🌍', name:'VIEWS AI Forecast',      weight:'5%',  summary:'AI conflict prediction',              detail:'VIEWS uses AI to predict fatalities 1–36 months ahead. Declining predicted fatalities = peace signal.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'Monthly' },
+      normalization:{ icon:'🔗', name:'Normalization',          weight:'4%',  summary:'Diplomatic normalization events',   detail:'Tracks visa openings, direct flight routes, embassy openings, trade agreements, and formal normalization deals. Events decay over 180 days. Curated list updated manually.', sources:['Foreign ministry press releases','IATA route data','Embassy opening announcements'], update:'Weekly' },
+      economic:     { icon:'📊', name:'Economic',               weight:'3%',  summary:'Trade & economic integration',    detail:'Tracks FTAs, trade milestones, economic corridors, port agreements, and cargo routes. 365-day window with exponential decay. Curated list updated manually.', sources:['Ministry of Economy press releases','World Bank trade data','Port authority announcements'], update:'Monthly' },
+      humanitarian: { icon:'🏥', name:'Humanitarian',           weight:'1%',  summary:'Aid corridors & prisoner swaps',      detail:'Counts events: aid openings, releases, hospital access, refugee returns. Lagging indicator — happens after political decisions.', sources:['UN OCHA reports','ReliefWeb RSS','BBC/Al Jazeera humanitarian keywords'], update:'Daily' }
     },
 
     privacy: `<h2>Privacy Policy</h2>
@@ -145,16 +145,16 @@ const LANG = {
 <p>It is <strong>not a prediction</strong> — a structured aggregation of publicly available data to track positive momentum.</p>
 <h3>Signals</h3>
 <ul>
-<li><strong>Political Tone</strong> (18.4%) — GDELT event tone scoring</li>
-<li><strong>Diplomatic News</strong> (13.9%) — GDELT CAMEO diplomatic event ratio</li>
-<li><strong>Commercial Aviation</strong> (11.1%) — Flight counts + airline policy</li>
-<li><strong>Prediction Markets</strong> (9.3%) — Polymarket ceasefire odds</li>
-<li><strong>Credit Ratings</strong> (9.3%) — Fitch/S&P/Moody's sovereign ratings</li>
-<li><strong>Travel Advisories</strong> (9.3%) — Foreign ministry risk levels</li>
-<li><strong>Think Tank & Expert</strong> (9.3%) — Mitvim, EcoPeace ME publications</li>
-<li><strong>Conflict Events</strong> (7.4%) — GDELT hostile vs constructive event ratio</li>
-<li><strong>VIEWS AI Forecast</strong> (4.6%) — PRIO/Uppsala AI prediction</li>
-<li><strong>Normalization</strong> (3.7%) — Diplomatic normalization events</li>
+<li><strong>Political Tone</strong> (18%) — GDELT event tone scoring</li>
+<li><strong>Diplomatic News</strong> (14%) — GDELT CAMEO diplomatic event ratio</li>
+<li><strong>Commercial Aviation</strong> (11%) — Flight counts + airline policy</li>
+<li><strong>Prediction Markets</strong> (9%) — Polymarket ceasefire odds</li>
+<li><strong>Credit Ratings</strong> (9%) — Fitch/S&P/Moody's sovereign ratings</li>
+<li><strong>Travel Advisories</strong> (9%) — Foreign ministry risk levels</li>
+<li><strong>Think Tank & Expert</strong> (9%) — Mitvim, EcoPeace ME publications</li>
+<li><strong>Conflict Events</strong> (8%) — GDELT hostile vs constructive event ratio</li>
+<li><strong>VIEWS AI Forecast</strong> (5%) — PRIO/Uppsala AI prediction</li>
+<li><strong>Normalization</strong> (4%) — Diplomatic normalization events</li>
 <li><strong>Economic</strong>
 </ul>
 <h3>Scoring</h3>
@@ -183,7 +183,7 @@ const LANG = {
     calc: `<h2>How the Score Is Calculated</h2>
 <p><strong>Formula (12 signals, weights sum to 1.0):</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;">
-Score = Tone×0.184 + News×0.139 + Aviation×0.111 + Predict×0.093 + Credit×0.093 + Travel×0.093 + ThinkTank×0.093 + Conflict×0.074 + VIEWS×0.046 + Norm×0.037 + Econ×0.028 + Human×0.009
+Score = Tone×0.18 + News×0.14 + Aviation×0.11 + Predict×0.10 + Credit×0.09 + Travel×0.09 + ThinkTank×0.09 + Conflict×0.08 + VIEWS×0.05 + Norm×0.04 + Econ×0.03 + Human×0.01
 </p>
 <p><strong>Volatility Multiplier:</strong> During event spikes, tone &amp; conflict shifts are amplified up to 1.5×. Score is always clamped to 0–100.</p>
 <h3>Smoothing</h3>
@@ -225,19 +225,19 @@ Score = Tone×0.184 + News×0.139 + Aviation×0.111 + Predict×0.093 + Credit×0
     status: { live: 'בשידור חי', delayed: 'מושהה', unavailable: 'לא זמין', estimated: 'מוערך' },
 
     signals: {
-      master:      { icon:'☮️', name:'ציון שלום',           weight:'100%', summary:'ממוצע משוקלל של 12 אותות', detail:'כל אחד מ-12 האותות מצורב 0-100 באופן עצמאי. הציון הראשי הוא סכום משוקלל: גוון×18.4% + חדשות×13.9% + תעופה×11.1% + תחזית×9.3% + אשראי×9.3% + נסיעות×9.3% + מכונים×9.3% + קונפליקט×7.4% + VIEWS×4.6% + נרמול×3.7% + כלכלי×2.8% + הומניטרי×0.9%.\n\nמיושמת EMA א-סימטרית: שלום עולה מהר (חצי חיים 3 שעות) אבל דועך לאט (חצי חיים 12 שעות).\n\nמכפיל תנודתיות (עד 1.5×) ממגנט שינויי ציון בזריקות אירועים, ומגביר את רגישות הציון לשינויים פתאומיים בקונפליקט או בדיפלומטיה.', sources:['GDELT 2.0 Event Database','RSS feeds','OpenSky API','Polymarket API','VIEWS API','משרדי חוץ','סוכויות דירוג אשראי'], update:'כל 15 דקות' },
-      tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'18.4%', summary:'ניקוד רגש אירועים GDELT',         detail:'משתמש במסד GDELT 2.0. סולם גולדשטיין (-10 עד +10) לאירוע. ציון = 50 + (ממוצעGoldstein/10)×50, חתוך 0-100. חוזר ל-RSS אם GDELT לא זמין.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
-      news:         { icon:'📰', name:'חדשות דיפלומטיות',    weight:'13.9%', summary:'יחס אירועים דיפלומטיים CAMEO', detail:'סופר קודי אירועים דיפלומטיים CAMEO לעומת סך האירועים ב-GDELT. ציון = (יחסבני)² × 150, חתוך 3-95. חוזר לניתוח כותרות RSS.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
-      aviation:      { icon:'✈️', name:'תעופה מסחרית',        weight:'11.1%', summary:'נפח טיסות + מדיניות חברות תעופה', detail:'40% ספירת טיסות מול קו בסיס 2023, 60% שינויי מדיניות (החזרת מסלולים, רשות מעבר אווירי).', sources:['API של OpenSky Network','הצהרות לעיתונות של חברות תעופה + RSS'], update:'כל 30 דקות' },
-      prediction:    { icon:'💰', name:'שווקי תחזית',         weight:'9.3%', summary:'הסתברות לסיכום הפסקת אש', detail:'ממוצע הסתברות "כן" בכל שווקי הסיכום הפעילים. חכמתן של אלפי משקיעים.', sources:['API של Polymarket'], update:'כל שעה' },
-      credit:        { icon:'🏛', name:'דירוגי אשראי',        weight:'9.3%', summary:'כיוון דירוגי אשראי מדינתיים', detail:'מעקב אחר שדרוגים, ירידות דירוג ושינויי תחזית. הכיוון חשוב יותר מהרמה המוחלטת.', sources:['Fitch Ratings','S&P Global Ratings',"Moody's",'Trading Economics'], update:'שבועי' },
-      travel:        { icon:'🛂', name:'אזהרות נסיעות',       weight:'9.3%', summary:'רמות סיכון של משרדי חוץ', detail:'מאגד רמות אזהרה (1-4) ממספר משרדי חוץ. ירידה באזהרה = אות של שלום. ציון = (4 - ממוצע)/3 × 100.', sources:['משרד החוץ האמריקאי','FCDO בריטי','ממשלת קנדה','נציבות השלטון הישראלי'], update:'יומי' },
-      thinktank:     { icon:'🧠', name:'מכוני מחקר',          weight:'9.3%', summary:'רגש מדיני וקונצנזוס', detail:'ניקוד רגש NLP של פרסומים, משוקלל לפי אמינות המכון. הערה: משקף המלצות מדיניות, לא תחזיות.', sources:['RSS של מיטבim','RSS של INSS','RSS של JISS','RSS של ICT'], update:'כל 30 דקות' },
-      conflict:      { icon:'💥', name:'אירועי קונפליקט',      weight:'7.4%',  summary:'יחס אלימות לעומת דיפלומטיה',     detail:'משתמש במסד GDELT 2.0. סופר אירועים עוינים מול אירועים בונים. הפוך: יותר עוינות = ציון נמוך יותר. 0 עוינות → 100, הכל עוינות → 0.', sources:['GDELT 2.0 Event Database'], update:'כל 15 דקות' },
-      views:         { icon:'🌍', name:'תחזית AI — VIEWS',    weight:'4.6%',  summary:'תחזית קונפליקט בינה מלאכותית', detail:'VIEWS משתמש ב-AI לחזות נפגטים בטווח של 1-36 חודשים. ירידה בניפגטים הצפויים = אות של שלום.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'חודשי' },
-      normalization: { icon:'🔗', name:'נרמול',               weight:'3.7%',  summary:'אירועי נרמול דיפלומטי',         detail:'מעקב אחר פתיחות ויזה, מסלולי טיסה ישירים, פתיחת שגרירויות, הסכמי סחר והסכמי נרמל רשמיים. אירועים דועכים לאורך 180 יום. רשימה מעודכנת ידנית.', sources:['הצהרות לעיתונות של משרדי חוץ','נתוני מסלולי IATA','הכרזות על פתיחת שגרירויות'], update:'שבועי' },
-      economic:      { icon:'📊', name:'כלכלי',              weight:'2.8%',  summary:'סחר ואינטגרציה כלכלית',        detail:'מעקב אחר הסכמי סחר חופשי, ציוני דרך סחירתיים, מסדרונות כלכליים, הסכמי נמלים ומסלולי מטען. חלון של 365 יום עם דעיכה מעריכית. רשימה מעודכנת ידנית.', sources:['הצהרות לעיתונות של משרדי הכלכלה','נתוני סחר של בנק העולמי','הכרזות של רשויות נמל'], update:'חודשי' },
-      humanitarian:  { icon:'🏥', name:'הומניטרי',            weight:'0.9%',  summary:'מסדרונות סיוע והחלפת אסירים', detail:'סופר אירועים: פתיחת מסדרונות, שחרורים, גישה לבתי חולים, חזרת פליטים. מדד מאחר — מתרחש אחרי החלטות פוליטיות.', sources:['דוחות UN OCHA','RSS של ReliefWeb','מילות מפתח הומניטריות ב-BBC/אל-ג׳אזירה'], update:'יומי' }
+      master:      { icon:'☮️', name:'ציון שלום',           weight:'100%', summary:'ממוצע משוקלל של 12 אותות', detail:'כל אחד מ-12 האותות מצורב 0-100 באופן עצמאי. הציון הראשי הוא סכום משוקלל: גוון×18% + חדשות×14% + תעופה×11% + תחזית×9% + אשראי×9% + נסיעות×9% + מכונים×9% + קונפליקט×8% + VIEWS×5% + נרמול×4% + כלכלי×3% + הומניטרי×1%.\n\nמיושמת EMA א-סימטרית: שלום עולה מהר (חצי חיים 3 שעות) אבל דועך לאט (חצי חיים 12 שעות).\n\nמכפיל תנודתיות (עד 1.5×) ממגנט שינויי ציון בזריקות אירועים, ומגביר את רגישות הציון לשינויים פתאומיים בקונפליקט או בדיפלומטיה.', sources:['GDELT 2.0 Event Database','RSS feeds','OpenSky API','Polymarket API','VIEWS API','משרדי חוץ','סוכויות דירוג אשראי'], update:'כל 15 דקות' },
+      tone:         { icon:'🤝', name:'גוון פוליטי',         weight:'18%', summary:'ניקוד רגש אירועים GDELT',         detail:'משתמש במסד GDELT 2.0. סולם גולדשטיין (-10 עד +10) לאירוע. ציון = 50 + (ממוצעGoldstein/10)×50, חתוך 0-100. חוזר ל-RSS אם GDELT לא זמין.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
+      news:         { icon:'📰', name:'חדשות דיפלומטיות',    weight:'14%', summary:'יחס אירועים דיפלומטיים CAMEO', detail:'סופר קודי אירועים דיפלומטיים CAMEO לעומת סך האירועים ב-GDELT. ציון = (יחסבני)² × 150, חתוך 3-95. חוזר לניתוח כותרות RSS.', sources:['GDELT 2.0 Event Database','RSS feeds (גיבוי)'], update:'כל 15 דקות' },
+      aviation:      { icon:'✈️', name:'תעופה מסחרית',        weight:'11%', summary:'נפח טיסות + מדיניות חברות תעופה', detail:'40% ספירת טיסות מול קו בסיס 2023, 60% שינויי מדיניות (החזרת מסלולים, רשות מעבר אווירי).', sources:['API של OpenSky Network','הצהרות לעיתונות של חברות תעופה + RSS'], update:'כל 30 דקות' },
+      prediction:    { icon:'💰', name:'שווקי תחזית',         weight:'9%', summary:'הסתברות לסיכום הפסקת אש', detail:'ממוצע הסתברות "כן" בכל שווקי הסיכום הפעילים. חכמתן של אלפי משקיעים.', sources:['API של Polymarket'], update:'כל שעה' },
+      credit:        { icon:'🏛', name:'דירוגי אשראי',        weight:'9%', summary:'כיוון דירוגי אשראי מדינתיים', detail:'מעקב אחר שדרוגים, ירידות דירוג ושינויי תחזית. הכיוון חשוב יותר מהרמה המוחלטת.', sources:['Fitch Ratings','S&P Global Ratings',"Moody's",'Trading Economics'], update:'שבועי' },
+      travel:        { icon:'🛂', name:'אזהרות נסיעות',       weight:'9%', summary:'רמות סיכון של משרדי חוץ', detail:'מאגד רמות אזהרה (1-4) ממספר משרדי חוץ. ירידה באזהרה = אות של שלום. ציון = (4 - ממוצע)/3 × 100.', sources:['משרד החוץ האמריקאי','FCDO בריטי','ממשלת קנדה','נציבות השלטון הישראלי'], update:'יומי' },
+      thinktank:     { icon:'🧠', name:'מכוני מחקר',          weight:'9%', summary:'רגש מדיני וקונצנזוס', detail:'ניקוד רגש NLP של פרסומים, משוקלל לפי אמינות המכון. הערה: משקף המלצות מדיניות, לא תחזיות.', sources:['RSS של מיטבim','RSS של INSS','RSS של JISS','RSS של ICT'], update:'כל 30 דקות' },
+      conflict:      { icon:'💥', name:'אירועי קונפליקט',      weight:'8%',  summary:'יחס אלימות לעומת דיפלומטיה',     detail:'משתמש במסד GDELT 2.0. סופר אירועים עוינים מול אירועים בונים. הפוך: יותר עוינות = ציון נמוך יותר. 0 עוינות → 100, הכל עוינות → 0.', sources:['GDELT 2.0 Event Database'], update:'כל 15 דקות' },
+      views:         { icon:'🌍', name:'תחזית AI — VIEWS',    weight:'5%',  summary:'תחזית קונפליקט בינה מלאכותית', detail:'VIEWS משתמש ב-AI לחזות נפגטים בטווח של 1-36 חודשים. ירידה בניפגטים הצפויים = אות של שלום.', sources:['VIEWS API / HDX (viewsforecasting.org)'], update:'חודשי' },
+      normalization: { icon:'🔗', name:'נרמול',               weight:'4%',  summary:'אירועי נרמול דיפלומטי',         detail:'מעקב אחר פתיחות ויזה, מסלולי טיסה ישירים, פתיחת שגרירויות, הסכמי סחר והסכמי נרמל רשמיים. אירועים דועכים לאורך 180 יום. רשימה מעודכנת ידנית.', sources:['הצהרות לעיתונות של משרדי חוץ','נתוני מסלולי IATA','הכרזות על פתיחת שגרירויות'], update:'שבועי' },
+      economic:      { icon:'📊', name:'כלכלי',              weight:'3%',  summary:'סחר ואינטגרציה כלכלית',        detail:'מעקב אחר הסכמי סחר חופשי, ציוני דרך סחירתיים, מסדרונות כלכליים, הסכמי נמלים ומסלולי מטען. חלון של 365 יום עם דעיכה מעריכית. רשימה מעודכנת ידנית.', sources:['הצהרות לעיתונות של משרדי הכלכלה','נתוני סחר של בנק העולמי','הכרזות של רשויות נמל'], update:'חודשי' },
+      humanitarian:  { icon:'🏥', name:'הומניטרי',            weight:'1%',  summary:'מסדרונות סיוע והחלפת אסירים', detail:'סופר אירועים: פתיחת מסדרונות, שחרורים, גישה לבתי חולים, חזרת פליטים. מדד מאחר — מתרחש אחרי החלטות פוליטיות.', sources:['דוחות UN OCHA','RSS של ReliefWeb','מילות מפתח הומניטריות ב-BBC/אל-ג׳אזירה'], update:'יומי' }
     },
 
     privacy: `<h2>מדיניות פרטיות</h2>
@@ -341,18 +341,18 @@ Score = Tone×0.184 + News×0.139 + Aviation×0.111 + Predict×0.093 + Credit×0
 <p>זה <strong>אינו תחזית</strong> — אגרגציה מסודרת של נתונים ציבוריים למעקב אחר תנע חיובי.</p>
 <h3>אותות</h3>
 <ul>
-<li><strong>גוון פוליטי</strong> (18.4%) — ניקוד רגש אירועים GDELT</li>
-<li><strong>חדשות דיפלומטיות</strong> (13.9%) — יחס אירועים דיפלומטיים CAMEO</li>
-<li><strong>תעופה מסחרית</strong> (11.1%) — ספירת טיסות + מדיניות חברות תעופה</li>
-<li><strong>שווקי תחזית</strong> (9.3%) — הסתברויות סיכום ב-Polymarket</li>
-<li><strong>דירוגי אשראי</strong> (9.3%) — דירוגי Fitch/S&P/Moody's</li>
-<li><strong>אזהרות נסיעות</strong> (9.3%) — רמות סיכון של משרדי חוץ</li>
-<li><strong>מכוני מחקר</strong> (9.3%) — פרסומי Mitvim, EcoPeace ME</li>
-<li><strong>אירועי קונפליקט</strong> (7.4%) — יחס אירועים עוינים לבונים מ-GDELT</li>
-<li><strong>VIEWS AI</strong> (4.6%) — תחזית AI של PRIO/Uppsala</li>
-<li><strong>נרמול</strong> (3.7%) — אירועי נרמול דיפלומטי</li>
-<li><strong>כלכלי</strong> (2.8%) — אינטגרציה כלכלית + הסחר</li>
-<li><strong>הומניטרי</strong> (0.9%) — מסדרונות סיוע, החלפת אסירים</li>
+<li><strong>גוון פוליטי</strong> (18%) — ניקוד רגש אירועים GDELT</li>
+<li><strong>חדשות דיפלומטיות</strong> (14%) — יחס אירועים דיפלומטיים CAMEO</li>
+<li><strong>תעופה מסחרית</strong> (11%) — ספירת טיסות + מדיניות חברות תעופה</li>
+<li><strong>שווקי תחזית</strong> (9%) — הסתברויות סיכום ב-Polymarket</li>
+<li><strong>דירוגי אשראי</strong> (9%) — דירוגי Fitch/S&P/Moody's</li>
+<li><strong>אזהרות נסיעות</strong> (9%) — רמות סיכון של משרדי חוץ</li>
+<li><strong>מכוני מחקר</strong> (9%) — פרסומי Mitvim, EcoPeace ME</li>
+<li><strong>אירועי קונפליקט</strong> (8%) — יחס אירועים עוינים לבונים מ-GDELT</li>
+<li><strong>VIEWS AI</strong> (5%) — תחזית AI של PRIO/Uppsala</li>
+<li><strong>נרמול</strong> (4%) — אירועי נרמול דיפלומטי</li>
+<li><strong>כלכלי</strong> (3%) — אינטגרציה כלכלית + הסחר</li>
+<li><strong>הומניטרי</strong> (1%) — מסדרונות סיוע, החלפת אסירים</li>
 </ul>
 <h3>ציון</h3>
 <p>כל אות נצרב 0-100. הציון הראשי הוא ממוצע משוקלל. EMA א-סימטרית: שלום עולה מהר, דועך לאט.</p>`,
@@ -380,7 +380,7 @@ Score = Tone×0.184 + News×0.139 + Aviation×0.111 + Predict×0.093 + Credit×0
     calc: `<h2>איך הציון מחושב</h2>
 <p><strong>נוסחה (12 אותות, סך משקלים = 1.0):</strong></p>
 <p style="font-family:monospace;font-size:12px;background:#1e293b;padding:10px;border-radius:6px;margin:8px 0;direction:ltr;text-align:left;">
-Score = Tone×0.184 + News×0.139 + Aviation×0.111 + Predict×0.093 + Credit×0.093 + Travel×0.093 + ThinkTank×0.093 + Conflict×0.074 + VIEWS×0.046 + Norm×0.037 + Econ×0.028 + Human×0.009
+Score = Tone×0.18 + News×0.14 + Aviation×0.11 + Predict×0.10 + Credit×0.09 + Travel×0.09 + ThinkTank×0.09 + Conflict×0.08 + VIEWS×0.05 + Norm×0.04 + Econ×0.03 + Human×0.01
 </p>
 <p><strong>מכפיל תנודתיות:</strong> במהלך זינוק אירועים, השינויים בגוון ובקונפליקט מוגברים עד 1.5×. הציון תמיד מוגבל ל-0-100.</p>
 <h3>החלקה</h3>

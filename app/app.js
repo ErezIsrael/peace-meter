@@ -717,7 +717,7 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 
 /* ── Custom Weights ───────────────────────────────────── */
 const SIGNAL_KEYS = ['tone','news','aviation','prediction','credit','travel','thinktank','conflict','views','normalization','economic','humanitarian'];
-const DEFAULT_WEIGHTS = { tone:0.184, news:0.139, aviation:0.111, prediction:0.093, credit:0.093, travel:0.093, thinktank:0.093, conflict:0.074, views:0.046, normalization:0.037, economic:0.028, humanitarian:0.009 };
+const DEFAULT_WEIGHTS = { tone:0.18, news:0.14, aviation:0.11, prediction:0.10, credit:0.09, travel:0.09, thinktank:0.09, conflict:0.08, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.01 };
 const BUILT_IN_PRESETS = {
   default:   { ...DEFAULT_WEIGHTS },
   conflict:  { tone:0.30, news:0.08, aviation:0.06, prediction:0.05, credit:0.05, travel:0.05, thinktank:0.05, conflict:0.15, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.04 },
