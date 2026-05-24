@@ -24,7 +24,7 @@
         <!-- ── Error banner (hidden by default) ──── -->
         <div class="error-banner" id="errorBanner" style="display:none">
             <p id="errorMessage">Failed to load data. Using cached data.</p>
-            <button id="retryBtn" onclick="loadAndRender()">Retry</button>
+            <button id="retryBtn">Retry</button>
         </div>
 
         <!-- ── Header ────────────────────────────────── -->
@@ -32,9 +32,9 @@
             <h1 class="logo">☮️ Peace Meter</h1>
             <div class="header-right">
                 <div class="live-badge"><div class="live-dot"></div> Live</div>
-                <button class="icon-btn" id="langToggle" onclick="toggleLang()" title="עברית / English">א</button>
-                <button class="icon-btn" onclick="showInfo('calculation')" title="How it works">?</button>
-                <button class="icon-btn" onclick="showInfo('about')" title="About Peace Meter">i</button>
+                <button class="icon-btn" id="langToggle" title="עברית / English">א</button>
+                <button class="icon-btn" id="helpBtn" title="How it works">?</button>
+                <button class="icon-btn" id="aboutBtn" title="About Peace Meter">i</button>
             </div>
         </header>
 
@@ -46,7 +46,7 @@
         </div>
 
         <!-- ── Master Gauge ──────────────────────────── -->
-        <section class="gauge-card" aria-label="Peace score gauge" onclick="showPeaceScoreDetail()" style="cursor:pointer" tabindex="0" onkeydown="(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showPeaceScoreDetail()}}">
+        <section class="gauge-card" id="gaugeCard" aria-label="Peace score gauge" style="cursor:pointer" tabindex="0">
             <span class="sr-only" id="gaugeSr">Loading peace score...</span>
             <div class="gauge-title">Middle East Peace Score</div>
             <div class="gauge-container">
@@ -74,13 +74,13 @@
             <div class="gauge-meta" id="gaugeMeta" style="display:flex;align-items:center;gap:10px;margin-top:4px;font-size:12px;font-weight:600;font-family:var(--font-mono);">
                 <span class="vol-icon" id="volIcon" title="Volatility" style="cursor:default;font-size:16px;">🔵</span>
                 <span class="momentum-arrow" id="momentumArrow" style="display:none;"></span>
-                <button class="icon-btn weights-btn" id="weightsBtn" onclick="showWeightEditor()" title="Customize weights" style="margin-left:auto;">⚙️</button>
+                <button class="icon-btn weights-btn" id="weightsBtn" title="Customize weights" style="margin-left:auto;">⚙️</button>
             </div>
             <div class="status-label thawing" id="statusLabel">Loading...</div>
         </section>
 
         <!-- ── 72-Hour Trend ─────────────────────────── -->
-        <section class="chart-card trend-clickable" aria-label="Trend chart" onclick="showTrendDetail(event)" style="cursor:pointer" tabindex="0" onkeydown="(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showTrendDetail()}}">
+        <section class="chart-card trend-clickable" id="trendCard" aria-label="Trend chart" style="cursor:pointer" tabindex="0">
             <h3>📈 Trend (12 Hours)</h3>
             <svg id="trendSvg" style="width:100%;height:160px;" viewBox="0 0 600 200" role="img" aria-label="12-hour trend chart"></svg>
         </section>
@@ -92,7 +92,7 @@
 
                 <!-- ── Conflict Pairs ────────────────────────── -->
         <section class="pairs-card" aria-label="Conflict pair scores">
-            <h3 class="pairs-toggle" onclick="togglePairs()">⚔️ Conflict Pairs <span class="toggle-arrow" id="pairArrow">▼</span></h3>
+            <h3 class="pairs-toggle" id="pairsToggle">⚔️ Conflict Pairs <span class="toggle-arrow" id="pairArrow">▼</span></h3>
             <div id="pairsGrid" class="pairs-grid" style="display:none">
                 <!-- Rendered by JS -->
             </div>
@@ -100,7 +100,7 @@
 
         <!-- ── Regional Map ──────────────────────────── -->
         <section class="map-card" aria-label="Regional peace map">
-            <h3 class="map-toggle" onclick="toggleMap()">🗺️ Regional Peace Map <span class="toggle-arrow" id="mapArrow">▼</span></h3>
+            <h3 class="map-toggle" id="mapToggle">🗺️ Regional Peace Map <span class="toggle-arrow" id="mapArrow">▼</span></h3>
             <div id="mapContainer" class="map-container" style="display:none">
                 <!-- Rendered by JS -->
             </div>
@@ -119,9 +119,9 @@
             <p>Peace Meter is an experimental project for informational purposes only.</p>
             <p>Scores are algorithmic aggregations of publicly available data, not predictions.</p>
             <nav class="footer-links" aria-label="Legal links">
-              <a href="#" onclick="showInfo('privacy');return false;" class="footer-link">Privacy Policy</a>
-              <a href="#" onclick="showInfo('terms');return false;" class="footer-link">Terms of Service</a>
-              <a href="#" onclick="showInfo('accessibility');return false;" class="footer-link">Accessibility</a>
+              <a href="#" id="privacyLink" class="footer-link">Privacy Policy</a>
+              <a href="#" id="termsLink" class="footer-link">Terms of Service</a>
+              <a href="#" id="accessibilityLink" class="footer-link">Accessibility</a>
               <span id="versionTag" class="footer-link"></span>
               <a href="https://github.com/ErezIsrael/peace-meter/issues" target="_blank" rel="noopener" class="footer-link">🐛 Report a Bug</a>
               <a href="https://ko-fi.com/erezse" target="_blank" rel="noopener" class="footer-link">☕ Buy Me Coffee</a>
@@ -130,10 +130,10 @@
     </div>
 
     <!-- ── Weight Editor Modal ─────────────────────────── -->
-    <div class="modal-overlay" id="weightModalOverlay" onclick="if(event.target===this)hideWeightEditor()">
+    <div class="modal-overlay" id="weightModalOverlay">
         <div class="modal weight-modal">
             <div id="weightModalContent"></div>
-            <button class="modal-close" id="weightModalClose" onclick="hideWeightEditor()">Close</button>
+            <button class="modal-close" id="weightModalClose">Close</button>
         </div>
     </div>
 

@@ -706,11 +706,13 @@ function showInfo(type) {
   overlay.classList.add('active');
 }
 
-document.getElementById('modalClose').addEventListener('click', () => {
+function hideModal() {
   document.getElementById('modalOverlay').classList.remove('active');
-});
+}
+
+document.getElementById('modalClose').addEventListener('click', hideModal);
 document.getElementById('modalOverlay').addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.remove('active');
+  if (e.target === e.currentTarget) hideModal();
 });
 
 /* ── Custom Weights ───────────────────────────────────── */
@@ -904,7 +906,7 @@ function showWeightEditor() {
     sliders += `
       <div class="weight-row">
         <label for="ws-${key}">${icon} ${name}</label>
-        <input type="range" id="ws-${key}" min="1" max="50" step="0.1" value="${pct}" oninput="onSliderChange('${key}', this.value)">
+        <input type="range" id="ws-${key}" data-key="${key}" class="weight-slider" min="1" max="50" step="0.1" value="${pct}">
         <span class="weight-val" id="wv-${key}">${pct}%</span>
       </div>
     `;
@@ -913,20 +915,32 @@ function showWeightEditor() {
   content.innerHTML = `
     <h2>⚙️ ${t('weights.title')}</h2>
     <div class="weight-preset-row">
-      <select class="preset-select" id="presetSelect" onchange="onPresetChange(this.value)">
+      <select class="preset-select" id="presetSelect">
         ${options}
       </select>
-      <button onclick="onNewPreset()">${t('weights.newPreset')}</button>
-      <button onclick="onShareWeights()">${t('weights.share')}</button>
+      <button id="btnNewPreset">${t('weights.newPreset')}</button>
+      <button id="btnShareWeights">${t('weights.share')}</button>
     </div>
     <div class="weight-slider-list">${sliders}</div>
     <div class="weight-total ok" id="weightTotal">${t('weights.total')}: 100.0% ✓</div>
     <div class="weight-actions">
-      <button class="primary" onclick="onSavePreset()">${t('weights.save')}</button>
-      <button onclick="onSaveAsPreset()">${t('weights.saveAs')}</button>
-      <button onclick="onResetWeights()">${t('weights.reset')}</button>
+      <button class="primary" id="btnSavePreset">${t('weights.save')}</button>
+      <button id="btnSaveAsPreset">${t('weights.saveAs')}</button>
+      <button id="btnResetWeights">${t('weights.reset')}</button>
     </div>
   `;
+
+  // Wire up weight editor event listeners
+  document.getElementById('presetSelect').addEventListener('change', (e) => onPresetChange(e.target.value));
+  document.getElementById('btnNewPreset').addEventListener('click', onNewPreset);
+  document.getElementById('btnShareWeights').addEventListener('click', onShareWeights);
+  document.getElementById('btnSavePreset').addEventListener('click', onSavePreset);
+  document.getElementById('btnSaveAsPreset').addEventListener('click', onSaveAsPreset);
+  document.getElementById('btnResetWeights').addEventListener('click', onResetWeights);
+  content.querySelectorAll('.weight-slider').forEach(slider => {
+    slider.addEventListener('input', (e) => onSliderChange(e.target.dataset.key, e.target.value));
+  });
+
   overlay.classList.add('active');
 }
 
@@ -1128,6 +1142,61 @@ async function loadAndRender() {
 
 // Load custom weights from URL or localStorage before rendering
 loadWeights();
+
+// ── Wire up event listeners (replaces inline onclick/ onkeydown) ──
+(function wireEvents() {
+  const el = (id) => document.getElementById(id);
+
+  // Retry button
+  el('retryBtn')?.addEventListener('click', loadAndRender);
+
+  // Language toggle
+  el('langToggle')?.addEventListener('click', toggleLang);
+
+  // Help & About buttons
+  el('helpBtn')?.addEventListener('click', () => showInfo('calculation'));
+  el('aboutBtn')?.addEventListener('click', () => showInfo('about'));
+
+  // Gauge card — click + keyboard
+  const gaugeCard = el('gaugeCard');
+  if (gaugeCard) {
+    gaugeCard.addEventListener('click', showPeaceScoreDetail);
+    gaugeCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showPeaceScoreDetail(); }
+    });
+  }
+
+  // Weights button
+  el('weightsBtn')?.addEventListener('click', showWeightEditor);
+
+  // Trend chart — click + keyboard
+  const trendCard = el('trendCard');
+  if (trendCard) {
+    trendCard.addEventListener('click', (e) => showTrendDetail(e));
+    trendCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showTrendDetail(); }
+    });
+  }
+
+  // Pairs toggle
+  el('pairsToggle')?.addEventListener('click', togglePairs);
+
+  // Map toggle
+  el('mapToggle')?.addEventListener('click', toggleMap);
+
+  // Footer links
+  el('privacyLink')?.addEventListener('click', (e) => { e.preventDefault(); showInfo('privacy'); });
+  el('termsLink')?.addEventListener('click', (e) => { e.preventDefault(); showInfo('terms'); });
+  el('accessibilityLink')?.addEventListener('click', (e) => { e.preventDefault(); showInfo('accessibility'); });
+
+  // Modal overlays — close on backdrop click
+  el('modalOverlay')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) hideModal(); });
+  el('weightModalOverlay')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) hideWeightEditor(); });
+
+  // Modal close buttons
+  el('modalClose')?.addEventListener('click', hideModal);
+  el('weightModalClose')?.addEventListener('click', hideWeightEditor);
+})();
 
 loadAndRender();
 setInterval(loadAndRender, UPDATE_INTERVAL);
