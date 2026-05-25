@@ -20,3 +20,23 @@ LEGAL.md
 METHODOLOGY_IMPROVEMENTS.md
 README_DEPLOY.md
 SITE_STRUCTURE.md
+
+# Generated data — produced by the analyzer, not source
+app/peace-room/solutions.json
+peace-paths/solutions.json
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+
+# AI cache — local dev only
+peace-paths/ai_cache.json
+
+# Dev helpers — not part of deployment
+peace-paths/serve.bat
+peace-paths/*.OPML
+
+# Windows junk
+nul
+Thumbs.db

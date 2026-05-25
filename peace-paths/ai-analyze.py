@@ -95,11 +95,6 @@ SOLUTIONS = {
         "phases": ["Active Fighting", "Ceasefire Talks", "Draft Agreement", "Signed", "Holding"],
         "description": "Ceasefire negotiations, de-escalation efforts, truce agreements across all conflict zones",
     },
-    "hostages": {
-        "icon": "👥", "name": "Hostage & POW Release",
-        "phases": ["No Progress", "Negotiations", "Partial Release", "Most Returned", "All Released"],
-        "description": "Hostage releases, prisoner exchanges, detainee releases, captives",
-    },
     "aid": {
         "icon": "🚚", "name": "Humanitarian Aid",
         "phases": ["Blocked", "Limited Access", "Corridors Open", "Steady Flow", "Full Access"],
@@ -129,6 +124,31 @@ SOLUTIONS = {
         "icon": "🇱🇧", "name": "Lebanon & Hezbollah",
         "phases": ["Active Fighting", "De-escalation", "Ceasefire", "Withdrawal", "Stable"],
         "description": "Lebanon conflict, Hezbollah-Israel hostilities, southern Lebanon situation",
+    },
+    "gaza-crisis": {
+        "icon": "🏚", "name": "Gaza Humanitarian Crisis",
+        "phases": ["Blockade", "Aid Inflow", "Recovery", "Rebuilding", "Stabilized"],
+        "description": "Gaza humanitarian crisis, displacement, medicine/food blockade, disease, civilian suffering",
+    },
+    "human-rights": {
+        "icon": "⚖️", "name": "Human Rights & Intl Law",
+        "phases": ["Allegations", "Investigations", "Sanctions", "Accountability", "Reform"],
+        "description": "Human rights violations, war crimes, flotilla activists, ICC/ICJ, international law, abuse allegations",
+    },
+    "domestic-politics": {
+        "icon": "🏛", "name": "Israeli Domestic Politics",
+        "phases": ["Fractured", "Coalition Shift", "Policy Change", "Elections", "Stability"],
+        "description": "Israeli internal politics, coalition dynamics, Knesset, party struggles, Netanyahu, Herzog, liberal center",
+    },
+    "west-bank": {
+        "icon": "🔥", "name": "West Bank & Settlements",
+        "phases": ["Escalation", "Violence Spike", "Mediation", "Calming", "Frozen Conflict"],
+        "description": "West Bank settler violence, occupation policies, East Jerusalem, Palestinian communities",
+    },
+    "regional": {
+        "icon": "🌍", "name": "Regional Relations",
+        "phases": ["Tensions", "Diplomatic Push", "Accord", "Integration", "Cooperation"],
+        "description": "Regional diplomacy, Arab states positions, Jordan, Egypt, Syria, Türkiye, Morocco, UAE, China influence",
     },
 }
 
@@ -202,6 +222,7 @@ def fetch_all_feeds():
         "bahrain", "morocco", "iraq", "baghdad",
         "tel aviv", "jerusalem", "beirut", "damascus", "riyadh",
         "middle east", "sinai", "hormuz", "arab",
+        "knesset", "netanyahu", "herzog", "settler", "west bank",
     ]
 
     now = datetime.now(timezone.utc)
@@ -259,17 +280,15 @@ def classify_batch_ollama(articles):
 {chr(10).join(f'{sid}: {sol["description"]}' for sid, sol in SOLUTIONS.items())}
 
 Rules:
-- Pick the SINGLE best matching category
-- If the article is about fighting/strikes but not clearly about a specific solution, use the most relevant conflict zone (ceasefire, iran, lebanon)
-- If about aid/relief/hospitals/food/water → "aid"
-- If about prisoners/hostages/captives → "hostages"
-- If about diplomacy/treaties/agreements → "diplomacy"
+- Pick the SINGLE best matching category from the list above
+- If NONE fit, create a new category id (lowercase, hyphenated, e.g. "yemen-war")
+- If about fighting/strikes but not clearly about a specific solution, use the most relevant conflict zone (ceasefire, iran, lebanon, gaza-crisis)
 - Sentiment: "positive" = progress toward peace, "negative" = setback/escalation, "neutral" = mixed/informational
 - Risk score: 1-10 (10 = highest risk to peace progress)
 
 Output ONLY valid JSON, no markdown, no explanation:
 [
-  {{"solution": "ceasefire", "sentiment": "positive", "risk": 3}},
+  {{"solution": "<id>", "sentiment": "positive", "risk": 3}},
   ...
 ]"""
 
@@ -379,13 +398,17 @@ def classify_articles(articles):
 
 KEYWORD_MAP = {
     "ceasefire": ["ceasefire", "truce", "cease fire", "armistice", "de-escalation", "peace talks"],
-    "hostages": ["hostage", "hostages", "prisoner", "captives", "pows"],
-    "aid": ["humanitarian aid", "aid", "relief", "wfp", "unrwa", "food delivery", "medical"],
-    "diplomacy": ["abraham accords", "normalization", "diplomatic", "saudi", "nuclear deal"],
+    "aid": ["humanitarian aid", "relief", "wfp", "unrwa", "food delivery"],
+    "diplomacy": ["abraham accords", "normalization", "saudi", "nuclear deal", "peace deal"],
     "governance": ["governance", "authority", "two state", "pa reform", "election"],
     "infrastructure": ["reconstruction", "rebuild", "infrastructure", "hospital", "water"],
     "iran": ["iran", "tehran", "hormuz", "khamenei"],
     "lebanon": ["lebanon", "hezbollah", "beirut", "southern lebanon"],
+    "gaza-crisis": ["gaza", "displaced", "blockade", "medicine", "disease", "sumud", "flotilla"],
+    "human-rights": ["abuse", "rights", "war crime", "icj", "icc", "flotilla", "torture", "eurovision", "flotilla"],
+    "domestic-politics": ["netanyahu", "herzog", "knesset", "coalition", "arab parties", "liberal center", "death penalty"],
+    "west-bank": ["west bank", "settler", "east jerusalem", "occupied"],
+    "regional": ["jordan", "egypt", "syria", "türkiye", "turkey", "morocco", "uae", "china", "arab", "somaliland"],
 }
 
 POSITIVE_WORDS = ["agreed", "signed", "resumed", "reopened", "released", "deal", "progress", "restored"]
@@ -408,7 +431,7 @@ def keyword_classify(articles):
         if scores:
             best = max(scores, key=scores.get)
         else:
-            best = "ceasefire"  # default
+            continue  # drop unclassifiable articles
 
         # Sentiment
         pos = sum(1 for w in POSITIVE_WORDS if w in lower)
@@ -484,17 +507,16 @@ Output ONLY valid JSON:
 # Build Output Data
 # ═══════════════════════════════════════════════════════════════════════
 
-def build_output(articles, classifications):
+def build_output(articles, classifications, skip_meta=False):
     """Build the final JSON structure for the Peace Room frontend."""
     now = datetime.now(timezone.utc)
 
-    # Group articles by solution
-    solution_events = {sid: [] for sid in SOLUTIONS}
+    # Group articles by solution — allow dynamic categories from AI
+    solution_events: dict[str, list] = {}
 
     for article, classification in zip(articles, classifications):
         sol = classification.get("solution", "ceasefire")
-        if sol not in solution_events:
-            sol = "ceasefire"  # fallback
+        solution_events.setdefault(sol, [])
 
         solution_events[sol].append({
             "date": article["date"],
@@ -522,6 +544,16 @@ def build_output(articles, classifications):
             return "stalling"
         return "stable"
 
+    def parse_date(date_str):
+        """Parse date string (ISO 8601 or RFC 2822)."""
+        try:
+            return datetime.fromisoformat(date_str)
+        except (ValueError, TypeError):
+            try:
+                return parsedate_to_datetime(date_str)
+            except Exception:
+                return datetime.now(timezone.utc)
+
     def compute_phase(events):
         if not events:
             return 0
@@ -533,7 +565,7 @@ def build_output(articles, classifications):
         # Weighted ratio (recent events count double)
         w_pos, w_total = 0, 0
         for e in events:
-            age = now_ts - datetime.fromisoformat(e["date"]).timestamp()
+            age = now_ts - parse_date(e["date"]).timestamp()
             weight = 2 if age < 48 * 3600 else 1
             w_total += weight
             if e["sentiment"] == "positive":
@@ -547,35 +579,64 @@ def build_output(articles, classifications):
 
     solutions = []
     counts = {"advancing": 0, "stable": 0, "stalling": 0}
+    active_solutions = []
 
-    for sol_id, sol_cfg in SOLUTIONS.items():
+    for sol_id in solution_events:
         events = solution_events[sol_id]
+        if not events:
+            continue
+        active_solutions.append(sol_id)
         direction = compute_direction(events)
         phase_index = compute_phase(events)
         counts[direction] = counts.get(direction, 0) + 1
 
-        # AI meta-analysis (optional, can be skipped for speed)
-        meta = meta_analyze(sol_id, events) if events else None
+        sol_cfg = SOLUTIONS.get(sol_id)
+        if sol_cfg:
+            # Known category — run AI meta-analysis (skip with --fetch-only)
+            meta = meta_analyze(sol_id, events) if not skip_meta else None
+            solutions.append({
+                "id": sol_id,
+                "icon": sol_cfg["icon"],
+                "name": sol_cfg["name"],
+                "phases": sol_cfg["phases"],
+                "phaseIndex": meta["phase_index"] if meta else phase_index,
+                "direction": meta["direction"] if meta else direction,
+                "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
+                "summary": meta["summary"] if meta and meta.get("summary") else events[0]["text"],
+                "events": events[:12],
+                "confidence": meta["confidence"] if meta else ("high" if len(events) > 5 else "medium" if len(events) > 2 else "low"),
+            })
+            if meta and meta.get("key_risk"):
+                solutions[-1]["keyRisk"] = meta["key_risk"]
+            if meta and meta.get("key_opportunity"):
+                solutions[-1]["keyOpportunity"] = meta["key_opportunity"]
+            if meta and meta.get("trend_48h"):
+                solutions[-1]["trend48h"] = meta["trend_48h"]
+        else:
+            # Dynamic category discovered by AI
+            name = sol_id.replace("-", " ").replace("_", " ").title()
+            solutions.append({
+                "id": sol_id,
+                "icon": "📌",
+                "name": name,
+                "phases": ["Emerged", "Developing", "Gaining Traction", "Maturing", "Resolved"],
+                "phaseIndex": phase_index,
+                "direction": direction,
+                "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
+                "summary": events[0]["text"],
+                "events": events[:12],
+                "confidence": "low",
+            })
 
-        solutions.append({
-            "id": sol_id,
-            "icon": sol_cfg["icon"],
-            "name": sol_cfg["name"],
-            "phases": sol_cfg["phases"],
-            "phaseIndex": meta["phase_index"] if meta else phase_index,
-            "direction": meta["direction"] if meta else direction,
-            "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
-            "summary": meta["summary"] if meta and meta.get("summary") else (events[0]["text"] if events else "No recent developments"),
-            "events": events[:12],
-            "confidence": meta["confidence"] if meta else ("high" if len(events) > 5 else "medium" if len(events) > 2 else "low"),
-        })
+    if not active_solutions:
+        counts["stable"] = 1
 
-        if meta and meta.get("key_risk"):
-            solutions[-1]["keyRisk"] = meta["key_risk"]
-        if meta and meta.get("key_opportunity"):
-            solutions[-1]["keyOpportunity"] = meta["key_opportunity"]
-        if meta and meta.get("trend_48h"):
-            solutions[-1]["trend48h"] = meta["trend_48h"]
+    # Sort by event count desc, keep top 8
+    solutions.sort(key=lambda s: s["keyMetric"]["value"], reverse=True)
+    solutions = solutions[:8]
+    # Re-sort activeSolutions to match
+    active_ids = set(s["id"] for s in solutions)
+    active_solutions = [sid for sid in active_solutions if sid in active_ids]
 
     # Overall momentum
     if counts["advancing"] > counts["stalling"]:
@@ -590,8 +651,9 @@ def build_output(articles, classifications):
         "overallMomentum": {
             "direction": m_dir,
             "label": m_label,
-            "summary": f"{counts['advancing']} advancing, {counts['stable']} stable, {counts['stalling']} stalling. {len(articles)} ME articles from {len(RSS_FEEDS)} feeds.",
+            "summary": f"{counts['advancing']} advancing, {counts['stable']} stable, {counts['stalling']} stalling ({len(active_solutions)}/{len(SOLUTIONS)} active). {len(articles)} ME articles from {len(RSS_FEEDS)} feeds.",
         },
+        "activeSolutions": active_solutions,
         "lastUpdated": now.isoformat(),
         "source": "ai-analyzer",
         "feedCount": len(articles),
@@ -662,7 +724,7 @@ def main():
         classifications = classify_articles(articles)
 
     # 3. Build output
-    data = build_output(articles, classifications)
+    data = build_output(articles, classifications, skip_meta=args.fetch_only)
 
     # 4. Write local JSON
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)

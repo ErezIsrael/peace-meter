@@ -270,7 +270,9 @@ function renderAll(data) {
   };
   Object.values(containers).forEach(el => { if (el) el.innerHTML = ''; });
 
+  const activeIds = data.activeSolutions || data.solutions.map(s => s.id);
   (data.solutions || []).forEach(solution => {
+    if (!activeIds.includes(solution.id)) return;  // skip inactive categories
     const card = createSolutionCard(solution);
     let category = 'structural';
     for (const [cat, ids] of Object.entries(CATEGORIES)) {

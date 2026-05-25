@@ -19,8 +19,22 @@ const DIRECTION_LABELS = {
 };
 
 /* ── Helpers ─────────────────────────────────────────── */
+function parseDate(dateStr) {
+  if (!dateStr) return null;
+  let d = new Date(dateStr);
+  if (!isNaN(d.getTime())) return d;
+  // Normalize "Wednesday, April 29, 2026 - 10:00" -> "April 29, 2026 10:00"
+  const normalized = dateStr
+    .replace(/^\w+,?\s*/, '')       // strip day-of-week
+    .replace(/\s+-\s+/, ' ');       // replace " - " with space
+  d = new Date(normalized);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+}
+
 function formatTime(dateStr) {
-  const d = new Date(dateStr);
+  const d = parseDate(dateStr);
+  if (!d) return 'recent';
   const now = new Date();
   const diffMs = now - d;
   const diffHrs = diffMs / 3600000;
@@ -36,7 +50,8 @@ function formatTime(dateStr) {
 }
 
 function formatEventTime(dateStr) {
-  const d = new Date(dateStr);
+  const d = parseDate(dateStr);
+  if (!d) return '—';
   const h = d.getUTCHours();
   const m = String(d.getUTCMinutes()).padStart(2, '0');
   return `${h}:${m}`;
@@ -283,7 +298,9 @@ function renderAll(data) {
   containers['iraq'] = document.getElementById('iraqSolutions');
   containers['lebanon'] = document.getElementById('lebanonSolutions');
 
+  const activeIds = data.activeSolutions || data.solutions.map(s => s.id);
   (data.solutions || []).forEach(solution => {
+    if (!activeIds.includes(solution.id)) return;  // skip inactive categories
     const card = createSolutionCard(solution);
     // Check if this solution ID matches its own container (iraq, lebanon)
     if (containers[solution.id]) {
