@@ -1,0 +1,153 @@
+{
+  "solutions": [
+    {
+      "id": "ceasefire",
+      "icon": "🕊",
+      "name": "Ceasefire Agreement",
+      "phases": ["Proposed", "Negotiating", "Draft Terms", "Signed", "Holding"],
+      "phaseIndex": 2,
+      "direction": "advancing",
+      "keyMetric": { "label": "Days Holding", "value": "45", "unit": "days" },
+      "summary": "Draft terms agreed in Doha; violations reported but overall holding",
+      "events": [
+        { "date": "2026-05-25T18:00:00Z", "text": "UN monitors report calm along eastern border", "sentiment": "positive" },
+        { "date": "2026-05-25T14:30:00Z", "text": "Mediators schedule follow-up talks for Monday", "sentiment": "positive" },
+        { "date": "2026-05-25T08:15:00Z", "text": "Violations: 2 rockets fired from northern Gaza toward Sderot", "sentiment": "negative" },
+        { "date": "2026-05-24T21:00:00Z", "text": "Egypt confirms draft terms accepted by both sides", "sentiment": "positive" },
+        { "date": "2026-05-24T10:00:00Z", "text": "Qatari mediator Al-Thani departs for Doha", "sentiment": "neutral" },
+        { "date": "2026-05-23T16:45:00Z", "text": "Human Rights Watch: 12 violations in past 48 hours", "sentiment": "negative" },
+        { "date": "2026-05-22T09:00:00Z", "text": "Ceasefire holds for 45th consecutive day", "sentiment": "positive" }
+      ],
+      "confidence": "medium",
+      "stakeholders": [
+        { "name": "Shamma Al-Thani", "org": "Qatar Mediation Team", "email": "shamma.al-thani@qmed.qa", "role": "Mediator" },
+        { "name": "Egyptian Foreign Ministry", "org": "Egypt", "email": "mofa@mfa.eg", "role": "Co-mediator" },
+        { "name": "UN Ceasefire Monitor", "org": "UN", "email": "ceasefire-mee@un.org", "role": "Monitoring" }
+      ]
+    },
+    {
+      "id": "hostages",
+      "icon": "👥",
+      "name": "Hostage/POW Release",
+      "phases": ["No Progress", "Negotiating", "Partial Releases", "Most Returned", "Complete Return"],
+      "phaseIndex": 2,
+      "direction": "advancing",
+      "keyMetric": { "label": "Released", "value": "87", "total": "134" },
+      "summary": "10 more released this week; 47 remain held",
+      "events": [
+        { "date": "2026-05-25T16:00:00Z", "text": "ICRC confirms 3 more scheduled for Friday exchange", "sentiment": "positive" },
+        { "date": "2026-05-25T07:00:00Z", "text": "Families gather at Tel Aviv hospital in anticipation", "sentiment": "neutral" },
+        { "date": "2026-05-24T19:30:00Z", "text": "Hamas releases video showing 2 remaining hostages", "sentiment": "negative" },
+        { "date": "2026-05-23T14:00:00Z", "text": "10 hostages released via Rafah crossing", "sentiment": "positive" },
+        { "date": "2026-05-22T22:00:00Z", "text": "Israel confirms prisoner list for next exchange", "sentiment": "positive" },
+        { "date": "2026-05-21T11:00:00Z", "text": "Medical hostages prioritized per UN request", "sentiment": "positive" },
+        { "date": "2026-05-20T09:00:00Z", "text": "Red Cross facilitates prisoner exchange talks", "sentiment": "positive" }
+      ],
+      "confidence": "high",
+      "stakeholders": [
+        { "name": "ICRC Jerusalem Office", "org": "ICRC", "email": "jerusalem@icrc.org", "role": "Facilitator" },
+        { "name": "IDF Spokesperson", "org": "Israel Defense Forces", "email": "spokesperson@idf.il", "role": "Coordination" }
+      ]
+    },
+    {
+      "id": "aid",
+      "icon": "🚚",
+      "name": "Humanitarian Aid",
+      "phases": ["Blocked", "Limited Access", "Corridors Open", "Steady Flow", "Full Access"],
+      "phaseIndex": 2,
+      "direction": "stable",
+      "keyMetric": { "label": "Trucks/Day", "value": "180", "unit": "avg" },
+      "summary": "3 corridors open; daily crossings at 6-month high",
+      "events": [
+        { "date": "2026-05-25T17:00:00Z", "text": "180 trucks crossed Kerem Shalom today — highest in 6 months", "sentiment": "positive" },
+        { "date": "2026-05-25T10:00:00Z", "text": "Rafah crossing reopens after 2-day closure", "sentiment": "positive" },
+        { "date": "2026-05-25T04:00:00Z", "text": "WFP convoy delayed by road damage near N. Gaza", "sentiment": "negative" },
+        { "date": "2026-05-24T15:00:00Z", "text": "Fuel delivery resumed to Gaza power station", "sentiment": "positive" },
+        { "date": "2026-05-24T08:00:00Z", "text": "UN OCHA: food stocks sufficient for 3 weeks", "sentiment": "positive" },
+        { "date": "2026-05-23T13:00:00Z", "text": "Nitzanim corridor opened for first time since March", "sentiment": "positive" },
+        { "date": "2026-05-22T20:00:00Z", "text": "Medical supplies shipment arrives from UAE", "sentiment": "positive" }
+      ],
+      "confidence": "high",
+      "stakeholders": [
+        { "name": "UN OCHA", "org": "United Nations", "email": "ocha-ot@un.org", "role": "Coordination" },
+        { "name": "WFP Gaza Office", "org": "World Food Programme", "email": "wfp.gaza@wfp.org", "role": "Delivery" }
+      ]
+    },
+    {
+      "id": "abraham-accords",
+      "icon": "🤝",
+      "name": "Abraham Accords Expansion",
+      "phases": ["Stalled", "Back-channel", "Framework", "New Partner", "Regional Network"],
+      "phaseIndex": 3,
+      "direction": "advancing",
+      "keyMetric": { "label": "Countries", "value": "5" },
+      "summary": "Saudi normalization framework signed; Jordan deepening ties",
+      "events": [
+        { "date": "2026-05-25T12:00:00Z", "text": "Saudi-Israel cargo flights now weekly between Riyadh and TLV", "sentiment": "positive" },
+        { "date": "2026-05-24T09:00:00Z", "text": "Jordan-Israel water cooperation MOU signed", "sentiment": "positive" },
+        { "date": "2026-05-23T18:00:00Z", "text": "Morocco-Israel trade up 40% YoY", "sentiment": "positive" },
+        { "date": "2026-05-22T14:00:00Z", "text": "Oman mediates Israel-BA diplomatic talks", "sentiment": "positive" },
+        { "date": "2026-05-20T10:00:00Z", "text": "Saudi direct passenger flights begin", "sentiment": "positive" },
+        { "date": "2026-05-18T08:00:00Z", "text": "UAE tech delegation visits Tel Aviv startup hub", "sentiment": "positive" }
+      ],
+      "confidence": "medium",
+      "stakeholders": [
+        { "name": "State Dept — ME Bureau", "org": "US Government", "email": "meb@state.gov", "role": "Diplomacy" },
+        { "name": "Saudi MFA", "org": "Saudi Arabia", "email": "info@mofa.gov.sa", "role": "Negotiation" }
+      ]
+    },
+    {
+      "id": "governance",
+      "icon": "🏛",
+      "name": "Post-War Governance",
+      "phases": ["No Framework", "Proposals", "Consensus", "Interim", "Sustainable"],
+      "phaseIndex": 1,
+      "direction": "stalling",
+      "keyMetric": { "label": "Proposals", "value": "4" },
+      "summary": "Competing visions; no consensus emerging",
+      "events": [
+        { "date": "2026-05-25T15:00:00Z", "text": "PA leader rejects EU interim plan without elections", "sentiment": "negative" },
+        { "date": "2026-05-24T11:00:00Z", "text": "EU proposes 18-month UN administration for Gaza", "sentiment": "neutral" },
+        { "date": "2026-05-23T09:00:00Z", "text": "Arab League rejects PA reform without elections", "sentiment": "negative" },
+        { "date": "2026-05-21T16:00:00Z", "text": "US presents 'Gaza Reconstruction Authority' plan", "sentiment": "neutral" },
+        { "date": "2026-05-19T10:00:00Z", "text": "Hamas refuses any plan without guaranteed return", "sentiment": "negative" },
+        { "date": "2026-05-17T14:00:00Z", "text": "Turkey offers to host governance summit", "sentiment": "positive" }
+      ],
+      "confidence": "low",
+      "stakeholders": [
+        { "name": "EU Envoys Office", "org": "European Union", "email": "ee-me@eeas.europa.eu", "role": "Framework" },
+        { "name": "Arab League Secretariat", "org": "Arab League", "email": "info@arabsyria.org", "role": "Coordination" }
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "icon": "💧",
+      "name": "Infrastructure Recovery",
+      "phases": ["Destroyed", "Emergency Repairs", "Partial", "Reconstruction", "Full Recovery"],
+      "phaseIndex": 1,
+      "direction": "advancing",
+      "keyMetric": { "label": "Power", "value": "40", "unit": "% pre-war" },
+      "summary": "Water treatment restored; hospital wing reopened",
+      "events": [
+        { "date": "2026-05-25T11:00:00Z", "text": "Japanese team completes N. Gaza water plant repairs", "sentiment": "positive" },
+        { "date": "2026-05-25T06:00:00Z", "text": "Power grid in Khan Younis back online after repair", "sentiment": "positive" },
+        { "date": "2026-05-24T18:00:00Z", "text": "EU announces €200M emergency reconstruction fund", "sentiment": "positive" },
+        { "date": "2026-05-23T12:00:00Z", "text": "Al-Shifa hospital wing reopened with UN support", "sentiment": "positive" },
+        { "date": "2026-05-22T09:00:00Z", "text": "World Bank: $30B needed for full recovery", "sentiment": "neutral" },
+        { "date": "2026-05-21T15:00:00Z", "text": "School building demolished in Deir al-Balah", "sentiment": "negative" }
+      ],
+      "confidence": "medium",
+      "stakeholders": [
+        { "name": "World Bank", "org": "World Bank Group", "email": "mea@worldbank.org", "role": "Funding" },
+        { "name": "Japan MOFA", "org": "Japan", "email": "mofa@mofa.go.jp", "role": "Repair Teams" },
+        { "name": "EU Recovery Fund", "org": "European Union", "email": "recovery@ec.europa.eu", "role": "Financing" }
+      ]
+    }
+  ],
+  "overallMomentum": {
+    "direction": "advancing",
+    "label": "Net Positive",
+    "summary": "4 of 6 advancing, 1 stable, 1 stalling. Abraham Accords strongest signal."
+  },
+  "lastUpdated": "2026-05-25T19:00:00Z"
+}
