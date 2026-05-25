@@ -1,7 +1,7 @@
 /* ── Peace Meter — Frontend App (no dependencies) ──────── */
-/* VERSION: 2.10.0 */
+/* VERSION: 2.11.0 */
 
-const APP_VERSION = '2.10.0'; // 2026-05-24: Security hardening, self-hosted fonts, weight normalization
+const APP_VERSION = '2.11.0'; // 2026-05-26: Expanded RSS feeds from 6 to 29 sources
 const GAUGE_PATH_LEN = 251.2; // arc length for SVG gauge
 const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 min
 const STALE_THRESHOLD = 10 * 60 * 1000; // 10 min — refresh sooner if stale
@@ -238,12 +238,20 @@ function renderTrend(history) {
 function renderSignals(signals) {
   const grid = document.getElementById('signalGrid');
   grid.innerHTML = '';
+  const isMobile = window.innerWidth <= 600;
 
   Object.keys(signals).forEach(key => {
     const s = signals[key];
     const level = getLevel(s.score);
     const sigInfo = LANG[currentLang].signals[key];
     const name = sigInfo ? sigInfo.name : s.label;
+
+    // On mobile, shorten detail to first clause only (before first comma/semicolon)
+    let detail = s.detail;
+    if (isMobile) {
+      const sep = detail.match(/[,;]/);
+      if (sep) detail = detail.slice(0, sep.index).trim();
+    }
 
     const card = document.createElement('div');
     card.className = 'signal-card';
@@ -256,7 +264,7 @@ function renderSignals(signals) {
       <div class="signal-icon">${s.icon}</div>
       <div class="signal-name">${name}</div>
       <div class="signal-score" style="color:${level.color}">${s.score}</div>
-      <div class="signal-detail">${s.detail}</div>
+      <div class="signal-detail">${detail}</div>
       <div id="spark-${key}" class="signal-spark"></div>
       <div style="margin-top:6px"><span class="signal-status ${s.status.toLowerCase()}">${t('status.' + s.status.toLowerCase())}</span></div>
     `;
@@ -720,11 +728,12 @@ const SIGNAL_KEYS = ['tone','news','aviation','prediction','credit','travel','th
 const DEFAULT_WEIGHTS = { tone:0.18, news:0.14, aviation:0.11, prediction:0.10, credit:0.09, travel:0.09, thinktank:0.09, conflict:0.08, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.01 };
 const BUILT_IN_PRESETS = {
   default:   { ...DEFAULT_WEIGHTS },
-  conflict:  { tone:0.30, news:0.08, aviation:0.06, prediction:0.05, credit:0.05, travel:0.05, thinktank:0.05, conflict:0.15, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.04 },
+  conflict:  { tone:0.30, news:0.10, aviation:0.06, prediction:0.05, credit:0.05, travel:0.05, thinktank:0.05, conflict:0.15, views:0.05, normalization:0.04, economic:0.03, humanitarian:0.07 },
   diplomacy: { tone:0.15, news:0.20, aviation:0.06, prediction:0.05, credit:0.05, travel:0.10, thinktank:0.15, conflict:0.06, views:0.05, normalization:0.10, economic:0.03, humanitarian:0.05 },
 };
 
 let activeCustomWeights = null; // null = using defaults
+let lockedKeys = new Set(); // signal keys locked to their current weight
 
 function loadPresets() {
   try {
@@ -796,55 +805,61 @@ function recalcMaster(weights, signals) {
 }
 
 function autoNormalize(changedKey, newValue, currentWeights) {
-  // newValue is integer percent (1-50)
   const newVal = newValue / 100;
   const oldVal = currentWeights[changedKey];
-  const remaining = 1 - newVal;
-  const oldRemaining = 1 - oldVal;
   const result = { ...currentWeights };
   result[changedKey] = newVal;
 
+  // Signals that cannot be adjusted: the changed signal + any locked signals
+  const skip = new Set([changedKey, ...lockedKeys]);
+
+  // Proportional scale of unlocked signals
+  const remaining = 1 - newVal;
+  const oldRemaining = 1 - oldVal;
   if (oldRemaining > 0) {
     for (const key of SIGNAL_KEYS) {
-      if (key === changedKey) continue;
+      if (skip.has(key)) continue;
       result[key] = result[key] * (remaining / oldRemaining);
     }
   }
 
-  // Enforce 1% floor
-  const floor = 0.01;
-  let deficit = 0;
-  const belowFloor = [];
-  for (const key of SIGNAL_KEYS) {
-    if (key === changedKey) continue;
-    if (result[key] < floor) {
-      deficit += result[key] - floor;
-      belowFloor.push(key);
-      result[key] = floor;
+  // Iteratively clamp negatives to 0 and redistribute surplus
+  for (let iteration = 0; iteration < SIGNAL_KEYS.length; iteration++) {
+    let deficit = 0;
+    const clamped = [];
+    for (const key of SIGNAL_KEYS) {
+      if (skip.has(key)) continue;
+      if (result[key] < 0) {
+        deficit -= result[key]; // positive amount to redistribute
+        result[key] = 0;
+        clamped.push(key);
+      }
     }
-  }
-  if (deficit < 0) {
-    // Redistribute deficit among non-floor signals (excluding changedKey)
-    const others = SIGNAL_KEYS.filter(k => k !== changedKey && !belowFloor.includes(k));
+    if (deficit === 0) break;
+    // Distribute among remaining positive unlocked signals
+    const others = SIGNAL_KEYS.filter(k => !skip.has(k) && !clamped.includes(k) && result[k] > 0);
     const totalOther = others.reduce((s, k) => s + result[k], 0);
-    for (const key of others) {
-      result[key] += result[key] * (deficit / totalOther);
+    if (totalOther > 0) {
+      for (const key of others) result[key] += result[key] * (deficit / totalOther);
+    } else {
+      result[changedKey] += deficit;
+      break;
     }
   }
 
-  // Round to 1 decimal place
+  // Round to 3 decimal places
   for (const key of SIGNAL_KEYS) {
     result[key] = Math.round(result[key] * 1000) / 1000;
   }
 
-  // Fix rounding drift — add remainder to largest non-changed signal
+  // Fix rounding drift — add remainder to largest non-changed, non-locked signal
   let total = 0;
   for (const key of SIGNAL_KEYS) total += result[key];
   const remainder = 1 - total;
   if (Math.abs(remainder) > 0.0001) {
     let maxKey = null, maxVal = 0;
     for (const key of SIGNAL_KEYS) {
-      if (key !== changedKey && result[key] > maxVal) { maxVal = result[key]; maxKey = key; }
+      if (key !== changedKey && !lockedKeys.has(key) && result[key] > maxVal) { maxVal = result[key]; maxKey = key; }
     }
     if (maxKey) result[maxKey] = Math.round((result[maxKey] + remainder) * 1000) / 1000;
   }
@@ -906,8 +921,9 @@ function showWeightEditor() {
     sliders += `
       <div class="weight-row">
         <label for="ws-${key}">${icon} ${name}</label>
-        <input type="range" id="ws-${key}" data-key="${key}" class="weight-slider" min="1" max="50" step="0.1" value="${pct}">
+        <input type="range" id="ws-${key}" data-key="${key}" class="weight-slider" min="0" max="100" step="0.1" value="${pct}">
         <span class="weight-val" id="wv-${key}">${pct}%</span>
+        <button class="weight-lock" id="wl-${key}" data-key="${key}" title="${t('weights.lock')}">${t('weights.lock')}</button>
       </div>
     `;
   }
@@ -940,6 +956,14 @@ function showWeightEditor() {
   content.querySelectorAll('.weight-slider').forEach(slider => {
     slider.addEventListener('input', (e) => onSliderChange(e.target.dataset.key, e.target.value));
   });
+  content.querySelectorAll('.weight-lock').forEach(btn => {
+    btn.addEventListener('click', (e) => onToggleLock(e.target.dataset.key));
+  });
+  // Update lock button visual state
+  for (const key of SIGNAL_KEYS) {
+    const btn = document.getElementById(`wl-${key}`);
+    if (btn) updateLockBtn(key, btn);
+  }
 
   overlay.classList.add('active');
 }
@@ -957,6 +981,16 @@ function getEditorWeights() {
   return weights;
 }
 
+function getLockedSum(excludeKey) {
+  let sum = 0;
+  for (const key of lockedKeys) {
+    if (key === excludeKey) continue;
+    const slider = document.getElementById(`ws-${key}`);
+    sum += slider ? parseFloat(slider.value) / 100 : 0;
+  }
+  return sum;
+}
+
 function updateEditorUI(weights) {
   let total = 0;
   for (const key of SIGNAL_KEYS) {
@@ -965,7 +999,13 @@ function updateEditorUI(weights) {
     const slider = document.getElementById(`ws-${key}`);
     const pct = Math.round(weights[key] * 1000) / 10;
     if (valEl) valEl.textContent = `${pct}%`;
-    if (slider) slider.value = pct;
+    if (slider) {
+      slider.value = pct;
+      slider.disabled = lockedKeys.has(key);
+      // Dynamic max: 100 minus sum of other locked weights
+      const lockedOther = getLockedSum(key);
+      slider.max = Math.round((1 - lockedOther) * 1000) / 10;
+    }
   }
   const totalEl = document.getElementById('weightTotal');
   if (totalEl) {
@@ -984,13 +1024,43 @@ function updateEditorUI(weights) {
 }
 
 function onSliderChange(changedKey, newValue) {
+  const lockedOther = getLockedSum(changedKey);
+  const maxPct = Math.round((1 - lockedOther) * 1000) / 10;
+  const newVal = Math.min(parseFloat(newValue), maxPct);
+  const slider = document.getElementById(`ws-${changedKey}`);
+  if (slider && parseFloat(newValue) > maxPct) slider.value = maxPct;
   const currentWeights = getEditorWeights();
-  const newVal = parseFloat(newValue);
   currentWeights[changedKey] = newVal / 100;
   const normalized = autoNormalize(changedKey, newVal, currentWeights);
   activeCustomWeights = normalized;
   updateEditorUI(normalized);
   applyCustomWeights();
+}
+
+function onToggleLock(key) {
+  if (lockedKeys.has(key)) {
+    lockedKeys.delete(key);
+  } else {
+    lockedKeys.add(key);
+  }
+  // Persist
+  localStorage.setItem('pm-locked', JSON.stringify([...lockedKeys]));
+  // Update button visual
+  const btn = document.getElementById(`wl-${key}`);
+  if (btn) updateLockBtn(key, btn);
+}
+
+function updateLockBtn(key, btn) {
+  const isLocked = lockedKeys.has(key);
+  btn.textContent = isLocked ? t('weights.unlock') : t('weights.lock');
+  btn.classList.toggle('locked', isLocked);
+}
+
+function loadLockedKeys() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('pm-locked')) || [];
+    lockedKeys = new Set(stored);
+  } catch { lockedKeys = new Set(); }
 }
 
 function onPresetChange(presetName) {
@@ -1045,6 +1115,8 @@ function onSaveAsPreset() {
 function onResetWeights() {
   activeCustomWeights = null;
   localStorage.removeItem('pm-weights');
+  localStorage.removeItem('pm-locked');
+  lockedKeys = new Set();
   currentPresetName = 'default';
   updateEditorUI(DEFAULT_WEIGHTS);
   if (lastData) renderGauge(lastData.master.score);
@@ -1140,8 +1212,9 @@ async function loadAndRender() {
   }
 }
 
-// Load custom weights from URL or localStorage before rendering
+// Load custom weights and lock state from localStorage before rendering
 loadWeights();
+loadLockedKeys();
 
 // ── Wire up event listeners (replaces inline onclick/ onkeydown) ──
 (function wireEvents() {

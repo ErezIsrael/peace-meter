@@ -18,6 +18,7 @@ import { jwtClient } from './jwt-client.js';
 
 const CACHE_TTL_SECONDS = 60 * 60; // 60 minutes — stays within BigQuery free tier
 const BIGQUERY_PROJECT = 'peace-meter';
+const CACHE_VERSION = 'v2.10.3'; // bump to invalidate stale KV cache on deploy
 
 /* ── Rate limiting ───────────────────────────────────── */
 // Sliding-window rate limit via RATE_LIMIT KV namespace
@@ -288,12 +289,39 @@ function parseGDELTResponse(data) {
 /* ────────────────────────────────────────────────────────────────────── */
 
 const RSS_FEEDS = [
-  { url: 'https://mitvim.org.il/en/feed/',       source: 'Mitvim',            cap: 4, type: 'thinktank' },
-  { url: 'https://ecopeaceme.org/feed/',         source: 'EcoPeace',          cap: 3, type: 'thinktank' },
-  { url: 'https://www.al-monitor.com/rss',        source: 'Al Monitor',        cap: 3, type: 'me-news' },
-  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC', cap: 3, type: 'me-news' },
-  { url: 'https://www.jns.org/feed/',             source: 'JNS',               cap: 2, type: 'media' },
-  { url: 'https://www.timesofisrael.com/feed/',   source: 'Times of Israel',   cap: 2, type: 'media' },
+  // ── Think tanks & research ──────────────────────────────────────────
+  { url: 'https://mitvim.org.il/en/feed/',            source: 'Mitvim',            cap: 4, type: 'thinktank' },
+  { url: 'https://ecopeaceme.org/feed/',             source: 'EcoPeace',          cap: 3, type: 'thinktank' },
+  { url: 'https://www.crisisgroup.org/rss/91',       source: 'Crisis Group',      cap: 2, type: 'thinktank' },
+  { url: 'https://israel-alma.org/feed/',            source: 'Alma',              cap: 3, type: 'thinktank' },
+  // ── Middle East news ────────────────────────────────────────────────
+  { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC ME',          cap: 3, type: 'me-news' },
+  { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera',       cap: 3, type: 'me-news' },
+  { url: 'https://www.theguardian.com/world/israel/rss', source: 'Guardian',      cap: 3, type: 'me-news' },
+  { url: 'https://rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml', source: 'NYT ME',       cap: 3, type: 'me-news' },
+  { url: 'https://www.al-monitor.com/rss',            source: 'Al Monitor',        cap: 3, type: 'me-news' },
+  { url: 'https://www.middleeastmonitor.com/feed/',  source: 'ME Monitor',        cap: 3, type: 'me-news' },
+  { url: 'https://www.france24.com/en/middle-east/rss', source: 'France24',       cap: 3, type: 'me-news' },
+  { url: 'https://www.middleeasteye.net/rss',         source: 'Middle East Eye',   cap: 3, type: 'me-news' },
+  { url: 'https://menews247.com/feed/',               source: 'ME News',           cap: 3, type: 'me-news' },
+  { url: 'https://www.albawaba.com/rss/all',          source: 'Al Bawaba',         cap: 3, type: 'me-news' },
+  { url: 'https://news.un.org/feed/subscribe/en/news/region/middle-east/feed/rss.xml', source: 'UN News', cap: 2, type: 'me-news' },
+  // ── General media / broader coverage ────────────────────────────────
+  { url: 'https://foreignpolicy.com/feed/',           source: 'Foreign Policy',    cap: 2, type: 'media' },
+  { url: 'https://www.timesofisrael.com/feed/',      source: 'Times of Israel',   cap: 2, type: 'media' },
+  { url: 'https://www.haaretz.com/srv/haaretz-latest-headlines', source: 'Haaretz', cap: 2, type: 'media' },
+  { url: 'https://www.haaretz.com/srv/middle-east-news-rss', source: 'Haaretz ME',  cap: 2, type: 'media' },
+  { url: 'https://www.haaretz.com/srv/israel-news-rss', source: 'Haaretz Dom',     cap: 2, type: 'media' },
+  { url: 'https://rss.jpost.com/rss/rssfeedsfrontpage.aspx', source: 'JPost',       cap: 2, type: 'media' },
+  { url: 'https://www.israelnationalnews.com/Rss.aspx?act=.1', source: 'Arutz Sheva', cap: 2, type: 'media' },
+  { url: 'https://www.jns.org/feed/',                 source: 'JNS',               cap: 2, type: 'media' },
+  { url: 'https://a.jfeed.com/v1/rss/articles/latest/rss2', source: 'JFeed',       cap: 2, type: 'media' },
+  { url: 'https://forward.com/rss/',                  source: 'The Forward',       cap: 2, type: 'media' },
+  { url: 'https://www.maariv.co.il/Rss/RssChadashot', source: 'Maariv',            cap: 2, type: 'media' },
+  { url: 'https://rss.walla.co.il/feed/1',            source: 'Walla',             cap: 2, type: 'media' },
+  { url: 'https://www.amnesty.org/en/location/middle-east-and-north-africa/feed/', source: 'Amnesty', cap: 2, type: 'media' },
+  { url: 'https://www.bellingcat.com/feed/',          source: 'Bellingcat',        cap: 2, type: 'media' },
+  { url: 'https://news.google.com/rss/search?hl=en-US&gl=US&q=israel&um=1&ie=UTF-8&ceid=US:en', source: 'Google News Israel', cap: 2, type: 'media' },
 ];
 
 const RELEVANCE_PRIMARY = [
@@ -339,20 +367,24 @@ function parseRSS(xml, sourceName, feedType) {
   if (!itemMatches) return items;
 
   // Positive (peace) indicators — weighted by signal strength
+  // NOTE: 'aid' and 'humanitarian' removed — too ambiguous (aid deprivation = war, aid delivery = peace)
   const peaceWords = [
     { w: 'ceasefire', s: 3 }, { w: 'truce', s: 3 }, { w: 'peace deal', s: 3 },
     { w: 'normalization', s: 2 }, { w: 'normalize', s: 2 },
     { w: 'diplomat', s: 2 }, { w: 'mediation', s: 2 }, { w: 'dialogue', s: 2 },
     { w: 'agreement', s: 2 }, { w: 'framework', s: 1 }, { w: 'cooperation', s: 2 },
     { w: 'progress', s: 1 }, { w: 'talks', s: 1 }, { w: 'rebuild', s: 1 },
-    { w: 'reconstruction', s: 1 }, { w: 'humanitarian', s: 1 }, { w: 'aid', s: 1 },
+    { w: 'reconstruction', s: 1 },
     { w: 'corridor', s: 1 }, { w: 'swap', s: 1 }, { w: 'release', s: 1 },
     { w: 'confederation', s: 2 },
+    { w: 'aid delivery', s: 2 }, { w: 'aid resumed', s: 2 }, { w: 'aid corridor', s: 2 },
+    { w: 'humanitarian access', s: 2 }, { w: 'humanitarian aid', s: 1 },
   ];
   // Negative (war) indicators — weighted by severity
   const warWords = [
     { w: 'attack', s: 3 }, { w: 'strike', s: 3 }, { w: 'deadly', s: 3 },
-    { w: 'killed', s: 3 }, { w: 'rocket', s: 2 }, { w: 'missile', s: 2 },
+    { w: 'killed', s: 3 }, { w: 'kill', s: 3 }, { w: 'killing', s: 3 },
+    { w: 'rocket', s: 2 }, { w: 'missile', s: 2 },
     { w: 'drone', s: 2 }, { w: 'assassin', s: 3 }, { w: 'bombing', s: 3 },
     { w: 'bomb', s: 2 }, { w: 'raid', s: 2 }, { w: 'invasion', s: 3 },
     { w: 'offensive', s: 2 }, { w: 'offensiv', s: 2 }, { w: 'operation', s: 1 },
@@ -365,14 +397,30 @@ function parseRSS(xml, sourceName, feedType) {
     { w: 'seized', s: 2 }, { w: 'hijack', s: 3 }, { w: 'war', s: 2 },
     { w: 'conflict', s: 2 }, { w: 'hits', s: 2 }, { w: 'disarm', s: 2 },
     { w: 'control', s: 1 }, { w: 'claim to', s: 1 }, { w: 'escalat', s: 2 },
+    // Death/casualty variants
+    { w: 'died', s: 3 }, { w: 'death', s: 3 }, { w: 'deaths', s: 3 },
+    { w: 'fire', s: 2 }, { w: 'firing', s: 2 },
+    // Humanitarian crisis indicators
+    { w: 'deprive', s: 2 }, { w: 'deprived', s: 2 },
+    { w: 'denied', s: 1 },
+    { w: 'starv', s: 3 },
+    { w: 'crisis', s: 1 },
   ];
   // War negators: "ending war" → peace (phrase-level, not single words)
   const warNegators = ['end of war', 'ending war', 'end of conflict', 'ending conflict',
                        'end hostilities', 'ending hostilities', 'stop war', 'stop conflict',
-                       'de-escalat', 'withdraw from'];
+                       'de-escalat', 'withdraw from',
+                       // "political blow" is not a military strike
+                       'political blow', 'political strike'];
   // Peace phrases that are actually negative outcomes
   const peaceNegators = ['fail', 'failed', 'fails', 'collapse', 'collaps', 'stall', 'stalle',
-                         'breakdown', 'no deal', 'no agreement', 'deadlock', 'dead lock'];
+                         'breakdown', 'no deal', 'no agreement', 'deadlock', 'dead lock',
+                         'stalemate', 'losing hope', 'losing faith', 'no progress',
+                         'stuck', 'at odds', 'walked away', 'walked out'];
+
+  // Phrases that negate peace keywords: "aid" in "deprived of aid" = war, not peace
+  const aidNegators = ['deprived of aid', 'denied aid', 'no aid', 'aid cut', 'aid halted',
+                       'aid block', 'aid denied', 'aid withheld', 'blockade', 'aid stop'];
 
   for (const block of itemMatches) {
     const titleMatch = block.match(/<title>([\s\S]*?)<\/title>/);
@@ -420,8 +468,18 @@ function parseRSS(xml, sourceName, feedType) {
         warScore += 2;
       }
     }
-
-    const sentiment = peaceScore > warScore ? 'peace' : warScore > peaceScore ? 'war' : 'neutral';
+    // Aid phrases that are actually negative: "deprived of aid" → war
+    for (const neg of aidNegators) {
+      if (lower.includes(neg)) {
+        peaceScore = Math.max(0, peaceScore - 3);
+        warScore += 3;
+      }
+    }
+    // Tie-breaker: when scores are equal AND there's actual signal (warScore > 0), lean war.
+    // When both are 0, classify as neutral (no relevant keywords found).
+    const sentiment = peaceScore > warScore ? 'peace'
+      : warScore > peaceScore || (warScore > 0 && warScore === peaceScore) ? 'war'
+      : 'neutral';
 
     items.push({
       source: sourceName, title, link: linkMatch[1],
@@ -961,7 +1019,7 @@ export default {
 
     // ── GET /data — Full /data.json payload (cached in PEACE_CACHE) ──
     if (url.pathname === '/data' && request.method === 'GET') {
-      const cached = await env.PEACE_CACHE.get('data');
+      const cached = await env.PEACE_CACHE.get(`${CACHE_VERSION}:data`);
       if (cached) {
         // Return cached data — computedAt already reflects actual query time
         return jsonResp(JSON.parse(cached));
@@ -969,7 +1027,7 @@ export default {
 
       try {
         const payload = await buildFullPayload(env);
-        await env.PEACE_CACHE.put('data', JSON.stringify(payload), { expirationTtl: CACHE_TTL_SECONDS });
+        await env.PEACE_CACHE.put(`${CACHE_VERSION}:data`, JSON.stringify(payload), { expirationTtl: CACHE_TTL_SECONDS });
         return jsonResp(payload);
       } catch (err) {
         console.error('Data build error');

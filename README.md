@@ -1,55 +1,8 @@
-# ☮️ Peace Meter v2.10.0
+# ☮️ Peace Meter v2.11.0
 
-A real-time, open-source dashboard measuring the "temperature of peace" across the Middle East using **12 independent signals**.
+Real-time dashboard measuring "temperature of peace" across the Middle East using 12 independent signals.
 
 [Live site](https://peace-meter.pages.dev) · [Source](https://github.com/ErezIsrael/peace-meter)
-
----
-
-## What It Tracks
-
-Twelve signals are scored independently (0–100) and combined into a master score using normalized weights that sum to exactly 1.0.
-
-| # | Signal | Weight | Primary Source |
-|---|--------|--------|----------------|
-| 1 | 🤝 Political Tone | 18% | GDELT 2.0 BigQuery (Goldstein Scale) |
-| 2 | 📰 Diplomatic News | 14% | GDELT 2.0 BigQuery (CAMEO codes) |
-| 3 | ✈️ Commercial Aviation | 11% | GDELT-derived estimate |
-| 4 | 💰 Prediction Markets | 10% | Polymarket API |
-| 5 | 🏛 Credit Ratings | 9% | GDELT-derived estimate |
-| 6 | 🛂 Travel Advisories | 9% | GDELT-derived estimate |
-| 7 | 🧠 Think Tank & Expert | 9% | RSS feeds (Mitvim, EcoPeace ME) |
-| 8 | 💥 Conflict Events | 8% | GDELT 2.0 BigQuery |
-| 9 | 🌍 VIEWS AI Forecast | 5% | GDELT-derived estimate |
-| 10 | 🔗 Normalization | 4% | Curated events list |
-| 11 | 📊 Economic | 3% | Curated events list |
-| 12 | 🏥 Humanitarian | 1% | GDELT-derived estimate |
-
-### Peace Levels
-
-| Score | Level | Meaning |
-|-------|-------|---------|
-| 0–25 | ❄️ Frozen | Active conflict, no diplomacy |
-| 26–50 | 🌤 Thawing | Back-channel talks |
-| 51–75 | 🌱 Growing | Active negotiations |
-| 76–100 | 🕊 Flourishing | Peace agreements |
-
-### Master Score Formula
-
-```
-Score = Tone×0.18 + News×0.14 + Aviation×0.11 + Predict×0.10 + Credit×0.09
-      + Travel×0.09 + ThinkTank×0.09 + Conflict×0.08 + VIEWS×0.05 + Norm×0.04
-      + Econ×0.03 + Human×0.01
-```
-
-- **Asymmetric EMA**: Peace rises fast (3h half-life), decays slowly (12h half-life).
-- **Volatility Multiplier**: During event spikes, tone & conflict shifts are amplified up to 1.5×.
-- Score is always clamped to 0–100.
-
-### Per-Pair Scores
-
-In addition to the master gauge, six conflict pairs are tracked:
-Israel-Palestine, Israel-Lebanon, Red Sea/Yemen, Israel-Iran, USA-Iran, Abraham Accords.
 
 ---
 
@@ -77,118 +30,9 @@ Israel-Palestine, Israel-Lebanon, Red Sea/Yemen, Israel-Iran, USA-Iran, Abraham 
 └─────────────────────┘
 ```
 
-### Why a Separate Worker?
+**Why a separate Worker?** Cloudflare cannot reach `data.gdeltproject.org` (Google Cloud egress restriction). Worker authenticates via Google Service Account JWT, runs SQL against `gdelt-bq.gdeltv2.events_partitioned` (1-day window), fetches 6 RSS feeds, computes all signals, and caches in KV (60 min TTL).
 
-Cloudflare cannot reach `data.gdeltproject.org` (Google Cloud egress restriction). BigQuery REST API is accessible, so the Worker:
-1. Authenticates via Google Service Account (JWT Bearer flow)
-2. Runs SQL against ``gdelt-bq.gdeltv2.events_partitioned`` (partitioned, 1-day window)
-3. Fetches 6 RSS feeds, computes all 12 signals + master score + 6 pair scores
-4. Caches in KV (60 min TTL) — stays within BigQuery's 1 TB/month free tier
-
-### Cost: $0/month
-
-- Cloudflare Workers: 100K requests/day free
-- KV reads/writes: included
-- BigQuery: ~0.3-0.5 GB/query × 24/day ≈ 0.3-0.6 TB/month (under 1 TB free tier)
-
----
-
-## RSS Feeds
-
-Six feeds are fetched from Cloudflare edge on each Worker cache miss:
-
-| Source | URL | Type | Cap |
-|--------|-----|------|-----|
-| Mitvim | `mitvim.org.il/en/feed/` | thinktank | 4 |
-| EcoPeace ME | `ecopeaceme.org/feed/` | thinktank | 3 |
-| BBC Middle East | `feeds.bbci.co.uk/news/world/middle_east/rss.xml` | me-news | 3 |
-| Al Monitor | `www.al-monitor.com/rss` | me-news | 3 |
-| JNS | `www.jns.org/feed/` | media (peace only) | 2 |
-| Times of Israel | `www.timesofisrael.com/feed/` | media (peace only) | 2 |
-
-Only publications from the last 30 days are shown. Articles are filtered for Middle East relevance and auto-classified (peace / war / neutral).
-
----
-
-## Features
-
-- **Zero-dependency frontend** — Vanilla JS, HTML, CSS. Charts are inline SVG.
-- **GDELT integration** — Primary data source for Political Tone, Diplomatic News, and Conflict Events.
-- **EN / HE bilingual** — Full Hebrew translation with RTL layout. Use `?lang=he` in URL.
-- **Error resilience** — 3-attempt retry, localStorage cache fallback, stale-data auto-refresh.
-- **Self-hosted fonts** — Inter & Space Grotesk variable fonts (no Google Fonts).
-- **Security** — Strict CSP, HSTS, X-Frame-Options, rate limiting (30 req/min/IP).
-- **Accessibility** — Semantic HTML, keyboard nav, screen reader support, WCAG AA contrast.
-- **Legal compliance** — Privacy Policy, Terms of Service, Accessibility Statement (EN/HE modals).
-- **Cache-safe deployment** — Version query strings on JS/CSS assets.
-
----
-
-## Local Development
-
-```bash
-# Pages frontend (with Functions)
-npx wrangler pages dev app --compatibility-date=2026-05-20
-# → http://127.0.0.1:8788
-
-# GDELT Proxy Worker
-cd gdelt-proxy
-npx wrangler dev --compatibility-date=2026-05-20
-```
-
----
-
-## Deploying
-
-### Frontend (Cloudflare Pages)
-
-```bash
-npx wrangler pages deploy app --project-name=peace-meter --skip-caching
-```
-
-**Always use `--skip-caching`** — Cloudflare caches file hashes and may skip re-uploading unchanged files.
-
-### Backend (GDELT Proxy Worker)
-
-```bash
-cd gdelt-proxy
-npx wrangler deploy --project-name=gdelt-proxy
-```
-
-### Git-Triggered Deployments
-
-Connect GitHub repo `ErezIsrael/peace-meter` (branch `main`) in Cloudflare Dashboard:
-- Framework preset: **None**
-- Build command: **(leave empty)**
-- Build output directory: `app`
-
-> `functions/` and `_routes.json` must be at the **repository root** (not inside `app/`).
-
----
-
-## Required Secrets
-
-### GDELT Proxy Worker (`gdelt-proxy/`)
-
-| Secret | Description |
-|--------|-------------|
-| `GDELT_SA_KEY` | Full JSON content of Google Service Account key |
-
-Set via: `cd gdelt-proxy && npx wrangler secret put GDELT_SA_KEY`
-
-### Pages Functions (`app/`)
-
-No secrets currently required. RSS feeds and GDELT are fetched through the Worker.
-
-### KV Namespaces
-
-Created in Cloudflare Dashboard or via CLI:
-
-| Binding | Namespace | Purpose |
-|---------|-----------|---------|
-| `PEACE_CACHE` | Worker | Full `/data` payload (60 min TTL) |
-| `RATE_LIMIT` | Worker | Sliding-window rate limiting (30 req/min/IP) |
-| `GDELT_CACHE` | Worker | BigQuery auth token + metrics (60 min TTL) |
+**Cost: ~$0/month** — Workers: 100K req/day free, KV: included, BigQuery: ~0.3–0.6 TB/month (under 1 TB free tier).
 
 ---
 
@@ -201,25 +45,151 @@ peace-meter/
 ├── functions/
 │   └── data.json.js       # Pages Function — thin proxy to Worker
 ├── app/                   # Static frontend (deployed content)
-│   ├── index.html         # Main page
+│   ├── index.html
 │   ├── app.js             # Frontend logic, SVG rendering, i18n
 │   ├── lang.js            # EN/HE translations, signal metadata, legal modals
-│   ├── styles.css         # Dark theme, RTL, accessibility
+│   ├── styles.css
 │   ├── data.json          # Fallback mock data
-│   ├── me_map.svg         # Middle East map (Natural Earth data)
-│   ├── fonts/             # Self-hosted fonts
-│   ├── _headers           # Security headers (CSP, HSTS, etc.)
-│   └── _routes.json       # Pages routing
+│   ├── me_map.svg
+│   ├── fonts/             # Self-hosted fonts (Inter & Space Grotesk)
+│   ├── _headers           # Security headers
+│   └── _routes.json
 ├── gdelt-proxy/           # GDELT BigQuery Proxy Worker
 │   ├── index.js           # Worker code — GDELT + RSS + signals + pairs
 │   ├── jwt-client.js      # JWT auth for BigQuery
-│   └── wrangler.toml      # Worker config
+│   └── wrangler.toml
 └── LICENSE
 ```
 
-### Version Bumping Protocol
+---
 
-When bumping the version, update these files:
+## Signal Weights
+
+| Signal | Weight | Source |
+|--------|--------|--------|
+| Political Tone | 18% | GDELT BigQuery (Goldstein) |
+| Diplomatic News | 14% | GDELT BigQuery (CAMEO) |
+| Commercial Aviation | 11% | GDELT-derived |
+| Prediction Markets | 10% | Polymarket API |
+| Credit Ratings | 9% | GDELT-derived |
+| Travel Advisories | 9% | GDELT-derived |
+| Think Tank & Expert | 9% | RSS (Mitvim, EcoPeace) |
+| Conflict Events | 8% | GDELT BigQuery |
+| VIEWS AI Forecast | 5% | GDELT-derived |
+| Normalization | 4% | Curated events |
+| Economic | 3% | Curated events |
+| Humanitarian | 1% | GDELT-derived |
+
+**Formula:** `Score = Σ(signal_i × weight_i)` with asymmetric EMA (3h rise / 12h decay) + volatility multiplier (up to 1.5×). Clamped 0–100.
+
+**Per-pair scores:** Israel-Palestine, Israel-Lebanon, Red Sea/Yemen, Israel-Iran, USA-Iran, Abraham Accords.
+
+---
+
+## RSS Feeds (29 sources)
+
+### Think Tanks & Research
+| Source | URL | Cap |
+|--------|-----|-----|
+| Mitvim | `mitvim.org.il/en/feed/` | 4 |
+| EcoPeace ME | `ecopeaceme.org/feed/` | 3 |
+| Crisis Group | `crisisgroup.org/rss/91` | 2 |
+| Alma | `israel-alma.org/feed/` | 3 |
+
+### Middle East News
+| Source | URL | Cap |
+|--------|-----|-----|
+| BBC ME | `feeds.bbci.co.uk/news/world/middle_east/rss.xml` | 3 |
+| Al Jazeera | `aljazeera.com/xml/rss/all.xml` | 3 |
+| Guardian | `theguardian.com/world/israel/rss` | 3 |
+| NYT ME | `rss.nytimes.com/services/xml/rss/nyt/MiddleEast.xml` | 3 |
+| Al Monitor | `al-monitor.com/rss` | 3 |
+| ME Monitor | `middleeastmonitor.com/feed/` | 3 |
+| France24 | `france24.com/en/middle-east/rss` | 3 |
+| Middle East Eye | `middleeasteye.net/rss` | 3 |
+| ME News | `menews247.com/feed/` | 3 |
+| Al Bawaba | `albawaba.com/rss/all` | 3 |
+| UN News | `news.un.org/feed/subscribe/en/news/region/middle-east/...` | 2 |
+
+### General Media / Broader Coverage
+| Source | URL | Cap |
+|--------|-----|-----|
+| Foreign Policy | `foreignpolicy.com/feed/` | 2 |
+| Times of Israel | `timesofisrael.com/feed/` | 2 |
+| Haaretz (latest) | `haaretz.com/srv/haaretz-latest-headlines` | 2 |
+| Haaretz ME | `haaretz.com/srv/middle-east-news-rss` | 2 |
+| Haaretz Domestic | `haaretz.com/srv/israel-news-rss` | 2 |
+| JPost | `rss.jpost.com/rss/rssfeedsfrontpage.aspx` | 2 |
+| Arutz Sheva | `israelnationalnews.com/Rss.aspx?act=.1` | 2 |
+| JNS | `jns.org/feed/` | 2 |
+| JFeed | `a.jfeed.com/v1/rss/articles/latest/rss2` | 2 |
+| The Forward | `forward.com/rss/` | 2 |
+| Maariv | `maariv.co.il/Rss/RssChadashot` | 2 |
+| Walla | `rss.walla.co.il/feed/1` | 2 |
+| Amnesty | `amnesty.org/en/location/middle-east-and-north-africa/feed/` | 2 |
+| Bellingcat | `bellingcat.com/feed/` | 2 |
+| Google News Israel | `news.google.com/rss/search?hl=en-US&gl=US&q=israel&...` | 2 |
+
+---
+
+## Local Development
+
+```bash
+# Frontend (with Pages Functions)
+npx wrangler pages dev app --compatibility-date=2026-05-20
+# → http://127.0.0.1:8788
+
+# GDELT Proxy Worker
+cd gdelt-proxy && npx wrangler dev --compatibility-date=2026-05-20
+```
+
+---
+
+## Deploying
+
+### Frontend
+
+```bash
+npx wrangler pages deploy app --project-name=peace-meter --skip-caching
+```
+
+**Always use `--skip-caching`** — Cloudflare caches file hashes and may skip re-uploading.
+
+### Backend (Worker)
+
+```bash
+cd gdelt-proxy && npx wrangler deploy --project-name=gdelt-proxy
+```
+
+### Git-Triggered
+
+Connect GitHub repo `ErezIsrael/peace-meter` (branch `main`) in Cloudflare Dashboard. Framework preset: **None**. Build output: `app`.
+
+> `functions/` and `_routes.json` must be at repository root (not inside `app/`).
+
+---
+
+## Required Secrets & KV
+
+### Worker Secrets
+
+| Secret | Set Via |
+|--------|---------|
+| `GDELT_SA_KEY` | `cd gdelt-proxy && npx wrangler secret put GDELT_SA_KEY` |
+
+### KV Namespaces
+
+| Binding | Purpose |
+|---------|---------|
+| `PEACE_CACHE` | Full `/data` payload (60 min TTL) |
+| `RATE_LIMIT` | Sliding-window rate limiting (30 req/min/IP) |
+| `GDELT_CACHE` | BigQuery auth token + metrics (60 min TTL) |
+
+---
+
+## Version Bumping
+
+Update these files on each release:
 
 1. `app/app.js` — `const APP_VERSION` + `/* VERSION: */` comment
 2. `app/lang.js` — `/* VERSION: */` comment
@@ -229,29 +199,28 @@ When bumping the version, update these files:
 
 ---
 
-## Security
+## Security Headers (_headers)
 
-- **CORS**: Restricted to `https://peace-meter.pages.dev`
-- **CSP**: `default-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:`
-- **HSTS**: `max-age=31536000; includeSubDomains`
-- **X-Frame-Options**: DENY
-- **X-Content-Type-Options**: nosniff
-- **Rate Limiting**: 30 requests/minute per IP on the Worker
-- **Credentials**: GCP Service Account key stored as Cloudflare secret (`GDELT_SA_KEY`), never in repo
+```
+CSP: default-src 'self'; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:
+HSTS: max-age=31536000; includeSubDomains
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Rate Limiting: 30 req/min/IP
+```
 
 ---
 
-## Legal
+## Debug Checklist
 
-- **Privacy**: No personal data collected. No cookies. localStorage stores language preference and cached data only.
-- **Terms**: Informational dashboard — not financial, political, or security advice.
-- **Accessibility**: WCAG 2.1 AA compliant. Known limitations: SVG gauge for screen readers, visual-only sparklines.
-
-Full text served in EN/HE modals from the site footer.
+1. **Frontend broken?** Check `app.js` console errors, verify `/data.json` returns valid JSON.
+2. **Worker broken?** Check `gdelt-proxy/index.js`, verify `GDELT_SA_KEY` secret is set, check BigQuery token expiry in `jwt-client.js`.
+3. **Stale data?** KV TTL is 60 min — check `PEACE_CACHE` namespace in Cloudflare Dashboard.
+4. **Deploy issues?** Always use `--skip-caching` for Pages. Verify `_routes.json` at repo root routes `/data.json` to `functions/data.json.js`.
+5. **BigQuery quota?** ~0.3–0.6 TB/month — monitor in GCP Console. Free tier = 1 TB/month.
 
 ---
 
 ## Links
 
 - [Report a Bug](https://github.com/ErezIsrael/peace-meter/issues)
-- [Buy Me Coffee](https://ko-fi.com/erezse)

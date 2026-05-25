@@ -1,5 +1,5 @@
 /* ── Reset & Variables ─────────────────────────────────── */
-/* VERSION: 2.10.0 */
+/* VERSION: 2.11.0 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -247,6 +247,13 @@ html[dir="rtl"] .gauge-card {
   transition: background 0.2s;
   cursor: pointer;
   position: relative;
+}
+@media (max-width: 600px) {
+  .signal-card { padding: 10px 12px; }
+  .signal-name { font-size: 10px; margin-bottom: 2px; }
+  .signal-score { font-size: 22px; margin-bottom: 3px; }
+  .signal-detail { font-size: 11px; line-height: 1.3; }
+  .signal-spark { height: 24px; }
 }
 .signal-card::before {
   content: '';
@@ -705,6 +712,9 @@ html[dir="rtl"] .footer-links {
   accent-color: var(--thawing);
   min-width: 80px;
 }
+.weight-row input[type="range"]:disabled {
+  opacity: 0.4;
+}
 .weight-row .weight-val {
   width: 42px;
   text-align: right;
@@ -712,6 +722,23 @@ html[dir="rtl"] .footer-links {
   font-size: 13px;
   font-weight: 600;
   color: var(--accent);
+}
+.weight-lock {
+  font-size: 10px;
+  padding: 3px 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.weight-lock:hover { background: var(--card-hover); color: var(--text); }
+.weight-lock.locked {
+  background: rgba(251,191,36,0.15);
+  border-color: rgba(251,191,36,0.4);
+  color: #fbbf24;
 }
 .weight-total {
   padding: 6px 0;
