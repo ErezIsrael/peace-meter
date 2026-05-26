@@ -31,7 +31,7 @@ if sys.platform == "win32":
 
 # ─── Configuration ───────────────────────────────────────────────────
 
-LLAMA_CPP_URL = "http://localhost:8080"  # change if running elsewhere
+LLAMA_CPP_URL = os.environ.get("LLAMA_CPP_URL", "http://localhost:8080")
 LLAMA_API_KEY = os.getenv("LLAMA_API_KEY", "")  # optional
 
 CLOUDFLARE_PAGES_PROJECT = "peace-meter"
@@ -272,35 +272,21 @@ def classify_articles(articles):
         f"  {sid}: {sol['description']}" for sid, sol in SOLUTIONS.items()
     )
 
-    prompt = f"""You are a Middle East news analyst. Classify each article title into ONE category.
+    prompt = "Classify each article title into ONE category:\n"
+    prompt += solution_descriptions + "\n"
+    prompt += f"\nCategories: {', '.join(SOLUTION_IDS)}\n"
+    prompt += "\nOutput a JSON array: [{\"solution\":\"<id>\",\"sentiment\":\"<positive/negative/neutral>\",\"risk\":<1-10>}], one entry per article in order.\n\nArticles:\n"
+    prompt += "\n".join(f"{i+1}. {a['title']}" for i, a in enumerate(articles))
 
-Known categories:
-{solution_descriptions}
-
-Rules:
-- Pick the SINGLE best matching category id from: {", ".join(SOLUTION_IDS)}
-- If NONE fit, create a new category id (lowercase, hyphenated, e.g. "yemen-war")
-- Sentiment: "positive" = progress toward peace, "negative" = setback/escalation, "neutral" = mixed
-- Risk score: integer 1-10 (10 = highest risk to peace progress)
-
-Output ONLY a JSON array, no markdown, no explanation:
-[
-  {{"solution": "<id>", "sentiment": "<positive|negative|neutral>", "risk": <1-10>}},
-  ...
-]
-
-One entry per article, in order. Total: {len(articles)} entries.
-
-Articles:
-""" + "\n".join(f"{i+1}. {a['title']}" for i, a in enumerate(articles))
-
-    # llama.cpp OpenAI-compatible API
+    # llama.cpp OpenAI-compatible Chat API
     body = {
-        "prompt": prompt,
-        "n_predict": 4096,
+        "model": "Qwen3.6-27B",
+        "messages": [
+            {"role": "system", "content": "You are a Middle East news classifier. Output ONLY a valid JSON array. No explanation, no markdown."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 16000,
         "temperature": 0.0,
-        "top_p": 0.1,
-        "stop": ["\n\n", "[DONE]"],
     }
 
     headers = {"Content-Type": "application/json"}
@@ -309,14 +295,14 @@ Articles:
 
     try:
         req = Request(
-            f"{LLAMA_CPP_URL}/v1/completions",
+            f"{LLAMA_CPP_URL}/v1/chat/completions",
             data=json.dumps(body).encode(),
             headers=headers,
         )
-        with urlopen(req, timeout=300) as f:
+        with urlopen(req, timeout=600) as f:
             response = json.loads(f.read().decode())
 
-        result_text = response.get("choices", [{}])[0].get("text", "")
+        result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
         print(f"  Response length: {len(result_text)} chars")
 
         # Extract JSON array from response

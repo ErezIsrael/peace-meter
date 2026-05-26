@@ -339,7 +339,7 @@ Articles:
 
     body = {
         "prompt": prompt,
-        "n_predict": 2000,
+        "n_predict": 16000,
         "temperature": 0.0,
         "top_p": 0.1,
     }
