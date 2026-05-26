@@ -522,7 +522,7 @@ def build_output(articles, classifications):
                 "direction": direction,
                 "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
                 "summary": events[0]["text"],
-                "events": events[:12],
+                "events": events,
                 "confidence": "high" if len(events) > 5 else "medium" if len(events) > 2 else "low",
             })
         else:
@@ -537,7 +537,7 @@ def build_output(articles, classifications):
                 "direction": direction,
                 "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
                 "summary": events[0]["text"],
-                "events": events[:12],
+                "events": events,
                 "confidence": "low",
             })
 
@@ -665,10 +665,9 @@ def _merge_with_existing(data, existing):
         if new_sol["id"] not in existing_ids:
             existing["solutions"].append(new_sol)
 
-    # Recompute for all solutions
+    # Recompute for all solutions — compute on ALL events, store all
     for sol in existing["solutions"]:
         sol["events"].sort(key=lambda e: e["date"], reverse=True)
-        sol["events"] = sol["events"][:12]  # keep top events for display
         sol["phaseIndex"] = compute_phase(sol["events"])
         sol["direction"] = compute_direction(sol["events"])
         sol["keyMetric"] = {"label": "Events (7d)", "value": str(len(sol["events"]))}
