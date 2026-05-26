@@ -70,20 +70,6 @@ const SOLUTIONS = {
                  'ground offensive', 'military operation', 'hostilities'],
     },
   },
-  'hostages': {
-    icon: '👥', name: 'Hostage & POW Release',
-    phases: ['No Progress', 'Negotiations', 'Partial Release', 'Most Returned', 'All Released'],
-    primary: ['hostage', 'hostages', 'prisoner exchange', 'prisoner swap',
-              'release hostages', 'return hostages', 'captives',
-              'pows', 'freedom deal', 'prisoners released',
-              'detainee release', 'prisoner release'],
-    context: {
-      locations: [],
-      patterns: ['icrc', 'red cross', 'families reunite',
-                 'detainee', 'detained', 'arrested', 'imprisoned',
-                 'prisoner', 'captivity'],
-    },
-  },
   'aid': {
     icon: '🚚', name: 'Humanitarian Aid',
     phases: ['Blocked', 'Limited Access', 'Corridors Open', 'Steady Flow', 'Full Access'],
@@ -160,8 +146,8 @@ const SOLUTIONS = {
                  'civilian homes', 'destruction', 'levelled'],
     },
   },
-  'iraq': {
-    icon: '☢️', name: 'Iran Nuclear & War',
+  'iran': {
+    icon: '☣️', name: 'Iran Nuclear & War',
     phases: ['War', 'Ceasefire Talks', 'Armistice', 'Nuclear Deal', 'Resolution'],
     primary: ['iran us', 'us iran', 'iran deal', 'iran agreement',
               'iran war', 'iran ceasefire', 'nuclear deal',
@@ -185,6 +171,76 @@ const SOLUTIONS = {
                  'withdrawal', 'withdraw', 'killing', 'killed',
                  'civilian', 'children', 'bombardment', 'raid',
                  'ground offensive', 'occupation'],
+    },
+  },
+  'gaza-crisis': {
+    icon: '🏚', name: 'Gaza Humanitarian Crisis',
+    phases: ['Blockade', 'Aid Inflow', 'Recovery', 'Rebuilding', 'Stabilized'],
+    primary: ['gaza crisis', 'gaza famine', 'gaza starvation', 'gaza death',
+              'gaza hospital', 'gaza water', 'gaza medicine',
+              'gaza displacement', 'gaza aid blocked', 'gaza siege',
+              'gaza blockade'],
+    context: {
+      locations: ['gaza'],
+      patterns: ['displacement', 'refugee', 'famine', 'starvation',
+                 'malnutrition', 'water crisis', 'medicine shortage',
+                 'aid denied', 'aid blocked', 'siege', 'civilian death',
+                 'hospital destroyed', 'civilian killed', 'shelling'],
+    },
+  },
+  'human-rights': {
+    icon: '⚖️', name: 'Human Rights & Intl Law',
+    phases: ['Allegations', 'Investigations', 'Sanctions', 'Accountability', 'Reform'],
+    primary: ['human rights', 'war crimes', 'icc', 'icj',
+              'genocide', 'flotilla', 'activists arrested',
+              'international court', 'war crime',
+              'human rights violation', 'abuse allegations'],
+    context: {
+      locations: ['gaza', 'west bank', 'israel', 'icc', 'icj'],
+      patterns: ['war crime', 'human rights', 'icc', 'icj',
+                 'genocide', 'crimes against humanity',
+                 'arrest warrant', 'sanctions', 'flotilla',
+                 'activist', 'msf', 'amnesty', 'hrw'],
+    },
+  },
+  'domestic-politics': {
+    icon: '🏛', name: 'Israeli Domestic Politics',
+    phases: ['Fractured', 'Coalition Shift', 'Policy Change', 'Elections', 'Stability'],
+    primary: ['netanyahu', 'herzog', 'knesset', 'coalition',
+              'israeli election', 'israeli politics',
+              'israeli protest', 'judicial reform',
+              'liberal center', 'opposition'],
+    context: {
+      locations: ['israel', 'tel aviv', 'jerusalem'],
+      patterns: ['netanyahu', 'coalition', 'knesset', 'herzog',
+                 'protest', 'demonstration', 'election', 'polls',
+                 'political', 'prime minister', 'president'],
+    },
+  },
+  'west-bank': {
+    icon: '🔥', name: 'West Bank & Settlements',
+    phases: ['Escalation', 'Violence Spike', 'Mediation', 'Calming', 'Frozen Conflict'],
+    primary: ['west bank', 'settler violence', 'settlements',
+              'east jerusalem', 'hebron', 'nablus',
+              'al-aqsa', 'west bank violence'],
+    context: {
+      locations: ['west bank', 'hebron', 'nablus', 'ramallah', 'jenin'],
+      patterns: ['settler', 'settlement', 'occupation', 'violence',
+                 'raid', 'arrest', 'killed', 'demolish',
+                 'palestinian', 'east jerusalem', 'al-aqsa'],
+    },
+  },
+  'regional': {
+    icon: '🌍', name: 'Regional Relations',
+    phases: ['Tensions', 'Diplomatic Push', 'Accord', 'Integration', 'Cooperation'],
+    primary: ['jordan', 'egypt', 'turkey', 'turkiye', 'morocco',
+              'saudi arabia', 'uae', 'qatar', 'arab league',
+              'regional diplomacy', 'china middle east'],
+    context: {
+      locations: ['jordan', 'egypt', 'turkey', 'morocco', 'uae', 'qatar', 'bahrain', 'oman'],
+      patterns: ['arab', 'diplomatic', 'regional', 'gulf',
+                 'mediation', 'summit', 'china', 'russia',
+                 'saudi', 'turkey', 'turkiye', 'morocco'],
     },
   },
 };
@@ -404,15 +460,18 @@ async function buildPeaceRoomData() {
     });
   }
 
-  // Build solutions array
+  // Build solutions array — only solutions with events
   const solutions = [];
+  const activeIds = [];
   let totalAdvancing = 0, totalStable = 0, totalStalling = 0;
 
   for (const [solId, cfg] of Object.entries(SOLUTIONS)) {
     const events = solutionEvents[solId] || [];
+    if (events.length === 0) continue;  // skip empty categories
+    activeIds.push(solId);
     const direction = computeDirection(events);
     const phaseIndex = computePhaseIndex(events);
-    const summary = events.length > 0 ? events[0].text : 'No recent developments';
+    const summary = events[0].text;
 
     if (direction === 'advancing') totalAdvancing++;
     else if (direction === 'stalling') totalStalling++;
@@ -427,6 +486,10 @@ async function buildPeaceRoomData() {
     });
   }
 
+  // Sort by event count desc, take top 8
+  solutions.sort((a, b) => b.keyMetric.value - a.keyMetric.value);
+  const top8 = solutions.slice(0, 8);
+
   // Overall momentum
   let momentumDir, momentumLabel;
   if (totalAdvancing > totalStalling) { momentumDir = 'advancing'; momentumLabel = 'Net Positive'; }
@@ -434,7 +497,8 @@ async function buildPeaceRoomData() {
   else { momentumDir = 'stable'; momentumLabel = 'Mixed Signals'; }
 
   return {
-    solutions,
+    solutions: top8,
+    activeSolutions: top8.map(s => s.id),
     overallMomentum: {
       direction: momentumDir,
       label: momentumLabel,
