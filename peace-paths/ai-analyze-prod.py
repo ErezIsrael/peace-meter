@@ -323,7 +323,8 @@ def _classify_batch(batch):
     articles_text = "\n".join(lines)
     prompt = "Classify each article into ONE category from the list below.\n"
     prompt += "Read the snippet carefully — the title alone can be misleading.\n"
-    prompt += "Choose the MOST SPECIFIC matching category. Do NOT put general Middle East news into Iran or Lebanon.\n"
+    prompt += "Choose the MOST SPECIFIC matching category.\n"
+    prompt += "Do NOT put general ME news into Iran or Lebanon — use regional or diplomacy instead.\n"
     prompt += solution_descriptions + "\n"
     prompt += f"\nCategories: {', '.join(SOLUTION_IDS)}\n"
     prompt += '\nOutput ONLY a JSON array: [{"solution":"<id>","sentiment":"<positive/negative/neutral>","risk":<1-10>}], one per article.\n\nArticles:\n'
@@ -369,23 +370,47 @@ def _classify_batch(batch):
 
 
 def classify_articles(articles):
-    """Classify articles in batches of 30 to llama.cpp."""
+    """Classify articles in batches of 5 to llama.cpp.
+    Small batches = higher accuracy (AI focuses on few articles).
+    Failsafe: if AI fails 3 consecutive batches, switch to keyword fallback."""
     print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp...")
-    batch_size = 30
+    batch_size = 5
     all_classifications = []
     ai_count = 0
+    consecutive_failures = 0
+    MAX_CONSECUTIVE_FAILURES = 3  # failsafe: switch to keyword fallback after 3 failures
+    ai_mode = True
 
     for i in range(0, len(articles), batch_size):
         batch = articles[i:i+batch_size]
         t0 = time.time()
-        result = _classify_batch(batch)
-        elapsed = time.time() - t0
-        if result:
-            all_classifications.extend(result)
-            ai_count += len(result)
-            print(f"  Batch {i//batch_size+1}: {len(result)} classified in {elapsed:.1f}s")
+
+        if ai_mode:
+            result = _classify_batch(batch)
+            elapsed = time.time() - t0
+            if result:
+                all_classifications.extend(result)
+                ai_count += len(result)
+                consecutive_failures = 0
+                print(f"  Batch {i//batch_size+1}: {len(result)} classified in {elapsed:.1f}s")
+            else:
+                consecutive_failures += 1
+                print(f"  Batch {i//batch_size+1}: AI failed in {elapsed:.1f}s ({consecutive_failures} consec.)")
+                if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                    ai_mode = False
+                    print(f"  \u26a0\ufe0f Switching to keyword fallback (AI unreachable)")
+                else:
+                    # Retry once on failure
+                    result = _classify_batch(batch)
+                    elapsed = time.time() - t0
+                    if result:
+                        all_classifications.extend(result)
+                        ai_count += len(result)
+                        consecutive_failures = 0
+                    else:
+                        # Give up on this batch, use keyword fallback
+                        all_classifications.extend(keyword_classify(batch))
         else:
-            print(f"  Batch {i//batch_size+1}: AI failed in {elapsed:.1f}s, using keyword fallback")
             all_classifications.extend(keyword_classify(batch))
 
     print(f"  Total: {ai_count}/{len(articles)} via AI")
