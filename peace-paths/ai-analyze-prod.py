@@ -335,36 +335,49 @@ _CATEGORY_BLOCK = "\n".join(
 _CATEGORY_LIST = ", ".join(SOLUTION_IDS)
 
 
+# Pre-built system prompt (static, reused per article)
+_SYSTEM_PROMPT = (
+    "You are a precise Middle East news classifier. "
+    "Your task is to analyze the provided news text and output a single, valid JSON object."
+    "\n\n"
+    "CRITICAL RULES:"
+    "\n"
+    "1. Choose the MOST SPECIFIC category. Do NOT put general news into 'iran' or 'lebanon'—use 'regional' or 'diplomacy' instead."
+    "\n"
+    "2. Output ONLY raw JSON. No explanations, no markdown code blocks."
+    "\n\n"
+    f"Categories:\n{_CATEGORY_BLOCK}"
+)
+
+
 def _classify_article(article):
     """Classify a single article via llama.cpp chat API.
-    Returns dict {me_relevant, solution, sentiment, risk} or None on failure.
+    Returns dict {me_relevant, category, sentiment, risk} or None on failure.
     """
     snippet = article.get("snippet", "")
     context = snippet if snippet else article["title"]
 
-    prompt = (
-        "You are a Middle East news filter.\n"
+    user_prompt = (
+        "Analyze this specific article and determine its category, sentiment, risk (1-10), and Middle East relevance."
+        "\n\n"
+        "<article>"
         "\n"
-        "Step 1: Is this article about Middle East conflict, politics, diplomacy, humanitarian issues, or regional security?\n"
-        "Step 2: If yes, classify it into ONE category from the list below.\n"
+        f"<title>{article['title']}</title>"
         "\n"
-        f"Categories:\n{_CATEGORY_BLOCK}\n"
-        f"\nCategories list: {_CATEGORY_LIST}\n"
+        f"<snippet>{context}</snippet>"
         "\n"
-        "Output ONLY a JSON object:\n"
-        '{"me_relevant": true/false, "solution": "<id>", "sentiment": "<positive/negative/neutral>", "risk": <1-10>}\n'
-        'If me_relevant is false, set solution to "null", sentiment to "neutral", risk to 0.\n'
+        "</article>"
+        "\n\n"
+        "Output exactly in this JSON format:"
         "\n"
-        "Article:\n"
-        f"  Title: {article['title']}\n"
-        f"  Context: {context}\n"
+        '{"me_relevant": true, "category": "ceasefire", "sentiment": "neutral", "risk": 4}'
     )
 
     body = {
         "model": "Qwen3.6-27B",
         "messages": [
-            {"role": "system", "content": "Middle East news filter. Output ONLY a valid JSON object with keys: me_relevant, solution, sentiment, risk. No explanation."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt}
         ],
         "max_tokens": 8000,
         "temperature": 0.0,
@@ -388,6 +401,12 @@ def _classify_article(article):
 
     result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
 
+    # Strip markdown code fences if LLM wraps them
+    result_text = result_text.strip()
+    if result_text.startswith("```"):
+        lines = result_text.split("\n")
+        result_text = "\n".join(lines[1:-1]).strip() if len(lines) > 2 else "".join(lines[1:]).strip()
+
     # Extract JSON object
     first_brace = result_text.find('{')
     last_brace = result_text.rfind('}')
@@ -405,15 +424,29 @@ def _classify_article(article):
 def classify_articles(articles):
     """Classify each article individually via llama.cpp.
     Articles with me_relevant=false are silently dropped.
-    Returns list of {solution, sentiment, risk} dicts for relevant articles.
+    Returns list of (article, {solution, sentiment, risk}) pairs.
     """
+    # Lightweight pre-filter: skip obvious noise before LLM call (saves tokens + time)
+    HARD_EXCLUDE = {
+        "world cup", "fifa", "afcon", "premier league", "man city", "guardiola",
+        "real estate", "property investment", "fragrance", "bakhoor", "perfume",
+        "hollywood", "celebrity", "sydney sweeney", "euphoria", "tv show",
+        "secondhand smoke", "smoke in public", "sponsored",
+    }
     print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp (1-by-1)...")
     pairs = []  # list of (article, classification)
     relevant = 0
     dropped = 0
+    pre_filtered = 0
     ai_failures = 0
 
     for idx, article in enumerate(articles):
+        # Pre-filter: skip obvious noise
+        lower_title = article["title"].lower()
+        if any(w in lower_title for w in HARD_EXCLUDE):
+            pre_filtered += 1
+            continue
+
         t0 = time.time()
         result = _classify_article(article)
         elapsed = time.time() - t0
@@ -432,8 +465,10 @@ def classify_articles(articles):
                 break
 
         if result.get("me_relevant"):
+            # LLM returns 'category', we map to our internal 'solution' key
+            sol = result.get("category") or result.get("solution") or "regional"
             pairs.append((article, {
-                "solution": result.get("solution", "regional"),
+                "solution": sol,
                 "sentiment": result.get("sentiment", "neutral"),
                 "risk": result.get("risk", 5),
             }))
@@ -444,7 +479,7 @@ def classify_articles(articles):
         if (idx + 1) % 20 == 0 or idx == len(articles) - 1:
             print(f"  [{idx+1}/{len(articles)}] {relevant} relevant, {dropped} dropped")
 
-    print(f"  Total: {relevant} relevant / {len(articles)} articles")
+    print(f"  Total: {relevant} relevant, {dropped} dropped by LLM, {pre_filtered} pre-filtered / {len(articles)} articles")
     return pairs
 
 # ═══════════════════════════════════════════════════════════════════════
