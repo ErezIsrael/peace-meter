@@ -29,6 +29,12 @@ from email.utils import parsedate_to_datetime
 from urllib.request import urlopen, Request
 from urllib.error import URLError
 
+try:
+    from bs4 import BeautifulSoup
+    HAS_BS4 = True
+except ImportError:
+    HAS_BS4 = False
+
 # Fix Windows console encoding
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
@@ -181,6 +187,21 @@ def inject_category(cat_id, name, description, icon=None):
 # RSS Fetching & Parsing
 # ═══════════════════════════════════════════════════════════════════════
 
+def _extract_text(raw_html):
+    """Extract clean text from HTML content.
+    Prefers BeautifulSoup for clean stripping; falls back to regex.
+    """
+    if HAS_BS4:
+        soup = BeautifulSoup(raw_html, "html.parser")
+        text = soup.get_text(separator=" ", strip=True)
+    else:
+        text = html.unescape(raw_html)
+        text = re.sub(r"<[^>]+>", " ", text)
+    # Collapse whitespace
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
 def fetch_rss(url, source, max_items):
     """Fetch and parse RSS feed using regex."""
     try:
@@ -210,15 +231,23 @@ def fetch_rss(url, source, max_items):
         title = re.sub(r"&\w+;|&#\d+;|&#x[0-9a-fA-F]+;", "", title)
         title = re.sub(r"<[^>]+>", "", title)
 
-        # Extract description/snippet for better AI classification
-        desc_m = re.search(r"<description>(.*?)</description>", block, re.DOTALL)
-        desc = ""
-        if desc_m:
-            desc = desc_m.group(1).strip()
-            desc = desc.replace("<![CDATA[", "").replace("]]>", "")
-            desc = html.unescape(desc)
-            desc = re.sub(r"<[^>]+>", "", desc)
-            desc = desc[:200]  # limit snippet length
+        # Extract snippet from <content:encoded> first, then <description>
+        snippet = ""
+        # Try <content:encoded> — usually holds full article text
+        content_m = re.search(r"<content:encoded>(.*?)</content:encoded>", block, re.DOTALL)
+        if content_m:
+            raw = content_m.group(1)
+            raw = raw.replace("<![CDATA[", "").replace("]]>", "")
+            snippet = _extract_text(raw)
+        else:
+            # Fallback to <description>
+            desc_m = re.search(r"<description>(.*?)</description>", block, re.DOTALL)
+            if desc_m:
+                raw = desc_m.group(1)
+                raw = raw.replace("<![CDATA[", "").replace("]]>", "")
+                snippet = _extract_text(raw)
+        # Truncate to 1500 chars for AI prompt
+        snippet = snippet[:1500]
 
         link = link_m.group(1).strip() if link_m else ""
         date_str = date_m.group(1).strip() if date_m else datetime.now(timezone.utc).isoformat()
@@ -234,7 +263,7 @@ def fetch_rss(url, source, max_items):
             "link": link,
             "date": date_str,
             "source": source,
-            "snippet": desc,
+            "snippet": snippet,
         })
     return articles
 
@@ -264,23 +293,23 @@ def fetch_all_feeds(age_hours=None):
     me_countries = ["egypt", "saudi", "uae", "qatar", "doha", "jordan", "bahrain", "morocco", "iraq", "baghdad"]
 
     # Words that indicate the article is NOT about ME conflict/politics
+    # Keep these specific — broad words like "film" or "series" are too common
     me_exclude = [
-        "sponsored", "ad", "advertisement",
-        "real estate", "property investment", "property for sale",
+        "sponsored content", "advertisement", "advertising",
+        "property investment", "real estate market", "property for sale",
         "fragrance", "bakhoor", "perfume",
-        "world cup", "afcon", "champions league", "man city",
-        "smoke", "secondhand smoke",
-        "music", "concert", "tour",
-        "movie", "film", "series", "euphoria", "hollywood",
-        "celebrity", "entertainment", "tv show", "sydney sweeney",
+        "world cup", "afcon", "man city", "guardiola",
+        "secondhand smoke",
+        "hollywood", "sydney sweeney", "euphoria role",
+        "celebrity", "tv show", "music concert",
     ]
 
     def is_me_relevant(article):
         title = article["title"].lower()
         snippet = article.get("snippet", "").lower()
         text = title + " " + snippet
-        # Exclude non-ME articles early
-        if any(ex in text for ex in me_exclude):
+        # Exclude non-ME articles — check TITLE only for exclusions
+        if any(ex in title for ex in me_exclude):
             return False
         # Direct match on conflict/political keywords
         if any(kw in text for kw in me_conflict):
