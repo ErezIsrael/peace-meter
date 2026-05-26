@@ -328,8 +328,12 @@ def _classify_batch(batch):
         data=json.dumps(body).encode(),
         headers=headers,
     )
-    with urlopen(req, timeout=120) as f:
-        response = json.loads(f.read().decode())
+    try:
+        with urlopen(req, timeout=120) as f:
+            response = json.loads(f.read().decode())
+    except Exception as e:
+        print(f"  AI unavailable: {e}")
+        return None
 
     result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
 
