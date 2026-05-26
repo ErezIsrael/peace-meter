@@ -248,15 +248,51 @@ def fetch_all_feeds(age_hours=None):
     print(f"\U0001f4e1 Fetching {len(RSS_FEEDS)} RSS feeds...")
     all_articles = []
 
-    me_keywords = [
+    # Conflict/political keywords — indicate ME-relevant news
+    me_conflict = [
         "israel", "palestine", "gaza", "west bank", "hamas", "iran",
         "lebanon", "hezbollah", "syria", "yemen", "houthi", "red sea",
-        "egypt", "saudi", "uae", "qatar", "doha", "jordan",
-        "bahrain", "morocco", "iraq", "baghdad",
         "tel aviv", "jerusalem", "beirut", "damascus", "riyadh",
-        "middle east", "sinai", "hormuz", "arab",
-        "ceasefire", "truce", "aid", "refugee",
+        "middle east", "sinai", "hormuz",
+        "netanyahu", "idf", "palestinian", "knesset",
+        "ceasefire", "truce", "armistice",
+        "occupation", "settlement", "settler",
+        "flotilla", "refugee", "displaced",
+        "ben-gvir", "abbas", "aoun", "khamenei",
     ]
+    # Country names that are ME — but need conflict context to be relevant
+    me_countries = ["egypt", "saudi", "uae", "qatar", "doha", "jordan", "bahrain", "morocco", "iraq", "baghdad"]
+
+    # Words that indicate the article is NOT about ME conflict/politics
+    me_exclude = [
+        "sponsored", "ad", "advertisement",
+        "real estate", "property investment", "property for sale",
+        "fragrance", "bakhoor", "perfume",
+        "world cup", "afcon", "champions league", "man city",
+        "smoke", "secondhand smoke",
+        "music", "concert", "tour",
+        "movie", "film", "series", "euphoria", "hollywood",
+        "celebrity", "entertainment", "tv show", "sydney sweeney",
+    ]
+
+    def is_me_relevant(article):
+        title = article["title"].lower()
+        snippet = article.get("snippet", "").lower()
+        text = title + " " + snippet
+        # Exclude non-ME articles early
+        if any(ex in text for ex in me_exclude):
+            return False
+        # Direct match on conflict/political keywords
+        if any(kw in text for kw in me_conflict):
+            return True
+        # Country name alone is not enough — need conflict context
+        if any(c in text for c in me_countries):
+            conflict_words = ["war", "conflict", "strike", "attack", "military", "politics",
+                              "diplomacy", "tensions", "nuclear", "missile", "sanctions",
+                              "peace", "deal", "agreement", "protest", "riot", "killed",
+                              "dead", "invasion", "alliance", "normalization"]
+            return any(w in text for w in conflict_words)
+        return False
 
     now = datetime.now(timezone.utc)
     if age_hours is not None:
@@ -279,8 +315,7 @@ def fetch_all_feeds(age_hours=None):
                 print(f"  \u26a0 {source}: {e}")
 
     for a in fetched:
-        title_lower = a["title"].lower()
-        if not any(kw in title_lower for kw in me_keywords):
+        if not is_me_relevant(a):
             continue
         try:
             dt = datetime.fromisoformat(a["date"])
