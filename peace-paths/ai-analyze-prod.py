@@ -35,7 +35,7 @@ if sys.platform == "win32":
 
 # ─── Configuration ───────────────────────────────────────────────────
 
-LLAMA_CPP_URL = os.environ.get("LLAMA_CPP_URL", "http://localhost:8080")
+LLAMA_CPP_URL = os.environ.get("LLAMA_CPP_URL", "http://192.168.2.121:8080")
 LLAMA_API_KEY = os.getenv("LLAMA_API_KEY", "")  # optional
 
 CLOUDFLARE_PAGES_PROJECT = "peace-meter"

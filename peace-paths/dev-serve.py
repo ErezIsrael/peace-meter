@@ -45,15 +45,12 @@ def main():
         if not sync_data():
             sys.exit(1)
 
-    # Check if data is from keyword fallback
+    # Show data source info
     data = json.loads(DATA_JSON.read_text(encoding="utf-8"))
-    if data.get("source") == "ai-analyzer-prod" and data.get("feedCount", 0) > 0:
-        # Check for ai_risk markers — keyword fallback uses ai_risk=5
-        sample = data.get("solutions", [{}])[0].get("events", [])
-        if sample and sample[0].get("ai_risk") == 5:
-            print("  ⚠ WARNING: Data is from KEYWORD FALLBACK (llama server unavailable)")
-            print("  Classification quality is poor — many articles misclassified")
-            print("  Start llama-server on 192.168.2.121 for proper AI classification\n")
+    sample = data.get("solutions", [{}])[0].get("events", [])
+    if sample and sample[0].get("ai_risk") == 5 and sample[0].get("ai_risk") is not None:
+        print("  ⚠ WARNING: Data is from KEYWORD FALLBACK (llama server unavailable)")
+        print("  Run: LLAMA_CPP_URL=http://192.168.2.121:8080 python ai-analyze-prod.py --daily")
 
     print(f"\n  Serving Peace Room on http://localhost:{args.port}")
     print(f"  App dir: {APP_DIR}")
