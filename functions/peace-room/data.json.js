@@ -477,7 +477,7 @@ export async function onRequest(context) {
 
   try {
     // Try to load AI-generated solutions.json from static assets
-    const asset = await context.env.ASSETS.fetch('./solutions.json');
+    const asset = await context.env.ASSETS.fetch('/peace-room/solutions.json');
     if (asset.ok) {
       const aiData = await asset.json();
       // Check if data is fresh (< 12 hours)
