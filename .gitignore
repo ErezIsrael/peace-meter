@@ -43,6 +43,7 @@ peace-paths/test_*.py
 peace-paths/app.js
 peace-paths/index.html
 peace-paths/styles.css
+peace-paths/admin/
 
 # Windows junk
 nul
