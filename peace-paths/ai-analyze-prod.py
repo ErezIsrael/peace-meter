@@ -17,6 +17,7 @@ import json
 import sys
 import os
 import re
+import html
 import time
 import hashlib
 import concurrent.futures
@@ -182,7 +183,8 @@ def fetch_rss(url, source, max_items):
 
         title = title_m.group(1).strip()
         title = title.replace("<![CDATA[", "").replace("]]>", "")
-        title = re.sub(r"&\w+;|&#\d+;", "", title)
+        title = html.unescape(title)
+        title = re.sub(r"&\w+;|&#\d+;|&#x[0-9a-fA-F]+;", "", title)
         title = re.sub(r"<[^>]+>", "", title)
 
         link = link_m.group(1).strip() if link_m else ""
@@ -264,28 +266,26 @@ def fetch_all_feeds():
 # AI Classification via llama.cpp (SINGLE prompt for all articles)
 # ═══════════════════════════════════════════════════════════════════════
 
-def classify_articles(articles):
-    """Send ALL article titles to llama.cpp in ONE prompt."""
-    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp...")
-
+def _classify_batch(batch):
+    """Classify a batch of articles via llama.cpp chat API."""
     solution_descriptions = "\n".join(
         f"  {sid}: {sol['description']}" for sid, sol in SOLUTIONS.items()
     )
 
-    prompt = "Classify each article title into ONE category:\n"
+    articles_text = "\n".join(f"{i+1}. {a['title']}" for i, a in enumerate(batch))
+    prompt = "Classify each article into ONE category:\n"
     prompt += solution_descriptions + "\n"
     prompt += f"\nCategories: {', '.join(SOLUTION_IDS)}\n"
-    prompt += "\nOutput a JSON array: [{\"solution\":\"<id>\",\"sentiment\":\"<positive/negative/neutral>\",\"risk\":<1-10>}], one entry per article in order.\n\nArticles:\n"
-    prompt += "\n".join(f"{i+1}. {a['title']}" for i, a in enumerate(articles))
+    prompt += '\nOutput ONLY a JSON array: [{"solution":"<id>","sentiment":"<positive/negative/neutral>","risk":<1-10>}], one per article.\n\nArticles:\n'
+    prompt += articles_text
 
-    # llama.cpp OpenAI-compatible Chat API
     body = {
         "model": "Qwen3.6-27B",
         "messages": [
-            {"role": "system", "content": "You are a Middle East news classifier. Output ONLY a valid JSON array. No explanation, no markdown."},
+            {"role": "system", "content": "Middle East news classifier. Output ONLY a valid JSON array. No explanation."},
             {"role": "user", "content": prompt}
         ],
-        "max_tokens": 16000,
+        "max_tokens": 8000,
         "temperature": 0.0,
     }
 
@@ -293,41 +293,49 @@ def classify_articles(articles):
     if LLAMA_API_KEY:
         headers["Authorization"] = f"Bearer {LLAMA_API_KEY}"
 
-    try:
-        req = Request(
-            f"{LLAMA_CPP_URL}/v1/chat/completions",
-            data=json.dumps(body).encode(),
-            headers=headers,
-        )
-        with urlopen(req, timeout=600) as f:
-            response = json.loads(f.read().decode())
+    req = Request(
+        f"{LLAMA_CPP_URL}/v1/chat/completions",
+        data=json.dumps(body).encode(),
+        headers=headers,
+    )
+    with urlopen(req, timeout=120) as f:
+        response = json.loads(f.read().decode())
 
-        result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
-        print(f"  Response length: {len(result_text)} chars")
+    result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
 
-        # Extract JSON array from response
-        first_bracket = result_text.find('[')
-        last_bracket = result_text.rfind(']')
-        if first_bracket != -1 and last_bracket > first_bracket:
-            json_str = result_text[first_bracket:last_bracket+1]
-            try:
-                classifications = json.loads(json_str)
-                print(f"  Parsed {len(classifications)} classifications")
-                return classifications
-            except json.JSONDecodeError as e:
-                print(f"  \u26a0 JSON parse error at pos {e.pos}: {e.msg}")
-                print(f"  Context: ...{json_str[max(0,e.pos-30):e.pos+30]}...")
-                print(f"  Response preview: {result_text[:500]}")
-                return None
+    first_bracket = result_text.find('[')
+    last_bracket = result_text.rfind(']')
+    if first_bracket != -1 and last_bracket > first_bracket:
+        json_str = result_text[first_bracket:last_bracket+1]
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def classify_articles(articles):
+    """Classify articles in batches of 50 to llama.cpp."""
+    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp...")
+    batch_size = 50
+    all_classifications = []
+    ai_count = 0
+
+    for i in range(0, len(articles), batch_size):
+        batch = articles[i:i+batch_size]
+        t0 = time.time()
+        result = _classify_batch(batch)
+        elapsed = time.time() - t0
+        if result:
+            all_classifications.extend(result)
+            ai_count += len(result)
+            print(f"  Batch {i//batch_size+1}: {len(result)} classified in {elapsed:.1f}s")
         else:
-            print(f"  \u26a0 No JSON array found in response")
-            print(f"  Response preview: {result_text[:500]}")
-            return None
+            print(f"  Batch {i//batch_size+1}: AI failed in {elapsed:.1f}s, using keyword fallback")
+            all_classifications.extend(keyword_classify(batch))
 
-    except Exception as e:
-        print(f"  \u26a0 llama.cpp classification failed: {e}")
-        return None
-
+    print(f"  Total: {ai_count}/{len(articles)} via AI")
+    return all_classifications
 
 # ═══════════════════════════════════════════════════════════════════════
 # Keyword fallback classifier

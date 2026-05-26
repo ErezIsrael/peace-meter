@@ -289,7 +289,8 @@ function decodeHTML(text) {
     .replace(/&#8230;/g, '\u2026').replace(/&#39;/g, "'")
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
     .replace(/&ndash;/g, '\u2013').replace(/&mdash;/g, '\u2014')
-    .replace(/\&#\d+;/g, ' ').trim();
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10))).trim();
 }
 
 function parseRSS(xml, sourceName) {

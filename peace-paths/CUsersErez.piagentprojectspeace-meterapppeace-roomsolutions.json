@@ -1,0 +1,606 @@
+{
+  "solutions": [
+    {
+      "id": "domestic-politics",
+      "icon": "🏛",
+      "name": "Israeli Domestic Politics",
+      "phases": [
+        "Fractured",
+        "Coalition Shift",
+        "Policy Change",
+        "Elections",
+        "Stability"
+      ],
+      "phaseIndex": 0,
+      "direction": "stable",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "7"
+      },
+      "summary": "Hormuz and the Globalization of the War",
+      "events": [
+        {
+          "date": "Sun, 01 Mar 2026 22:02:22 +0000",
+          "text": "Hormuz and the Globalization of the War",
+          "sentiment": "neutral",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/hormuz-and-the-globalization-of-the-war/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 19:57:40 +0300",
+          "text": "As Arab parties unite ahead of the election, Palestinians in Israel demand some answers",
+          "sentiment": "neutral",
+          "source": "Haaretz - Domestic",
+          "link": "https://www.haaretz.com/israel-news/haaretz-today/2026-05-25/ty-article/.highlight/as-arab-parties-unite-palestinians-in-israel-demand-some-answers/0000019e-5fc3-d66e-a99f-7ff351a90000",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 14:55:52 +0000",
+          "text": "Even After a Strait of Hormuz Deal, Moving 1,500 Ships Won’t Be Easy",
+          "sentiment": "neutral",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/25/business/iran-strait-hormuz-shipping-traffic.html",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 02 Mar 2026 19:23:48 +0000",
+          "text": "Israel–Iran energy infrastructure war signals a dangerous new escalation",
+          "sentiment": "neutral",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/israel-iran-energy-infrastructure-war-signals-a-dangerous-new-escalation/",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-26T00:20:00+00:00",
+          "text": "Israel’s military says it’s striking Hezbollah sites as Netanyahu vows to ‘increase the blows’ - NBC News",
+          "sentiment": "neutral",
+          "source": "Google News Israel",
+          "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQT0IxLVVsWnFSVXhXU2Y0WWJlalBzdTdSeEtheFRvZ281N3gtUlZTWWhQcDY1Y3l1NUNCX3BHX0Q5d1owTFlsek50QUxsQ2JVaEwzSl94R2NIbzJoZktJdE5LMVQtbGwxdGtBX3I4ZVRyaGNVS1Bqa29nRUxZTElGMzQwZkw4SzdTMUg5ZW01NVNUNldnbVVuaDdnNUxDZVFIOTMwSmlR?oc=5",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T18:50:49+00:00",
+          "text": "‘If Iran gets a bomb it will be Bibi’s’: Trump’s deal outline sparks alarm in Israel",
+          "sentiment": "neutral",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/world/2026/may/25/iran-bomb-trump-deal-sparks-alarm-israel-netanyahu",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T14:01:00+00:00",
+          "text": "Each side spins a different story about the US-Iran peace talks – but Tehran may have the last word | Rajan Menon",
+          "sentiment": "neutral",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/commentisfree/2026/may/25/us-iran-peace-talks-tehran-donald-trump",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "iran",
+      "icon": "☣️",
+      "name": "Iran Nuclear & War",
+      "phases": [
+        "War",
+        "Ceasefire Talks",
+        "Armistice",
+        "Nuclear Deal",
+        "Resolution"
+      ],
+      "phaseIndex": 1,
+      "direction": "stable",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "61"
+      },
+      "summary": "Guterres condemns Israeli move to militarise seized compound in occupied East Jerusalem",
+      "events": [
+        {
+          "date": "Wed, 20 May 2026 12:00:00 +0000",
+          "text": "Guterres condemns Israeli move to militarise seized compound in occupied East Jerusalem",
+          "sentiment": "neutral",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167560",
+          "ai_risk": 5
+        },
+        {
+          "date": "Wed, 20 May 2026 12:00:00 +0000",
+          "text": "Flak jackets and final goodbyes: Lebanon’s first responders under fire",
+          "sentiment": "neutral",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167556",
+          "ai_risk": 5
+        },
+        {
+          "date": "Wed, 20 May 2026 09:01:12 +0000",
+          "text": "Turkeys Military Buildup and Its Impact on the Construction and Employment of Syrian Force (April / May 2026)",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/turkeys-military-buildup-and-its-impact-on-the-construction-and-employment-of-syrian-force-april-may-2026/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Wed, 15 Apr 2026 07:56:30 +0000",
+          "text": "How to Sustain the US-Israel Security Relationship at a Moment of Strain",
+          "sentiment": "positive",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/how-to-sustain-the-us-israel-security-relationship-at-a-moment-of-strain/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Wed, 13 May 2026 23:01:00 +0000",
+          "text": "Syria: Israel’s deliberate destruction of civilian homes in Quneitra must be investigated as war crimes",
+          "sentiment": "positive",
+          "source": "Amnesty",
+          "link": "https://www.amnesty.org/en/latest/news/2026/05/syria-israels-deliberate-destruction-of-civilian-homes-in-quneitra-war-crime/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tuesday, May 12, 2026 - 17:19",
+          "text": "Iran Crisis Monitor #5",
+          "sentiment": "neutral",
+          "source": "Crisis Group",
+          "link": "https://www.crisisgroup.org/bnt/middle-east-north-africa/iran-israelpalestine-united-states/iran-crisis-monitor-5",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 28 Apr 2026 23:01:00 +0000",
+          "text": "Middle East: World leaders must centre protection of civilians and agree an enduring and sustainable ceasefire",
+          "sentiment": "positive",
+          "source": "Amnesty",
+          "link": "https://www.amnesty.org/en/latest/news/2026/04/middle-east-world-leaders-must-centre-protection-of-civilians-and-agree-an-enduring-and-sustainable-ceasefire/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 02:17:00 +0300",
+          "text": "‘Preemptive self-defense’: US strikes targets inside Iran",
+          "sentiment": "neutral",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427602",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 01:15:17 +0100",
+          "text": "Iranian security official calls for unity 'against US and Zionist enemies'",
+          "sentiment": "negative",
+          "source": "Middle East Eye",
+          "link": "https://www.middleeasteye.net/live-blog/live-blog-update/iranian-security-official-calls-unity-against-us-and-zionist-enemies",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 01:05:12 +0100",
+          "text": "Fars: Four killed in US-Israeli attack on Iranian boats near Hormuz",
+          "sentiment": "negative",
+          "source": "Middle East Eye",
+          "link": "https://www.middleeasteye.net/live-blog/live-blog-update/fars-four-killed-us-israeli-attack-iranian-boats-near-hormuz",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 00:58:33 +0100",
+          "text": "Northern Israeli authorities shut schools as tensions escalate",
+          "sentiment": "neutral",
+          "source": "Middle East Eye",
+          "link": "https://www.middleeasteye.net/live-blog/live-blog-update/northern-israeli-authorities-shut-schools-tensions-escalate",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 00:12:00 +0300",
+          "text": "Ahead of escalation? IDF tightens restrictions in communities in northern Israel",
+          "sentiment": "positive",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427600",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "diplomacy",
+      "icon": "🤝",
+      "name": "Diplomacy & Regional Deals",
+      "phases": [
+        "Isolated",
+        "Back-channel",
+        "Framework",
+        "New Partners",
+        "Regional Peace"
+      ],
+      "phaseIndex": 1,
+      "direction": "advancing",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "6"
+      },
+      "summary": "Security Council LIVE: Ambassadors debate future of Gaza amid stalled progress on lasting peace",
+      "events": [
+        {
+          "date": "Thu, 21 May 2026 12:00:00 +0000",
+          "text": "Security Council LIVE: Ambassadors debate future of Gaza amid stalled progress on lasting peace",
+          "sentiment": "neutral",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167563",
+          "ai_risk": 5
+        },
+        {
+          "date": "Thu, 14 May 2026 09:39:28 +0000",
+          "text": "Satellite Imagery Shows Ongoing Demolitions Across Southern Lebanon",
+          "sentiment": "neutral",
+          "source": "bellingcat",
+          "link": "https://www.bellingcat.com/news/2026/05/14/satellite-imagery-shows-ongoing-demolitions-across-southern-lebanon/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 11 May 2026 23:01:00 +0000",
+          "text": "Israel/OPT: Israel’s systematic destruction of high-rise buildings must be investigated as war crimes of wanton destruction and collective punishment",
+          "sentiment": "neutral",
+          "source": "Amnesty",
+          "link": "https://www.amnesty.org/en/latest/news/2026/05/israel-opt-israels-systematic-destruction-of-high-rise-buildings-must-be-investigated-as-war-crimes-of-wanton-destruction-and-collective-punishment/",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-26T02:30:02+00:00",
+          "text": "US strikes Iranian boats, missile launch sites in 'self defense', says CENTCOM - Fox News",
+          "sentiment": "neutral",
+          "source": "JPost",
+          "link": "https://www.jpost.com/international/article-897292",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T12:30:24-0400",
+          "text": "Migrants step up to support community in war-hit Beirut",
+          "sentiment": "positive",
+          "source": "Al Monitor",
+          "link": "https://www.al-monitor.com/originals/2026/05/migrants-step-support-community-war-hit-beirut",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T01:08:39+00:00",
+          "text": "How Saudi Arabia's spending spree reached the end of the line",
+          "sentiment": "neutral",
+          "source": "BBC ME",
+          "link": "https://www.bbc.com/news/articles/cx21g0828reo?at_medium=RSS&amp;at_campaign=rss",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "infrastructure",
+      "icon": "💧",
+      "name": "Infrastructure & Recovery",
+      "phases": [
+        "Destroyed",
+        "Emergency Repairs",
+        "Partial",
+        "Reconstruction",
+        "Full Recovery"
+      ],
+      "phaseIndex": 0,
+      "direction": "stalling",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "5"
+      },
+      "summary": "When Satellite Imagery Goes Dark: New Tool Shows Damage in Iran and the Gulf",
+      "events": [
+        {
+          "date": "Tue, 07 Apr 2026 13:35:12 +0000",
+          "text": "When Satellite Imagery Goes Dark: New Tool Shows Damage in Iran and the Gulf",
+          "sentiment": "negative",
+          "source": "bellingcat",
+          "link": "https://www.bellingcat.com/resources/2026/04/07/tool-damage-assessment-destruction-sentinel-satellite-imagery-iran-us-gulf/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 21:38:20 +0000",
+          "text": "Netanyahu taken to a Jerusalem hospital; his office says it’s for dental work",
+          "sentiment": "neutral",
+          "source": "Times of Israel",
+          "link": "https://www.timesofisrael.com/netanyahu-taken-to-a-jerusalem-hospital-his-office-says-its-for-dental-work/",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T20:55:00+00:00",
+          "text": "Israel, Canada issue very different readouts of foreign ministers call",
+          "sentiment": "neutral",
+          "source": "JNS",
+          "link": "https://www.jns.org/israel-canada-issue-very-different-readouts-of-foreign-ministers-call",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T18:42:37+00:00",
+          "text": "Businessman Tzachi Abu's REIT Fund Acquires 50 Apartments in Jerusalem Luxury Project ",
+          "sentiment": "neutral",
+          "source": "JFeed",
+          "link": "https://www.jfeed.com/news-israel/jerusalem-real-estate-investment",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T13:36:38-0400",
+          "text": "Iran would open Strait of Hormuz 30 days after peace deal, Nikkei reports citing source",
+          "sentiment": "negative",
+          "source": "Al Monitor",
+          "link": "https://www.al-monitor.com/originals/2026/05/iran-would-open-strait-hormuz-30-days-after-peace-deal-nikkei-reports-citing",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "ceasefire",
+      "icon": "🕊",
+      "name": "Ceasefire & De-escalation",
+      "phases": [
+        "Active Fighting",
+        "Ceasefire Talks",
+        "Draft Agreement",
+        "Signed",
+        "Holding"
+      ],
+      "phaseIndex": 0,
+      "direction": "stable",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "3"
+      },
+      "summary": "Weekly Update Report (May 11–17): Hezbollah Attacks Against Israel",
+      "events": [
+        {
+          "date": "Tue, 19 May 2026 16:25:21 +0000",
+          "text": "Weekly Update Report (May 11–17): Hezbollah Attacks Against Israel",
+          "sentiment": "neutral",
+          "source": "Alma",
+          "link": "https://israel-alma.org/weekly-update-report-may-11-17-hezbollah-attacks-against-israel/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Thu, 14 May 2026 11:09:01 +0000",
+          "text": "Hezbollah is not losing its Shiite base – rather it is entering a phase of radicalization and fortification",
+          "sentiment": "neutral",
+          "source": "Alma",
+          "link": "https://israel-alma.org/hezbollah-is-not-losing-its-shiite-base-rather-it-is-entering-a-phase-of-radicalization-and-fortification/",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T16:24:00+00:00",
+          "text": "'My job is to bring Israel down,' alleged Hamas financier says as he goes to trial in Netherlands",
+          "sentiment": "neutral",
+          "source": "JPost",
+          "link": "https://www.jpost.com/international/article-897254",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "human-rights",
+      "icon": "⚖️",
+      "name": "Human Rights & Intl Law",
+      "phases": [
+        "Allegations",
+        "Investigations",
+        "Sanctions",
+        "Accountability",
+        "Reform"
+      ],
+      "phaseIndex": 0,
+      "direction": "stable",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "3"
+      },
+      "summary": "Live updates: US-Iran deal to be announced 'within hours'",
+      "events": [
+        {
+          "date": "Mon, 25 May 2026 23:26:13 +0300",
+          "text": "Live updates: US-Iran deal to be announced 'within hours'",
+          "sentiment": "neutral",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/423124",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-26T00:52:57+00:00",
+          "text": "IDF strikes Hezbollah infrastructure targets as Home Front Command tightens northern guidelines",
+          "sentiment": "neutral",
+          "source": "JPost",
+          "link": "https://www.jpost.com/israel-news/defense-news/article-897290",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T15:38:52+00:00",
+          "text": "Trump demands Saudi Arabia, Qatar, Pakistan join Abraham Accords as part of Iran deal",
+          "sentiment": "neutral",
+          "source": "JPost",
+          "link": "https://www.jpost.com/international/article-897249",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "west-bank",
+      "icon": "🔥",
+      "name": "West Bank & Settlements",
+      "phases": [
+        "Escalation",
+        "Violence Spike",
+        "Mediation",
+        "Calming",
+        "Frozen Conflict"
+      ],
+      "phaseIndex": 0,
+      "direction": "stable",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "3"
+      },
+      "summary": "Iran Crisis Monitor #3",
+      "events": [
+        {
+          "date": "Wednesday, April 29, 2026 - 10:00",
+          "text": "Iran Crisis Monitor #3",
+          "sentiment": "neutral",
+          "source": "Crisis Group",
+          "link": "https://www.crisisgroup.org/bnt/middle-east-north-africa/iran-israelpalestine-united-states/iran-crisis-monitor-3",
+          "ai_risk": 5
+        },
+        {
+          "date": "Sun, 24 May 2026 06:58:54 +0000",
+          "text": "Hezbollahs Efforts to Rehabilitate its Financial Infrastructure",
+          "sentiment": "neutral",
+          "source": "Alma",
+          "link": "https://israel-alma.org/hezbollahs-efforts-to-rehabilitate-its-financial-infrastructure/",
+          "ai_risk": 5
+        },
+        {
+          "date": "2026-05-25T18:49:12+00:00",
+          "text": "Israel pounds Lebanon with fresh air strikes, vows to 'crush' Hezbollah",
+          "sentiment": "neutral",
+          "source": "France24",
+          "link": "https://www.france24.com/en/middle-east/20260525-israel-steps-up-lebanon-strikes-as-netanyahu-escalates-offensive",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "lebanon",
+      "icon": "🇱🇧",
+      "name": "Lebanon & Hezbollah",
+      "phases": [
+        "Active Fighting",
+        "De-escalation",
+        "Ceasefire",
+        "Withdrawal",
+        "Stable"
+      ],
+      "phaseIndex": 0,
+      "direction": "stalling",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "23"
+      },
+      "summary": "Netanyahu injected deadly poison into Israel&#x27;s body",
+      "events": [
+        {
+          "date": "Tue, 26 May 2026 00:17:22 +0300",
+          "text": "Netanyahu injected deadly poison into Israel&#x27;s body",
+          "sentiment": "negative",
+          "source": "Haaretz",
+          "link": "https://www.haaretz.com/opinion/2026-05-26/ty-article-opinion/.premium/netanyahu-injected-deadly-poison-into-israels-body/0000019e-6015-d6cc-a79e-f5bd4de60000",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 00:15:00 +0300",
+          "text": "Sally Rooney won&#x27;t save Israel&#x27;s liberal center from itself",
+          "sentiment": "negative",
+          "source": "Haaretz",
+          "link": "https://www.haaretz.com/opinion/2026-05-26/ty-article-opinion/.premium/sally-rooney-wont-save-israels-liberal-center-from-itself/0000019e-6044-da86-af9f-f0d762cc0000",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 00:12:59 +0300",
+          "text": "The questions Israelis must ask about Palestinian prisoners",
+          "sentiment": "neutral",
+          "source": "Haaretz",
+          "link": "https://www.haaretz.com/opinion/editorial/2026-05-26/ty-article-opinion/the-questions-israelis-must-ask-about-palestinian-prisoners/0000019e-60a4-d66e-a99f-66b420ea0000",
+          "ai_risk": 5
+        },
+        {
+          "date": "Sun, 17 May 2026 11:28:46 +0000",
+          "text": "Hezbollah – FPV Drones: Evolving and Potential Patterns and Modes of Action",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/hezbollah-fpv-drones-evolving-and-potential-patterns-and-modes-of-action/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 23:38:50 +0100",
+          "text": "Iran says US missile strike on sports hall killed 24 people at start of war",
+          "sentiment": "negative",
+          "source": "Middle East Eye",
+          "link": "https://www.middleeasteye.net/live-blog/live-blog-update/iran-says-us-missile-strike-sports-hall-killed-24-people-start-war",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 23:16:06 +0300",
+          "text": "Iran's Empty Cradles: Why Washington must not rescue a dying regime",
+          "sentiment": "negative",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427597",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 23:03:41 +0000",
+          "text": "Netanyahu orders IDF to ‘intensify blows’ against Hezbollah amid surge in drone attacks",
+          "sentiment": "negative",
+          "source": "Times of Israel",
+          "link": "https://www.timesofisrael.com/netanyahu-orders-idf-to-intensify-blows-against-hezbollah-amid-surge-in-drone-attacks/",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 22:15:21 +0300",
+          "text": "The saga of the &#x27;Egyptian Britney Spears&#x27; highlights the vulnerabilities of women in Arab society",
+          "sentiment": "neutral",
+          "source": "Haaretz",
+          "link": "https://www.haaretz.com/life/2026-05-25/ty-article-magazine/.highlight/the-saga-of-the-egyptian-britney-highlights-the-vulnerabilities-of-arab-women/0000019e-5a19-db4a-a9bf-ff9933ce0000",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 20:49:28 +0000",
+          "text": "Israel to intensify Lebanon offensive to ‘crush’ Hezbollah",
+          "sentiment": "neutral",
+          "source": "Al Jazeera",
+          "link": "https://www.aljazeera.com/news/2026/5/25/israel-to-intensify-lebanon-offensive-in-bid-to-crush-hezbollah?traffic_source=rss",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 19:28:54 +0300",
+          "text": "Bank of Israel cuts interest rates as Iran tensions ease and inflation slows",
+          "sentiment": "negative",
+          "source": "Haaretz - Domestic",
+          "link": "https://www.haaretz.com/israel-news/2026-05-25/ty-article/.premium/bank-of-israel-cuts-interest-rates-as-iran-tensions-ease-and-inflation-slows/0000019e-5f7b-da86-af9f-dfff18be0000",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 15:05:11 +0000",
+          "text": "Trump’s Pressure Had Little Effect on Iran’s Terms for a Peace Deal",
+          "sentiment": "neutral",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/25/world/middleeast/iran-deal-trump-pressure.html",
+          "ai_risk": 5
+        },
+        {
+          "date": "Mon, 25 May 2026 11:46:12 +0300",
+          "text": "Trump pushes normalization of ties with Israel from countries mediating Iran talks",
+          "sentiment": "negative",
+          "source": "Haaretz - ME",
+          "link": "https://www.haaretz.com/middle-east-news/iran/2026-05-25/ty-article/iran-would-discuss-nuclear-issue-with-u-s-if-potential-understanding-reached/0000019e-5e31-db4a-a9bf-ffb191f80000",
+          "ai_risk": 5
+        }
+      ],
+      "confidence": "high"
+    }
+  ],
+  "activeSolutions": [
+    "ceasefire",
+    "infrastructure",
+    "diplomacy",
+    "human-rights",
+    "lebanon",
+    "west-bank",
+    "domestic-politics",
+    "iran"
+  ],
+  "overallMomentum": {
+    "direction": "stalling",
+    "label": "Net Negative",
+    "summary": "2 advancing, 7 stable, 3 stalling (8 active). 150 ME articles from 29 feeds."
+  },
+  "lastUpdated": "2026-05-26T00:43:21.207992+00:00",
+  "source": "ai-analyzer-prod",
+  "feedCount": 150
+}
