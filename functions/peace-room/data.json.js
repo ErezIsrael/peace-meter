@@ -477,7 +477,10 @@ export async function onRequest(context) {
 
   try {
     // Try to load AI-generated solutions.json from static assets
-    const asset = await context.env.ASSETS.fetch('/peace-room/solutions.json');
+    // Pages Functions can't use ASSETS.env, so fetch via relative URL
+    const domain = new URL(context.request.url).origin;
+    const assetUrl = `${domain}/peace-room/solutions.json`;
+    const asset = await fetch(assetUrl);
     if (asset.ok) {
       const aiData = await asset.json();
       // Check if data is fresh (< 12 hours)
