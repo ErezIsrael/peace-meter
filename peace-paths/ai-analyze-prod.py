@@ -210,6 +210,16 @@ def fetch_rss(url, source, max_items):
         title = re.sub(r"&\w+;|&#\d+;|&#x[0-9a-fA-F]+;", "", title)
         title = re.sub(r"<[^>]+>", "", title)
 
+        # Extract description/snippet for better AI classification
+        desc_m = re.search(r"<description>(.*?)</description>", block, re.DOTALL)
+        desc = ""
+        if desc_m:
+            desc = desc_m.group(1).strip()
+            desc = desc.replace("<![CDATA[", "").replace("]]>", "")
+            desc = html.unescape(desc)
+            desc = re.sub(r"<[^>]+>", "", desc)
+            desc = desc[:200]  # limit snippet length
+
         link = link_m.group(1).strip() if link_m else ""
         date_str = date_m.group(1).strip() if date_m else datetime.now(timezone.utc).isoformat()
         if "GMT" in date_str or "UTC" in date_str:
@@ -224,6 +234,7 @@ def fetch_rss(url, source, max_items):
             "link": link,
             "date": date_str,
             "source": source,
+            "snippet": desc,
         })
     return articles
 
@@ -302,8 +313,17 @@ def _classify_batch(batch):
         f"  {sid}: {sol['description']}" for sid, sol in SOLUTIONS.items()
     )
 
-    articles_text = "\n".join(f"{i+1}. {a['title']}" for i, a in enumerate(batch))
-    prompt = "Classify each article into ONE category:\n"
+    lines = []
+    for i, a in enumerate(batch):
+        snippet = a.get('snippet', '')
+        if snippet:
+            lines.append(f"{i+1}. {a['title']}\n   [{snippet}]")
+        else:
+            lines.append(f"{i+1}. {a['title']}")
+    articles_text = "\n".join(lines)
+    prompt = "Classify each article into ONE category from the list below.\n"
+    prompt += "Read the snippet carefully — the title alone can be misleading.\n"
+    prompt += "Choose the MOST SPECIFIC matching category. Do NOT put general Middle East news into Iran or Lebanon.\n"
     prompt += solution_descriptions + "\n"
     prompt += f"\nCategories: {', '.join(SOLUTION_IDS)}\n"
     prompt += '\nOutput ONLY a JSON array: [{"solution":"<id>","sentiment":"<positive/negative/neutral>","risk":<1-10>}], one per article.\n\nArticles:\n'
@@ -349,9 +369,9 @@ def _classify_batch(batch):
 
 
 def classify_articles(articles):
-    """Classify articles in batches of 50 to llama.cpp."""
+    """Classify articles in batches of 30 to llama.cpp."""
     print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp...")
-    batch_size = 50
+    batch_size = 30
     all_classifications = []
     ai_count = 0
 
@@ -513,6 +533,7 @@ def build_output(articles, classifications):
             "sentiment": classification.get("sentiment", "neutral"),
             "source": article["source"],
             "link": article["link"],
+            "snippet": article.get("snippet", ""),
             "ai_risk": classification.get("risk", 5),
         })
 

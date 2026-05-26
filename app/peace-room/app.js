@@ -117,7 +117,7 @@ function renderActivityFeed() {
     item.innerHTML = `
       <span class="activity-time">${formatTime(ev.date)}</span>
       <span class="activity-solution">${ev.solutionId}</span>
-      <span class="activity-text">${ev.text}</span>
+      ${ev.link ? `<a href="${ev.link}" target="_blank" rel="noopener" class="activity-link">${ev.text}</a>` : `<span class="activity-text">${ev.text}</span>`}
     `;
     container.appendChild(item);
   });
@@ -198,7 +198,7 @@ function createSolutionCard(solution) {
     item.innerHTML = `
       <span class="card-event-dot ${ev.sentiment || 'neutral'}"></span>
       <span class="card-event-time">${formatEventTime(ev.date)}</span>
-      <span class="card-event-text">${ev.text}</span>
+      ${ev.link ? `<a href="${ev.link}" target="_blank" rel="noopener" class="card-event-text">${ev.text}</a>` : `<span class="card-event-text">${ev.text}</span>`}
     `;
     eventsDiv.appendChild(item);
   });
@@ -222,7 +222,7 @@ function createSolutionCard(solution) {
         item.innerHTML = `
           <span class="card-event-dot ${ev.sentiment || 'neutral'}"></span>
           <span class="card-event-time">${formatEventTime(ev.date)}</span>
-          <span class="card-event-text">${ev.text}</span>
+          ${ev.link ? `<a href="${ev.link}" target="_blank" rel="noopener" class="card-event-text">${ev.text}</a>` : `<span class="card-event-text">${ev.text}</span>`}
         `;
         eventsDiv.appendChild(item);
       });
