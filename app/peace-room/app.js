@@ -1,10 +1,6 @@
 /* ── Peace Room — Frontend App v3 ───────────────────── */
 
-const CATEGORIES = {
-  active:     ['ceasefire', 'hostages', 'aid'],
-  conflict:   ['iraq', 'lebanon'],
-  structural: ['diplomacy', 'governance', 'infrastructure'],
-};
+// No hardcoded categories — solutions render dynamically from data.activeSolutions
 
 const MOMENTUM_CONFIG = {
   advancing: { icon: '🟢', label: 'Net Positive', cls: 'momentum-advancing' },
@@ -288,33 +284,18 @@ function renderAll(data) {
   // Activity feed
   buildActivityFeed();
 
-  // Solution cards — dynamic: render all categories present in data
-  const containers = {};
-  for (const [cat, ids] of Object.entries(CATEGORIES)) {
-    containers[cat] = document.getElementById(cat + 'Solutions');
-    if (containers[cat]) containers[cat].innerHTML = '';
-  }
-  // Special: iraq and lebanon each have their own container
-  containers['iraq'] = document.getElementById('iraqSolutions');
-  containers['lebanon'] = document.getElementById('lebanonSolutions');
-
+  // Solution cards — all active solutions in a single grid
+  const grid = document.getElementById('solutionsGrid');
+  if (grid) grid.innerHTML = '';
   const activeIds = data.activeSolutions || data.solutions.map(s => s.id);
-  (data.solutions || []).forEach(solution => {
-    if (!activeIds.includes(solution.id)) return;  // skip inactive categories
-    const card = createSolutionCard(solution);
-    // Check if this solution ID matches its own container (iraq, lebanon)
-    if (containers[solution.id]) {
-      containers[solution.id].appendChild(card);
-      return;
-    }
-    // Otherwise use category mapping
-    let category = 'structural';
-    for (const [cat, ids] of Object.entries(CATEGORIES)) {
-      if (ids.includes(solution.id)) { category = cat; break; }
-    }
-    const container = containers[category];
-    if (container) container.appendChild(card);
-  });
+  (data.solutions || [])
+    .filter(solution => activeIds.includes(solution.id))
+    .sort((a, b) => b.keyMetric.value - a.keyMetric.value)
+    .slice(0, 8)
+    .forEach(solution => {
+      const card = createSolutionCard(solution);
+      if (grid) grid.appendChild(card);
+    });
 }
 
 /* ── Boot ────────────────────────────────────────────── */
@@ -329,4 +310,4 @@ setInterval(() => {
 
 // Version tag
 const vt = document.getElementById('versionTag');
-if (vt) vt.textContent = 'v0.2.0';
+if (vt) vt.textContent = 'v0.3.0';
