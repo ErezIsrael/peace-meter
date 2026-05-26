@@ -59,16 +59,14 @@ let activityFeedEvents = [];
 let feedShowing = 6;
 
 async function loadData() {
-  // Try live RSS endpoint first, fall back to static JSON
+  // Load AI-generated data.json (deployed with the site)
   try {
     const res = await fetch('./data.json');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const liveData = await res.json();
-    if (liveData.useFallback) throw new Error('RSS unavailable');
-    data = liveData;
+    data = await res.json();
     renderAll(data);
-  } catch (liveErr) {
-    console.warn('Live RSS unavailable, falling back to static data:', liveErr);
+  } catch (err) {
+    console.warn('data.json unavailable, falling back to solutions.json:', err);
     try {
       const res = await fetch('solutions.json');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
