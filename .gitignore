@@ -24,6 +24,7 @@ SITE_STRUCTURE.md
 # Generated data — produced by the analyzer, not source
 app/peace-room/solutions.json
 peace-paths/solutions.json
+peace-paths/full_run.json
 
 # Python artifacts
 __pycache__/
@@ -37,7 +38,17 @@ peace-paths/taxonomy.json
 # Dev helpers — not part of deployment
 peace-paths/serve.bat
 peace-paths/*.OPML
+peace-paths/dev-serve.py
+peace-paths/test_*.py
+peace-paths/app.js
+peace-paths/index.html
+peace-paths/styles.css
 
 # Windows junk
 nul
 Thumbs.db
+
+# Root docs not part of deployment
+README.md
+peace-paths/README.md
+peace-paths/*.pyc
