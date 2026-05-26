@@ -4,14 +4,21 @@ Peace Room AI Analyzer — Production
 ====================================
 Runs on the LLM server (192.168.2.121:8080).
 
+Pipeline:
+  [Raw RSS Feed] -> [Extract 1200 chars] -> [Single-article LLM inference]
+                                                      |
+                                        [me_relevant:true]    [me_relevant:false]
+                                              |                       |
+                                      [classify category]     [silently drop]
+
 Modes:
   --fast   — Hourly: fetch recent articles (last 2h), merge into existing solutions.json
-  --daily  — Daily: full fetch (7-day window), overwrite solutions.json, determine all categories
+  --daily  — Daily: full fetch (7-day window), overwrite solutions.json
   (default) — Same as --daily
 
 Run: python ai-analyze-prod.py
 Run: python ai-analyze-prod.py --fast
-Run: python ai-analyze-prod.py --categories "armistice:Ceasefire negotiations across all fronts"
+Run: python ai-analyze-prod.py --categories "id:name:description"
 
 Schedule: --fast every hour; --daily every 12h
 """
@@ -246,8 +253,8 @@ def fetch_rss(url, source, max_items):
                 raw = desc_m.group(1)
                 raw = raw.replace("<![CDATA[", "").replace("]]>", "")
                 snippet = _extract_text(raw)
-        # Truncate to 1500 chars for AI prompt
-        snippet = snippet[:1500]
+        # Truncate to 1200 chars for AI prompt
+        snippet = snippet[:1200]
 
         link = link_m.group(1).strip() if link_m else ""
         date_str = date_m.group(1).strip() if date_m else datetime.now(timezone.utc).isoformat()
@@ -269,60 +276,10 @@ def fetch_rss(url, source, max_items):
 
 
 def fetch_all_feeds(age_hours=None):
-    """Fetch all RSS feeds, return deduplicated ME-relevant articles.
-
-    age_hours: if set, only return articles from last N hours (--fast mode).
-               if None, use MAX_AGE_DAYS (--daily mode).
+    """Fetch all RSS feeds, return deduplicated articles (no keyword filter).
+    The LLM decides relevance.
     """
     print(f"\U0001f4e1 Fetching {len(RSS_FEEDS)} RSS feeds...")
-    all_articles = []
-
-    # Conflict/political keywords — indicate ME-relevant news
-    me_conflict = [
-        "israel", "palestine", "gaza", "west bank", "hamas", "iran",
-        "lebanon", "hezbollah", "syria", "yemen", "houthi", "red sea",
-        "tel aviv", "jerusalem", "beirut", "damascus", "riyadh",
-        "middle east", "sinai", "hormuz",
-        "netanyahu", "idf", "palestinian", "knesset",
-        "ceasefire", "truce", "armistice",
-        "occupation", "settlement", "settler",
-        "flotilla", "refugee", "displaced",
-        "ben-gvir", "abbas", "aoun", "khamenei",
-    ]
-    # Country names that are ME — but need conflict context to be relevant
-    me_countries = ["egypt", "saudi", "uae", "qatar", "doha", "jordan", "bahrain", "morocco", "iraq", "baghdad"]
-
-    # Words that indicate the article is NOT about ME conflict/politics
-    # Keep these specific — broad words like "film" or "series" are too common
-    me_exclude = [
-        "sponsored content", "advertisement", "advertising",
-        "property investment", "real estate market", "property for sale",
-        "fragrance", "bakhoor", "perfume",
-        "world cup", "afcon", "man city", "guardiola",
-        "secondhand smoke",
-        "hollywood", "sydney sweeney", "euphoria role",
-        "celebrity", "tv show", "music concert",
-    ]
-
-    def is_me_relevant(article):
-        title = article["title"].lower()
-        snippet = article.get("snippet", "").lower()
-        text = title + " " + snippet
-        # Exclude non-ME articles — check TITLE only for exclusions
-        if any(ex in title for ex in me_exclude):
-            return False
-        # Direct match on conflict/political keywords
-        if any(kw in text for kw in me_conflict):
-            return True
-        # Country name alone is not enough — need conflict context
-        if any(c in text for c in me_countries):
-            conflict_words = ["war", "conflict", "strike", "attack", "military", "politics",
-                              "diplomacy", "tensions", "nuclear", "missile", "sanctions",
-                              "peace", "deal", "agreement", "protest", "riot", "killed",
-                              "dead", "invasion", "alliance", "normalization"]
-            return any(w in text for w in conflict_words)
-        return False
-
     now = datetime.now(timezone.utc)
     if age_hours is not None:
         max_age = now.timestamp() - (age_hours * 3600)
@@ -343,15 +300,15 @@ def fetch_all_feeds(age_hours=None):
             except Exception as e:
                 print(f"  \u26a0 {source}: {e}")
 
+    # Age filter — keep articles within time window
+    all_articles = []
     for a in fetched:
-        if not is_me_relevant(a):
-            continue
         try:
             dt = datetime.fromisoformat(a["date"])
             if dt.timestamp() < max_age:
                 continue
         except Exception:
-            pass
+            pass  # keep articles with unparseable dates
         all_articles.append(a)
 
     # Deduplicate by title
@@ -363,41 +320,50 @@ def fetch_all_feeds(age_hours=None):
             seen.add(key)
             unique.append(a)
 
-    print(f"  \u2192 {len(unique)} unique ME articles ({len(all_articles) - len(unique)} duplicates removed)")
+    print(f"  \u2192 {len(unique)} unique articles ({len(all_articles) - len(unique)} duplicates removed)")
     return unique
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# AI Classification via llama.cpp (SINGLE prompt for all articles)
+# AI Classification via llama.cpp (single-article inference)
 # ═══════════════════════════════════════════════════════════════════════
 
-def _classify_batch(batch):
-    """Classify a batch of articles via llama.cpp chat API."""
-    solution_descriptions = "\n".join(
-        f"  {sid}: {sol['description']}" for sid, sol in SOLUTIONS.items()
-    )
+# Pre-build the category descriptions block (reused per article)
+_CATEGORY_BLOCK = "\n".join(
+    f"  {sid}: {sol['description']}" for sid, sol in SOLUTIONS.items()
+)
+_CATEGORY_LIST = ", ".join(SOLUTION_IDS)
 
-    lines = []
-    for i, a in enumerate(batch):
-        snippet = a.get('snippet', '')
-        if snippet:
-            lines.append(f"{i+1}. {a['title']}\n   [{snippet}]")
-        else:
-            lines.append(f"{i+1}. {a['title']}")
-    articles_text = "\n".join(lines)
-    prompt = "Classify each article into ONE category from the list below.\n"
-    prompt += "Read the snippet carefully — the title alone can be misleading.\n"
-    prompt += "Choose the MOST SPECIFIC matching category.\n"
-    prompt += "Do NOT put general ME news into Iran or Lebanon — use regional or diplomacy instead.\n"
-    prompt += solution_descriptions + "\n"
-    prompt += f"\nCategories: {', '.join(SOLUTION_IDS)}\n"
-    prompt += '\nOutput ONLY a JSON array: [{"solution":"<id>","sentiment":"<positive/negative/neutral>","risk":<1-10>}], one per article.\n\nArticles:\n'
-    prompt += articles_text
+
+def _classify_article(article):
+    """Classify a single article via llama.cpp chat API.
+    Returns dict {me_relevant, solution, sentiment, risk} or None on failure.
+    """
+    snippet = article.get("snippet", "")
+    context = snippet if snippet else article["title"]
+
+    prompt = (
+        "You are a Middle East news filter.\n"
+        "\n"
+        "Step 1: Is this article about Middle East conflict, politics, diplomacy, humanitarian issues, or regional security?\n"
+        "Step 2: If yes, classify it into ONE category from the list below.\n"
+        "\n"
+        f"Categories:\n{_CATEGORY_BLOCK}\n"
+        f"\nCategories list: {_CATEGORY_LIST}\n"
+        "\n"
+        "Output ONLY a JSON object:\n"
+        '{"me_relevant": true/false, "solution": "<id>", "sentiment": "<positive/negative/neutral>", "risk": <1-10>}\n'
+        'If me_relevant is false, set solution to "null", sentiment to "neutral", risk to 0.\n'
+        "\n"
+        "Article:\n"
+        f"  Title: {article['title']}\n"
+        f"  Context: {context}\n"
+    )
 
     body = {
         "model": "Qwen3.6-27B",
         "messages": [
-            {"role": "system", "content": "Middle East news classifier. Output ONLY a valid JSON array. No explanation."},
+            {"role": "system", "content": "Middle East news filter. Output ONLY a valid JSON object with keys: me_relevant, solution, sentiment, risk. No explanation."},
             {"role": "user", "content": prompt}
         ],
         "max_tokens": 8000,
@@ -414,7 +380,7 @@ def _classify_batch(batch):
         headers=headers,
     )
     try:
-        with urlopen(req, timeout=120) as f:
+        with urlopen(req, timeout=60) as f:
             response = json.loads(f.read().decode())
     except Exception as e:
         print(f"  AI unavailable: {e}")
@@ -422,63 +388,64 @@ def _classify_batch(batch):
 
     result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
 
-    first_bracket = result_text.find('[')
-    last_bracket = result_text.rfind(']')
-    if first_bracket != -1 and last_bracket > first_bracket:
-        json_str = result_text[first_bracket:last_bracket+1]
+    # Extract JSON object
+    first_brace = result_text.find('{')
+    last_brace = result_text.rfind('}')
+    if first_brace != -1 and last_brace > first_brace:
+        json_str = result_text[first_brace:last_brace+1]
         try:
-            return json.loads(json_str)
+            obj = json.loads(json_str)
+            if "me_relevant" in obj:
+                return obj
         except json.JSONDecodeError:
             pass
     return None
 
 
 def classify_articles(articles):
-    """Classify articles in batches of 5 to llama.cpp.
-    Small batches = higher accuracy (AI focuses on few articles).
-    Failsafe: if AI fails 3 consecutive batches, switch to keyword fallback."""
-    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp...")
-    batch_size = 5
-    all_classifications = []
-    ai_count = 0
-    consecutive_failures = 0
-    MAX_CONSECUTIVE_FAILURES = 3  # failsafe: switch to keyword fallback after 3 failures
-    ai_mode = True
+    """Classify each article individually via llama.cpp.
+    Articles with me_relevant=false are silently dropped.
+    Returns list of {solution, sentiment, risk} dicts for relevant articles.
+    """
+    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp (1-by-1)...")
+    pairs = []  # list of (article, classification)
+    relevant = 0
+    dropped = 0
+    ai_failures = 0
 
-    for i in range(0, len(articles), batch_size):
-        batch = articles[i:i+batch_size]
+    for idx, article in enumerate(articles):
         t0 = time.time()
+        result = _classify_article(article)
+        elapsed = time.time() - t0
 
-        if ai_mode:
-            result = _classify_batch(batch)
-            elapsed = time.time() - t0
-            if result:
-                all_classifications.extend(result)
-                ai_count += len(result)
-                consecutive_failures = 0
-                print(f"  Batch {i//batch_size+1}: {len(result)} classified in {elapsed:.1f}s")
+        if result is None:
+            ai_failures += 1
+            if ai_failures <= 3:
+                # Retry once
+                result = _classify_article(article)
+                elapsed = time.time() - t0
+                if result:
+                    ai_failures = 0
             else:
-                consecutive_failures += 1
-                print(f"  Batch {i//batch_size+1}: AI failed in {elapsed:.1f}s ({consecutive_failures} consec.)")
-                if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
-                    ai_mode = False
-                    print(f"  \u26a0\ufe0f Switching to keyword fallback (AI unreachable)")
-                else:
-                    # Retry once on failure
-                    result = _classify_batch(batch)
-                    elapsed = time.time() - t0
-                    if result:
-                        all_classifications.extend(result)
-                        ai_count += len(result)
-                        consecutive_failures = 0
-                    else:
-                        # Give up on this batch, use keyword fallback
-                        all_classifications.extend(keyword_classify(batch))
-        else:
-            all_classifications.extend(keyword_classify(batch))
+                # AI unreachable — abort
+                print(f"  \u26a0\ufe0f AI unreachable after {ai_failures} failures. Aborting classification.")
+                break
 
-    print(f"  Total: {ai_count}/{len(articles)} via AI")
-    return all_classifications
+        if result.get("me_relevant"):
+            pairs.append((article, {
+                "solution": result.get("solution", "regional"),
+                "sentiment": result.get("sentiment", "neutral"),
+                "risk": result.get("risk", 5),
+            }))
+            relevant += 1
+        else:
+            dropped += 1
+
+        if (idx + 1) % 20 == 0 or idx == len(articles) - 1:
+            print(f"  [{idx+1}/{len(articles)}] {relevant} relevant, {dropped} dropped")
+
+    print(f"  Total: {relevant} relevant / {len(articles)} articles")
+    return pairs
 
 # ═══════════════════════════════════════════════════════════════════════
 # Keyword fallback classifier
@@ -605,13 +572,23 @@ def compute_phase(events):
 # ═══════════════════════════════════════════════════════════════════════
 
 def build_output(articles, classifications):
-    """Build the final JSON structure for the Peace Room frontend."""
+    """Build the final JSON structure for the Peace Room frontend.
+
+    arguments: If 'classifications' is a list of (article, classification) tuples,
+    articles is ignored and pairs are iterated directly.
+    """
     now = datetime.now(timezone.utc)
 
     # Group articles by solution
     solution_events = {sid: [] for sid in SOLUTIONS}
 
-    for article, classification in zip(articles, classifications):
+    # Handle new format: list of (article, classification) pairs
+    if classifications and isinstance(classifications[0], tuple):
+        pairs = classifications
+    else:
+        pairs = list(zip(articles, classifications))
+
+    for article, classification in pairs:
         sol = classification.get("solution", "ceasefire")
         if sol not in solution_events:
             sol = "ceasefire"  # unknown category, default to ceasefire
@@ -913,24 +890,21 @@ def main():
     # 2. AI Classification
     if args.fetch_only:
         print("[--fetch-only] Using keyword fallback")
-        classifications = keyword_classify(articles)
+        classified_pairs = [(a, c) for a, c in zip(articles, keyword_classify(articles))]
     else:
-        classifications = classify_articles(articles)
-        if not classifications:
+        classified_pairs = classify_articles(articles)
+        if not classified_pairs:
             print("  \u26a0 AI failed, falling back to keyword classification")
-            classifications = keyword_classify(articles)
-
-    # Trim to match article count
-    classifications = classifications[:len(articles)]
+            classified_pairs = [(a, c) for a, c in zip(articles, keyword_classify(articles))]
 
     # 3. Build output
-    data = build_output(articles, classifications)
+    data = build_output(articles, classified_pairs)
 
     # 4. Merge with existing data (fast mode) or overwrite (daily mode)
     if mode == "fast":
         existing = _load_existing_data()
         if existing:
-            print(f"\u2192 Merging {len(articles)} new events into existing data")
+            print(f"\u2192 Merging {len(classified_pairs)} new events into existing data")
             data = _merge_with_existing(data, existing)
         else:
             print("  \u26a0 No existing data found, falling back to daily mode")
@@ -953,7 +927,7 @@ def main():
         upload_to_cloudflare(data)
 
     elapsed = time.time() - start
-    _print_summary(data, len(articles), elapsed)
+    _print_summary(data, len(classified_pairs), elapsed)
 
 
 if __name__ == "__main__":
