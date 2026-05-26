@@ -497,6 +497,7 @@ async function buildPeaceRoomData() {
     lastUpdated: new Date().toISOString(),
     source: 'rss-live',
     feedCount: allArticles.length,
+    aiVersion: 'rss-live',
   };
 }
 

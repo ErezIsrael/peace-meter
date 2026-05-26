@@ -46,6 +46,9 @@ except ImportError:
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
 
+# ─── Version ─────────────────────────────────────────────────────────
+SCRIPT_VERSION = "1.0.0"
+
 # ─── Configuration ───────────────────────────────────────────────────
 
 LLAMA_CPP_URL = os.environ.get("LLAMA_CPP_URL", "http://192.168.2.121:8080")
@@ -58,6 +61,7 @@ CLOUDFLARE_ACCOUNT = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
 # Output — write to local file, then push to Cloudflare
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app", "peace-room")
 DATA_FILE = os.path.join(DATA_DIR, "solutions.json")
+TAXONOMY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "taxonomy.json")
 
 MAX_ARTICLES_PER_FEED = 8
 MAX_AGE_DAYS = 7
@@ -325,7 +329,114 @@ def fetch_all_feeds(age_hours=None):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# AI Classification via llama.cpp (single-article inference)
+# Phase 1: Taxonomy Proposal — LLM suggests categories from articles
+# ═══════════════════════════════════════════════════════════════════════
+
+_DEFAULT_EMOJIS = ["\U0001f54a", "🏚", "\U0001f91d", "\U0001f3db", "\U0001f4a7",
+                   "\u2623\ufe0f", "\U0001f1f1\U0001f1e7", "⚖️", "\U0001f3db", "🔥", "🌍", "📌"]
+
+
+def propose_taxonomy(articles):
+    """Phase 1: Ask LLM to propose a taxonomy from all article titles.
+    Returns dict {categories: [{id, name, description, icon}], assignments: {idx: cat_id}}
+    or None on failure.
+    """
+    # Build numbered list of titles (no snippets — too many tokens)
+    lines = []
+    for i, a in enumerate(articles):
+        lines.append(f"{i+1}. {a['title']}")
+    articles_text = "\n".join(lines)
+
+    prompt = (
+        "You are a Middle East news analyst. Review the articles below and propose"
+        " a taxonomy of categories that best organizes them."
+        "\n\n"
+        "RULES:"
+        "\n"
+        "- Propose 6-12 categories max. No fewer than 4."
+        "\n"
+        "- Each category must have: id (lowercase-hyphen), name (title case),"
+        " description (one sentence), icon (one emoji)"
+        "\n"
+        "- Categories should reflect the ACTUAL TOPICS in the articles."
+        " Do not force-fit articles into generic buckets."
+        "\n"
+        "- Be specific: 'iran-nuclear' not 'regional'. 'west-bank' not 'palestine'."
+        "\n"
+        "- If articles span many countries without a clear theme, use 'regional'."
+        "\n"
+        "- Assign each article (by number) to exactly one category."
+        "\n\n"
+        "Output ONLY a JSON object:"
+        "\n"
+        '{"categories": [{"id": "...", "name": "...", "description": "...", "icon": "..."}], "assignments": {"1": "cat-id", "2": "cat-id"}}'
+        "\n\n"
+        "Articles:"
+        f"\n{articles_text}"
+    )
+
+    body = {
+        "model": "Qwen3.6-27B",
+        "messages": [
+            {"role": "system", "content": "Middle East news taxonomy designer. Output ONLY valid JSON with keys: categories, assignments. No explanation."},
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 16000,
+        "temperature": 0.0,
+    }
+
+    headers = {"Content-Type": "application/json"}
+    if LLAMA_API_KEY:
+        headers["Authorization"] = f"Bearer {LLAMA_API_KEY}"
+
+    req = Request(
+        f"{LLAMA_CPP_URL}/v1/chat/completions",
+        data=json.dumps(body).encode(),
+        headers=headers,
+    )
+    try:
+        with urlopen(req, timeout=180) as f:
+            response = json.loads(f.read().decode())
+    except Exception as e:
+        print(f"  AI unavailable for taxonomy proposal: {e}")
+        return None
+
+    result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
+    result_text = result_text.strip()
+    if result_text.startswith("```"):
+        lines = result_text.split("\n")
+        result_text = "\n".join(lines[1:-1]).strip() if len(lines) > 2 else "".join(lines[1:]).strip()
+
+    first_brace = result_text.find('{')
+    last_brace = result_text.rfind('}')
+    if first_brace != -1 and last_brace > first_brace:
+        try:
+            return json.loads(result_text[first_brace:last_brace+1])
+        except json.JSONDecodeError:
+            pass
+    return None
+
+
+def _build_taxonomy_prompt(categories):
+    """Build system prompt from LLM-proposed categories."""
+    block = "\n".join(f"  {c['id']}: {c['description']}" for c in categories)
+    cat_list = ", ".join(c['id'] for c in categories)
+    return (
+        "You are a precise Middle East news classifier. "
+        "Your task is to analyze the provided news text and output a single, valid JSON object."
+        "\n\n"
+        "CRITICAL RULES:"
+        "\n"
+        "1. Choose the MOST SPECIFIC category. Do NOT put general news into broad categories—use 'regional' instead."
+        "\n"
+        "2. Output ONLY raw JSON. No explanations, no markdown code blocks."
+        "\n\n"
+        f"Categories:\n{block}"
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 2: AI Classification via llama.cpp (single-article inference)
 # ═══════════════════════════════════════════════════════════════════════
 
 # Pre-build the category descriptions block (reused per article)
@@ -350,7 +461,7 @@ _SYSTEM_PROMPT = (
 )
 
 
-def _classify_article(article):
+def _classify_article(article, system_prompt=None):
     """Classify a single article via llama.cpp chat API.
     Returns dict {me_relevant, category, sentiment, risk} or None on failure.
     """
@@ -376,7 +487,7 @@ def _classify_article(article):
     body = {
         "model": "Qwen3.6-27B",
         "messages": [
-            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt if system_prompt else _SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt}
         ],
         "max_tokens": 8000,
@@ -421,10 +532,12 @@ def _classify_article(article):
     return None
 
 
-def classify_articles(articles):
+def classify_articles(articles, system_prompt=None):
     """Classify each article individually via llama.cpp.
     Articles with me_relevant=false are silently dropped.
     Returns list of (article, {solution, sentiment, risk}) pairs.
+
+    If system_prompt is provided, uses it instead of the default hardcoded taxonomy.
     """
     # Lightweight pre-filter: skip obvious noise before LLM call (saves tokens + time)
     HARD_EXCLUDE = {
@@ -433,7 +546,8 @@ def classify_articles(articles):
         "hollywood", "celebrity", "sydney sweeney", "euphoria", "tv show",
         "secondhand smoke", "smoke in public", "sponsored",
     }
-    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp (1-by-1)...")
+    mode_label = "custom taxonomy" if system_prompt else "default taxonomy"
+    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp (1-by-1) [{mode_label}]...")
     pairs = []  # list of (article, classification)
     relevant = 0
     dropped = 0
@@ -448,14 +562,14 @@ def classify_articles(articles):
             continue
 
         t0 = time.time()
-        result = _classify_article(article)
+        result = _classify_article(article, system_prompt=system_prompt)
         elapsed = time.time() - t0
 
         if result is None:
             ai_failures += 1
             if ai_failures <= 3:
                 # Retry once
-                result = _classify_article(article)
+                result = _classify_article(article, system_prompt=system_prompt)
                 elapsed = time.time() - t0
                 if result:
                     ai_failures = 0
@@ -717,6 +831,7 @@ def build_output(articles, classifications):
         "lastUpdated": now.isoformat(),
         "source": "ai-analyzer-prod",
         "feedCount": len(articles),
+        "aiVersion": SCRIPT_VERSION,
     }
 
 
@@ -850,6 +965,7 @@ def _merge_with_existing(data, existing):
     }
     existing["lastUpdated"] = datetime.now(timezone.utc).isoformat()
     existing["source"] = "ai-analyzer-prod"
+    existing["aiVersion"] = SCRIPT_VERSION
     return existing
 
 
@@ -877,6 +993,10 @@ def main():
     parser.add_argument("--skip-upload", action="store_true", help="Skip Cloudflare upload")
     parser.add_argument("--dry-run", action="store_true", help="Print output JSON to stdout")
     parser.add_argument("--fetch-only", action="store_true", help="Only fetch RSS, skip AI")
+    parser.add_argument("--review-taxonomy", action="store_true",
+                        help="Phase 1 only: propose taxonomy, save to taxonomy.json, wait for approval")
+    parser.add_argument("--use-taxonomy", type=str, default=None,
+                        help="Use approved taxonomy from file (or 'auto' to load taxonomy.json)")
     parser.add_argument("--recent", type=int, default=0,
                         help="[deprecated] Only process articles from last N hours")
     args = parser.parse_args()
@@ -922,12 +1042,65 @@ def main():
         print("No articles found, aborting.")
         return
 
+    # ── Phase 1: Taxonomy Proposal ──
+    custom_system_prompt = None
+    if args.review_taxonomy:
+        print(f"\n\U0001f50d Phase 1: Proposing taxonomy from {len(articles)} articles...")
+        taxonomy = propose_taxonomy(articles)
+        if taxonomy is None:
+            print("  \u274c Taxonomy proposal failed. Falling back to default.")
+            taxonomy = None
+
+        if taxonomy and "categories" in taxonomy:
+            # Save proposed taxonomy
+            with open(TAXONOMY_FILE, "w", encoding="utf-8") as f:
+                json.dump(taxonomy, f, indent=2, ensure_ascii=False)
+            print(f"\n\u2713 Proposed taxonomy saved to {TAXONOMY_FILE}")
+
+            # Display proposed taxonomy
+            print("\n--- PROPOSED CATEGORIES ---")
+            for cat in taxonomy["categories"]:
+                print(f"  {cat.get('icon', '📌')} {cat['id']:25s} → {cat['name']}")
+                print(f"       {cat['description']}")
+
+            # Show article counts per category
+            cat_counts = {}
+            for idx_str, cat_id in taxonomy.get("assignments", {}).items():
+                cat_counts[cat_id] = cat_counts.get(cat_id, 0) + 1
+            print("\n--- ARTICLE ASSIGNMENTS ---")
+            for cat in taxonomy["categories"]:
+                count = cat_counts.get(cat["id"], 0)
+                print(f"  {cat['id']:25s} → {count} articles")
+
+            print(f"\nEdit {TAXONOMY_FILE} to adjust categories, then run:")
+            print(f"  python ai-analyze-prod.py --use-taxonomy taxonomy.json --{mode}")
+            return
+        else:
+            print("  \u274c Taxonomy proposal failed, using default taxonomy.")
+
+    elif args.use_taxonomy:
+        # Load approved taxonomy
+        taxonomy_path = "taxonomy.json" if args.use_taxonomy == "auto" else args.use_taxonomy
+        try:
+            with open(taxonomy_path, encoding="utf-8") as f:
+                taxonomy = json.load(f)
+            categories = taxonomy.get("categories", [])
+            if not categories:
+                print(f"  \u26a0 No categories in {taxonomy_path}, using default.")
+            else:
+                custom_system_prompt = _build_taxonomy_prompt(categories)
+                print(f"\n\u2728 Using approved taxonomy from {taxonomy_path} ({len(categories)} categories)")
+                for cat in categories:
+                    print(f"  {cat.get('icon', '📌')} {cat['id']:25s} → {cat['name']}")
+        except FileNotFoundError:
+            print(f"  \u26a0 {taxonomy_path} not found, using default taxonomy.")
+
     # 2. AI Classification
     if args.fetch_only:
         print("[--fetch-only] Using keyword fallback")
         classified_pairs = [(a, c) for a, c in zip(articles, keyword_classify(articles))]
     else:
-        classified_pairs = classify_articles(articles)
+        classified_pairs = classify_articles(articles, system_prompt=custom_system_prompt)
         if not classified_pairs:
             print("  \u26a0 AI failed, falling back to keyword classification")
             classified_pairs = [(a, c) for a, c in zip(articles, keyword_classify(articles))]
@@ -957,9 +1130,16 @@ def main():
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"\n\u2713 Written to {DATA_FILE}")
 
+    # Also sync to data.json for local dev server (even with --skip-upload)
+    DATA_JSON = os.path.join(os.path.dirname(DATA_FILE), "data.json")
+    with open(DATA_JSON, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
     # 7. Upload to Cloudflare
     if not args.skip_upload:
         upload_to_cloudflare(data)
+    else:
+        print(f"\n\u2139\ufe0f --skip-upload: Cloudflare upload skipped. Data written to {DATA_FILE} and {DATA_JSON}")
 
     elapsed = time.time() - start
     _print_summary(data, len(classified_pairs), elapsed)

@@ -30,8 +30,9 @@ __pycache__/
 *.pyc
 *.pyo
 
-# AI cache — local dev only
+# AI cache & taxonomy — local dev only
 peace-paths/ai_cache.json
+peace-paths/taxonomy.json
 
 # Dev helpers — not part of deployment
 peace-paths/serve.bat

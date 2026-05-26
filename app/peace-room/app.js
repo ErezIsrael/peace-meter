@@ -281,6 +281,14 @@ function renderAll(data) {
     ts.textContent = `Updated ${formatTime(data.lastUpdated)} ago`;
   }
 
+  // Version tag — show app version + AI version if available
+  const vt = document.getElementById('versionTag');
+  if (vt) {
+    const appVersion = 'v0.3.0';
+    const aiVersion = data.aiVersion ? ` AI ${data.aiVersion}` : '';
+    vt.textContent = `${appVersion}${aiVersion}`;
+  }
+
   // Activity feed
   buildActivityFeed();
 
@@ -308,6 +316,4 @@ setInterval(() => {
   loadData();
 }, REFRESH_INTERVAL);
 
-// Version tag
-const vt = document.getElementById('versionTag');
-if (vt) vt.textContent = 'v0.3.0';
+// Version tag is now rendered in renderAll() for access to data.aiVersion
