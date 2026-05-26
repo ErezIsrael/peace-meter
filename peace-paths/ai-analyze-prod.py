@@ -381,21 +381,32 @@ KEYWORD_MAP = {
     "diplomacy": ["abraham accords", "normalization", "diplomatic", "saudi", "nuclear deal"],
     "governance": ["governance", "authority", "two state", "pa reform", "election"],
     "infrastructure": ["reconstruction", "rebuild", "infrastructure", "hospital", "water"],
-    "iran": ["iran", "tehran", "hormuz", "khamenei"],
-    "lebanon": ["lebanon", "hezbollah", "beirut", "southern lebanon"],
-    "gaza-crisis": ["gaza", "displaced", "blockade", "medicine", "disease", "sumud", "flotilla"],
-    "human-rights": ["abuse", "rights", "war crime", "icj", "icc", "flotilla", "torture", "european"],
+    "iran": ["iran war", "iran nuclear", "iran us", "us iran", "iran deal", "iran ceasefire", "khamenei", "isfahan", "strait of hormuz"],
+    "lebanon": ["lebanon", "hezbollah", "beirut", "southern lebanon", "south lebanon"],
+    "gaza-crisis": ["gaza crisis", "gaza famine", "gaza blockade", "gaza siege", "sumud", "flotilla"],
+    "human-rights": ["war crime", "icj", "icc", "genocide", "human rights", "flotilla", "torture"],
     "domestic-politics": ["netanyahu", "herzog", "knesset", "coalition", "arab parties", "liberal center", "death penalty"],
     "west-bank": ["west bank", "settler", "east jerusalem", "occupied"],
-    "regional": ["jordan", "egypt", "syria", "türkiye", "turkey", "morocco", "uae", "china", "arab", "somaliland"],
+    "regional": ["jordan", "egypt", "syria", "türkiye", "turkey", "turkiye", "morocco", "uae", "qatar", "china", "arab"],
 }
+
+# Priority order — checked first wins on tie
+KEYWORD_PRIORITY = [
+    "ceasefire", "aid", "lebanon", "gaza-crisis", "west-bank",
+    "iran", "infrastructure", "human-rights", "domestic-politics",
+    "diplomacy", "governance", "regional",
+]
 
 POSITIVE_WORDS = ["agreed", "signed", "resumed", "reopened", "released", "deal", "progress", "restored"]
 NEGATIVE_WORDS = ["killed", "attack", "strike", "bombing", "destroyed", "escalat", "crisis", "failed"]
 
 
 def keyword_classify(articles):
-    """Fallback keyword-based classification."""
+    """Fallback keyword-based classification with priority tie-breaking.
+
+    Multi-word keywords get a score of 2 (more specific), single-word gets 1.
+    Among tied scores, higher priority category wins.
+    """
     results = []
     for article in articles:
         lower = article["title"].lower()
@@ -404,10 +415,20 @@ def keyword_classify(articles):
         for sol, kws in KEYWORD_MAP.items():
             for kw in kws:
                 if kw in lower:
-                    scores[sol] = scores.get(sol, 0) + 1
+                    # Multi-word keywords are more specific → score 2
+                    weight = 2 if " " in kw else 1
+                    scores[sol] = scores.get(sol, 0) + weight
 
         if scores:
-            best = max(scores, key=scores.get)
+            # Among tied scores, prefer higher priority category
+            max_score = max(scores.values())
+            best = None
+            for sol in KEYWORD_PRIORITY:
+                if scores.get(sol, 0) == max_score:
+                    best = sol
+                    break
+            if best is None:
+                best = max(scores, key=scores.get)
         else:
             continue  # drop unclassifiable articles
 

@@ -2,7 +2,7 @@
   "solutions": [
     {
       "id": "aid",
-      "icon": "🚚",
+      "icon": "\ud83d\ude9a",
       "name": "Humanitarian Aid",
       "phases": [
         "Blocked",
@@ -72,7 +72,7 @@
     },
     {
       "id": "gaza-crisis",
-      "icon": "🏚",
+      "icon": "\ud83c\udfda",
       "name": "Gaza Humanitarian Crisis",
       "phases": [
         "Blockade",
@@ -107,7 +107,7 @@
         },
         {
           "date": "Tue, 26 May 2026 07:50:21 +0100",
-          "text": "'From position of power’: Iran should negotiate as victor, lawmaker says",
+          "text": "'From position of power\u2019: Iran should negotiate as victor, lawmaker says",
           "sentiment": "neutral",
           "source": "Middle East Eye",
           "link": "https://www.middleeasteye.net/live-blog/live-blog-update/position-power-iran-should-negotiate-victor-lawmaker-says",
@@ -123,7 +123,7 @@
         },
         {
           "date": "Mon, 25 May 2026 14:55:52 +0000",
-          "text": "Even After a Strait of Hormuz Deal, Moving 1,500 Ships Won’t Be Easy",
+          "text": "Even After a Strait of Hormuz Deal, Moving 1,500 Ships Won\u2019t Be Easy",
           "sentiment": "neutral",
           "source": "NYT ME",
           "link": "https://www.nytimes.com/2026/05/25/business/iran-strait-hormuz-shipping-traffic.html",
@@ -142,7 +142,7 @@
     },
     {
       "id": "ceasefire",
-      "icon": "🕊",
+      "icon": "\ud83d\udd4a",
       "name": "Ceasefire & De-escalation",
       "phases": [
         "Active Fighting",
@@ -157,11 +157,11 @@
         "label": "Events (7d)",
         "value": "6"
       },
-      "summary": "Bodies with names: Inside Gaza’s cemetery of the missing",
+      "summary": "Bodies with names: Inside Gaza\u2019s cemetery of the missing",
       "events": [
         {
           "date": "Tue, 26 May 2026 08:28:36 +0000",
-          "text": "Bodies with names: Inside Gaza’s cemetery of the missing",
+          "text": "Bodies with names: Inside Gaza\u2019s cemetery of the missing",
           "sentiment": "negative",
           "source": "Al Jazeera",
           "link": "https://www.aljazeera.com/features/2026/5/26/bodies-with-names-inside-gazas-cemetery-of-the-missing?traffic_source=rss",
@@ -212,7 +212,7 @@
     },
     {
       "id": "domestic-politics",
-      "icon": "🏛",
+      "icon": "\ud83c\udfdb",
       "name": "Israeli Domestic Politics",
       "phases": [
         "Fractured",
@@ -274,7 +274,7 @@
     },
     {
       "id": "diplomacy",
-      "icon": "🤝",
+      "icon": "\ud83e\udd1d",
       "name": "Diplomacy & Regional Deals",
       "phases": [
         "Isolated",
@@ -301,7 +301,7 @@
         },
         {
           "date": "Fri, 24 Apr 2026 14:16:34 +0000",
-          "text": "“Make Iran Ungovernable” – Tracking Efforts To Destroy Iran’s Police Infrastructure",
+          "text": "\u201cMake Iran Ungovernable\u201d \u2013 Tracking Efforts To Destroy Iran\u2019s Police Infrastructure",
           "sentiment": "neutral",
           "source": "bellingcat",
           "link": "https://www.bellingcat.com/news/2026/04/24/make-iran-ungovernable-tracking-efforts-to-destroy-irans-police-infrastructure/",
@@ -328,7 +328,7 @@
     },
     {
       "id": "west-bank",
-      "icon": "🔥",
+      "icon": "\ud83d\udd25",
       "name": "West Bank & Settlements",
       "phases": [
         "Escalation",
@@ -374,7 +374,7 @@
     },
     {
       "id": "human-rights",
-      "icon": "⚖️",
+      "icon": "\u2696\ufe0f",
       "name": "Human Rights & Intl Law",
       "phases": [
         "Allegations",
@@ -409,7 +409,7 @@
         },
         {
           "date": "Mon, 25 May 2026 15:05:11 +0000",
-          "text": "Trump’s Pressure Had Little Effect on Iran’s Terms for a Peace Deal",
+          "text": "Trump\u2019s Pressure Had Little Effect on Iran\u2019s Terms for a Peace Deal",
           "sentiment": "neutral",
           "source": "NYT ME",
           "link": "https://www.nytimes.com/2026/05/25/world/middleeast/iran-deal-trump-pressure.html",
@@ -420,7 +420,7 @@
     },
     {
       "id": "lebanon",
-      "icon": "🇱🇧",
+      "icon": "\ud83c\uddf1\ud83c\udde7",
       "name": "Lebanon & Hezbollah",
       "phases": [
         "Active Fighting",
@@ -435,11 +435,11 @@
         "label": "Events (7d)",
         "value": "26"
       },
-      "summary": "Syria: Israel’s deliberate destruction of civilian homes in Quneitra must be investigated as war crimes",
+      "summary": "Syria: Israel\u2019s deliberate destruction of civilian homes in Quneitra must be investigated as war crimes",
       "events": [
         {
           "date": "Wed, 13 May 2026 23:01:00 +0000",
-          "text": "Syria: Israel’s deliberate destruction of civilian homes in Quneitra must be investigated as war crimes",
+          "text": "Syria: Israel\u2019s deliberate destruction of civilian homes in Quneitra must be investigated as war crimes",
           "sentiment": "neutral",
           "source": "Amnesty",
           "link": "https://www.amnesty.org/en/latest/news/2026/05/syria-israels-deliberate-destruction-of-civilian-homes-in-quneitra-war-crime/",
@@ -455,7 +455,7 @@
         },
         {
           "date": "Tue, 26 May 2026 07:39:14 +0000",
-          "text": "Rubio says Strait of Hormuz will open ‘one way or the other’",
+          "text": "Rubio says Strait of Hormuz will open \u2018one way or the other\u2019",
           "sentiment": "negative",
           "source": "Al Jazeera",
           "link": "https://www.aljazeera.com/video/newsfeed/2026/5/26/rubio-says-strait-of-hormuz-will-open-one-way-or-the-other?traffic_source=rss",
@@ -511,7 +511,7 @@
         },
         {
           "date": "Thu, 30 Apr 2026 13:44:09 +0000",
-          "text": "Israel’s brazen interception of Global Sumud Flotilla bound for Gaza sparks fears for 175 arbitrarily detained",
+          "text": "Israel\u2019s brazen interception of Global Sumud Flotilla bound for Gaza sparks fears for 175 arbitrarily detained",
           "sentiment": "neutral",
           "source": "Amnesty",
           "link": "https://www.amnesty.org/en/latest/news/2026/04/israels-brazen-interception-of-global-sumud-flotilla-bound-for-gaza-sparks-fears-for-175-arbitrarily-detained/",
@@ -535,7 +535,7 @@
         },
         {
           "date": "Mon, 25 May 2026 02:22:26 +0000",
-          "text": "Rubio Rebukes Hezbollah Chief Over Call for Lebanese to ‘Take to the Streets’",
+          "text": "Rubio Rebukes Hezbollah Chief Over Call for Lebanese to \u2018Take to the Streets\u2019",
           "sentiment": "neutral",
           "source": "NYT ME",
           "link": "https://www.nytimes.com/2026/05/24/world/middleeast/naim-qassem-hezbollah-rubio.html",
@@ -543,7 +543,7 @@
         },
         {
           "date": "Mon, 11 May 2026 23:01:00 +0000",
-          "text": "Israel/OPT: Israel’s systematic destruction of high-rise buildings must be investigated as war crimes of wanton destruction and collective punishment",
+          "text": "Israel/OPT: Israel\u2019s systematic destruction of high-rise buildings must be investigated as war crimes of wanton destruction and collective punishment",
           "sentiment": "negative",
           "source": "Amnesty",
           "link": "https://www.amnesty.org/en/latest/news/2026/05/israel-opt-israels-systematic-destruction-of-high-rise-buildings-must-be-investigated-as-war-crimes-of-wanton-destruction-and-collective-punishment/",
@@ -551,7 +551,7 @@
         },
         {
           "date": "Mon, 11 May 2026 08:38:00 +0000",
-          "text": "Europe: Failure to suspend Israel from Eurovision betrays humanity and exposes blatant double standards",
+          "text": "Europe: Failure to suspend Israel from\u00a0Eurovision\u00a0betrays humanity\u00a0and exposes blatant double standards",
           "sentiment": "negative",
           "source": "Amnesty",
           "link": "https://www.amnesty.org/en/latest/news/2026/05/europe-failure-to-suspend-israel-from-eurovision-betrays-humanity-and-exposes-blatant-double-standards/",
@@ -591,7 +591,7 @@
         },
         {
           "date": "2026-05-26T00:01:52+00:00",
-          "text": "Israel escalates strikes in Lebanon as Netanyahu vows to ‘crush’ Hezbollah",
+          "text": "Israel escalates strikes in Lebanon as Netanyahu vows to \u2018crush\u2019 Hezbollah",
           "sentiment": "negative",
           "source": "Guardian",
           "link": "https://www.theguardian.com/world/2026/may/26/israel-escalates-strikes-in-lebanon-as-netanyahu-vows-to-crush-hezbollah",
@@ -623,7 +623,7 @@
         },
         {
           "date": "2026-05-25T18:50:49+00:00",
-          "text": "‘If Iran gets a bomb it will be Bibi’s’: Trump’s deal outline sparks alarm in Israel",
+          "text": "\u2018If Iran gets a bomb it will be Bibi\u2019s\u2019: Trump\u2019s deal outline sparks alarm in Israel",
           "sentiment": "negative",
           "source": "Guardian",
           "link": "https://www.theguardian.com/world/2026/may/25/iran-bomb-trump-deal-sparks-alarm-israel-netanyahu",
