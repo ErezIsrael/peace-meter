@@ -306,11 +306,19 @@ def classify_articles(articles):
         print(f"  Response length: {len(result_text)} chars")
 
         # Extract JSON array from response
-        json_match = re.search(r"\[.*\]", result_text, re.DOTALL)
-        if json_match:
-            classifications = json.loads(json_match.group())
-            print(f"  Parsed {len(classifications)} classifications")
-            return classifications
+        first_bracket = result_text.find('[')
+        last_bracket = result_text.rfind(']')
+        if first_bracket != -1 and last_bracket > first_bracket:
+            json_str = result_text[first_bracket:last_bracket+1]
+            try:
+                classifications = json.loads(json_str)
+                print(f"  Parsed {len(classifications)} classifications")
+                return classifications
+            except json.JSONDecodeError as e:
+                print(f"  \u26a0 JSON parse error at pos {e.pos}: {e.msg}")
+                print(f"  Context: ...{json_str[max(0,e.pos-30):e.pos+30]}...")
+                print(f"  Response preview: {result_text[:500]}")
+                return None
         else:
             print(f"  \u26a0 No JSON array found in response")
             print(f"  Response preview: {result_text[:500]}")
@@ -371,6 +379,56 @@ def keyword_classify(articles):
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# Utility Functions
+# ═══════════════════════════════════════════════════════════════════════
+
+def parse_date(date_str):
+    """Parse date string (ISO 8601 or RFC 2822)."""
+    try:
+        return datetime.fromisoformat(date_str)
+    except (ValueError, TypeError):
+        try:
+            return parsedate_to_datetime(date_str)
+        except Exception:
+            return datetime.now(timezone.utc)
+
+
+def compute_direction(events):
+    if not events:
+        return "stable"
+    pos = sum(1 for e in events if e["sentiment"] == "positive")
+    neg = sum(1 for e in events if e["sentiment"] == "negative")
+    ratio = pos / (pos + neg) if (pos + neg) > 0 else 0.5
+    if ratio > 0.65:
+        return "advancing"
+    elif ratio < 0.35:
+        return "stalling"
+    return "stable"
+
+
+def compute_phase(events):
+    if not events:
+        return 0
+    total = len(events)
+    now_ts = datetime.now(timezone.utc).timestamp()
+
+    w_pos, w_total = 0, 0
+    for e in events:
+        age = now_ts - parse_date(e["date"]).timestamp()
+        weight = 2 if age < 48 * 3600 else 1
+        w_total += weight
+        if e["sentiment"] == "positive":
+            w_pos += weight
+
+    ratio = w_pos / w_total if w_total > 0 else 0
+    phase = min(4, int(ratio * 5))
+    neg = sum(1 for e in events if e["sentiment"] == "negative")
+    if neg / total > 0.6:
+        phase = min(phase, 1)
+    return phase
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # Build Output Data
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -398,51 +456,6 @@ def build_output(articles, classifications):
     # Sort events per solution by date desc
     for sol in solution_events:
         solution_events[sol].sort(key=lambda e: e["date"], reverse=True)
-
-    # Compute direction per solution
-    def compute_direction(events):
-        if not events:
-            return "stable"
-        pos = sum(1 for e in events if e["sentiment"] == "positive")
-        neg = sum(1 for e in events if e["sentiment"] == "negative")
-        ratio = pos / (pos + neg) if (pos + neg) > 0 else 0.5
-        if ratio > 0.65:
-            return "advancing"
-        elif ratio < 0.35:
-            return "stalling"
-        return "stable"
-
-    def parse_date(date_str):
-        """Parse date string (ISO 8601 or RFC 2822)."""
-        try:
-            return datetime.fromisoformat(date_str)
-        except (ValueError, TypeError):
-            try:
-                return parsedate_to_datetime(date_str)
-            except Exception:
-                return datetime.now(timezone.utc)
-
-    def compute_phase(events):
-        if not events:
-            return 0
-        total = len(events)
-        now_ts = now.timestamp()
-        neg = sum(1 for e in events if e["sentiment"] == "negative")
-
-        # Weighted ratio (recent events count double)
-        w_pos, w_total = 0, 0
-        for e in events:
-            age = now_ts - parse_date(e["date"]).timestamp()
-            weight = 2 if age < 48 * 3600 else 1
-            w_total += weight
-            if e["sentiment"] == "positive":
-                w_pos += weight
-
-        ratio = w_pos / w_total if w_total > 0 else 0
-        phase = min(4, int(ratio * 5))
-        if neg / total > 0.6:
-            phase = min(phase, 1)
-        return phase
 
     solutions = []
     counts = {"advancing": 0, "stable": 0, "stalling": 0}
@@ -586,6 +599,7 @@ def main():
     parser.add_argument("--fetch-only", action="store_true", help="Only fetch RSS, skip AI")
     parser.add_argument("--skip-upload", action="store_true", help="Skip Cloudflare upload")
     parser.add_argument("--dry-run", action="store_true", help="Print output JSON to stdout")
+    parser.add_argument("--recent", type=int, default=0, help="Only process articles from last N hours (for testing)")
     args = parser.parse_args()
 
     start = time.time()
@@ -595,6 +609,21 @@ def main():
     if not articles:
         print("No articles found, aborting.")
         return
+
+    # Filter to recent articles if requested
+    if args.recent > 0:
+        now = datetime.now(timezone.utc)
+        cutoff = now.timestamp() - (args.recent * 3600)
+        filtered = []
+        for a in articles:
+            try:
+                dt = datetime.fromisoformat(a["date"]).replace(tzinfo=timezone.utc)
+                if dt.timestamp() >= cutoff:
+                    filtered.append(a)
+            except Exception:
+                filtered.append(a)  # keep if we can't parse date
+        articles = filtered
+        print(f"  [--recent {args.recent}h] {len(articles)} articles from last {args.recent}h")
 
     # 2. AI Classification
     if args.fetch_only:
@@ -612,19 +641,53 @@ def main():
     # 3. Build output
     data = build_output(articles, classifications)
 
-    # 4. Dry run
+    # 4. Merge with existing data if --recent (incremental scan)
+    existing_data = None
+    if args.recent > 0 and os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+        except Exception:
+            existing_data = None
+
+    if existing_data:
+        # Merge new articles into existing solutions
+        for sol in existing_data.get("solutions", []):
+            sol_id = sol["id"]
+            # Append new events to existing ones
+            for new_sol in data["solutions"]:
+                if new_sol["id"] == sol_id:
+                    for ev in new_sol["events"]:
+                        sol["events"].append(ev)
+        # Add any new solution categories
+        existing_ids = {s["id"] for s in existing_data["solutions"]}
+        for new_sol in data["solutions"]:
+            if new_sol["id"] not in existing_ids:
+                existing_data["solutions"].append(new_sol)
+        data = existing_data
+        # Recompute phases/directions for merged data
+        for sol in data["solutions"]:
+            phase_index = compute_phase(sol["events"])
+            direction = compute_direction(sol["events"])
+            sol["phaseIndex"] = phase_index
+            sol["direction"] = direction
+            sol["keyMetric"] = {"label": "Events (7d)", "value": str(len(sol["events"]))}
+            sol["summary"] = sol["events"][0]["text"] if sol["events"] else ""
+            sol["confidence"] = "high" if len(sol["events"]) >= 5 else "medium"
+
+    # 5. Dry run
     if args.dry_run:
         print("\n--- solutions.json ---")
         print(json.dumps(data, indent=2, ensure_ascii=False))
         return
 
-    # 5. Write local JSON
+    # 6. Write local JSON
     os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"\n\u2713 Written to {DATA_FILE}")
 
-    # 6. Upload to Cloudflare
+    # 7. Upload to Cloudflare
     if not args.skip_upload:
         upload_to_cloudflare(data)
 
