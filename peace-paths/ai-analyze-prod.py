@@ -3,14 +3,17 @@
 Peace Room AI Analyzer — Production
 ====================================
 Runs on the LLM server (192.168.2.121:8080).
-1. Fetches RSS feeds
-2. Sends ALL article titles to local llama.cpp in ONE prompt
-3. Classifies + rates each article
-4. Builds solutions.json with phase progress, direction, risks
-5. Pushes to Cloudflare Pages via Workers API
+
+Modes:
+  --fast   — Hourly: fetch recent articles (last 2h), merge into existing solutions.json
+  --daily  — Daily: full fetch (7-day window), overwrite solutions.json, determine all categories
+  (default) — Same as --daily
 
 Run: python ai-analyze-prod.py
-Schedule: every 3 hours via cron / Task Scheduler
+Run: python ai-analyze-prod.py --fast
+Run: python ai-analyze-prod.py --categories "armistice:Ceasefire negotiations across all fronts"
+
+Schedule: --fast every hour; --daily every 12h
 """
 
 import json
@@ -45,6 +48,7 @@ DATA_FILE = os.path.join(DATA_DIR, "solutions.json")
 
 MAX_ARTICLES_PER_FEED = 8
 MAX_AGE_DAYS = 7
+FAST_AGE_HOURS = 2  # --fast: only articles from last N hours
 
 # ─── RSS Feeds ──────────────────────────────────────────────────────
 
@@ -154,6 +158,25 @@ SOLUTIONS = {
 
 SOLUTION_IDS = list(SOLUTIONS.keys())
 
+
+def inject_category(cat_id, name, description, icon=None):
+    """Inject a custom category before AI classification.
+
+    Usage: --categories "armistice:Ceasefire across all fronts:Ceasefire talks, armistice negotiations, truce"
+    """
+    if cat_id in SOLUTIONS:
+        print(f"  \u26a0 Category '{cat_id}' already exists, updating description.")
+        SOLUTIONS[cat_id]["description"] = description
+    else:
+        SOLUTIONS[cat_id] = {
+            "icon": icon or "\U0001f4cc",
+            "name": name,
+            "phases": ["Emerged", "Developing", "Gaining Traction", "Maturing", "Resolved"],
+            "description": description,
+        }
+        SOLUTION_IDS.append(cat_id)
+    print(f"  \u2713 Category '{cat_id}' ({name})")
+
 # ═══════════════════════════════════════════════════════════════════════
 # RSS Fetching & Parsing
 # ═══════════════════════════════════════════════════════════════════════
@@ -205,8 +228,12 @@ def fetch_rss(url, source, max_items):
     return articles
 
 
-def fetch_all_feeds():
-    """Fetch all RSS feeds, return deduplicated ME-relevant articles."""
+def fetch_all_feeds(age_hours=None):
+    """Fetch all RSS feeds, return deduplicated ME-relevant articles.
+
+    age_hours: if set, only return articles from last N hours (--fast mode).
+               if None, use MAX_AGE_DAYS (--daily mode).
+    """
     print(f"\U0001f4e1 Fetching {len(RSS_FEEDS)} RSS feeds...")
     all_articles = []
 
@@ -221,7 +248,10 @@ def fetch_all_feeds():
     ]
 
     now = datetime.now(timezone.utc)
-    max_age = now.timestamp() - (MAX_AGE_DAYS * 86400)
+    if age_hours is not None:
+        max_age = now.timestamp() - (age_hours * 3600)
+    else:
+        max_age = now.timestamp() - (MAX_AGE_DAYS * 86400)
 
     fetched = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
@@ -601,37 +631,150 @@ def upload_to_cloudflare(data):
 # Main
 # ═══════════════════════════════════════════════════════════════════════
 
+def _load_existing_data():
+    """Load existing solutions.json for merge operations."""
+    if not os.path.exists(DATA_FILE):
+        return None
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"  \u26a0 Could not load existing data: {e}")
+        return None
+
+
+def _merge_with_existing(data, existing):
+    """Merge new events into existing solutions, preserving history.
+
+    - Deduplicates events by text content within each category
+    - Adds new solution categories discovered by AI
+    - Recomputes phases, directions, confidence for all solutions
+    """
+    for sol in existing.get("solutions", []):
+        sol_id = sol["id"]
+        existing_texts = {e["text"] for e in sol["events"]}
+        for new_sol in data["solutions"]:
+            if new_sol["id"] == sol_id:
+                for ev in new_sol["events"]:
+                    if ev["text"] not in existing_texts:
+                        sol["events"].append(ev)
+                        existing_texts.add(ev["text"])
+
+    existing_ids = {s["id"] for s in existing["solutions"]}
+    for new_sol in data["solutions"]:
+        if new_sol["id"] not in existing_ids:
+            existing["solutions"].append(new_sol)
+
+    # Recompute for all solutions
+    for sol in existing["solutions"]:
+        sol["events"].sort(key=lambda e: e["date"], reverse=True)
+        sol["events"] = sol["events"][:12]  # keep top events for display
+        sol["phaseIndex"] = compute_phase(sol["events"])
+        sol["direction"] = compute_direction(sol["events"])
+        sol["keyMetric"] = {"label": "Events (7d)", "value": str(len(sol["events"]))}
+        sol["summary"] = sol["events"][0]["text"] if sol["events"] else ""
+        sol["confidence"] = "high" if len(sol["events"]) >= 5 else "medium" if len(sol["events"]) >= 3 else "low"
+
+    # Recompute momentum
+    all_solutions = existing["solutions"]
+    active_ids = [s["id"] for s in all_solutions if s["events"]]
+    existing["activeSolutions"] = active_ids
+
+    counts = {"advancing": 0, "stable": 0, "stalling": 0}
+    for s in all_solutions:
+        counts[s["direction"]] += 1
+
+    # Sort by event count, keep top 8
+    all_solutions.sort(key=lambda s: len(s["events"]), reverse=True)
+    top8 = all_solutions[:8]
+    existing["solutions"] = top8
+    existing["activeSolutions"] = [s["id"] for s in top8]
+
+    if counts["advancing"] > counts["stalling"]:
+        m_dir, m_label = "advancing", "Net Positive"
+    elif counts["stalling"] > counts["advancing"]:
+        m_dir, m_label = "stalling", "Net Negative"
+    else:
+        m_dir, m_label = "stable", "Mixed Signals"
+
+    existing["overallMomentum"] = {
+        "direction": m_dir,
+        "label": m_label,
+        "summary": f"{counts['advancing']} advancing, {counts['stable']} stable, {counts['stalling']} stalling ({len(active_ids)} active). {sum(len(s['events']) for s in all_solutions)} events across {len(all_solutions)} categories.",
+    }
+    existing["lastUpdated"] = datetime.now(timezone.utc).isoformat()
+    existing["source"] = "ai-analyzer-prod"
+    return existing
+
+
+def _print_summary(data, articles_count, elapsed):
+    """Print run summary."""
+    print(f"\n\u2713 Done in {elapsed:.1f}s")
+    print(f"  {articles_count} articles \u2192 {len(data['solutions'])} solutions")
+    print(f"  Momentum: {data['overallMomentum']['label']}")
+
+    for sol in data["solutions"]:
+        d = "\U0001f7e2" if sol["direction"] == "advancing" else "\U0001f7e5" if sol["direction"] == "stalling" else "\U0001f7e1"
+        phase = sol["phases"][sol["phaseIndex"]]
+        print(f"  {sol['icon']} {sol['name']:35s} {sol['direction']:10s} {d} {sol['keyMetric']['value']} events \u2192 {phase}")
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Peace Room AI Analyzer (Production)")
-    parser.add_argument("--fetch-only", action="store_true", help="Only fetch RSS, skip AI")
+    parser.add_argument("--fast", action="store_true",
+                        help="Hourly fast run: fetch last 2h, merge into existing data")
+    parser.add_argument("--daily", action="store_true",
+                        help="Daily full run: fetch 7 days, overwrite solutions.json")
+    parser.add_argument("--categories", type=str, nargs="*",
+                        help="Inject custom categories (id:name:description). E.g., --categories \"armistice:Ceasefire Talks:Truce negotiations\"")
     parser.add_argument("--skip-upload", action="store_true", help="Skip Cloudflare upload")
     parser.add_argument("--dry-run", action="store_true", help="Print output JSON to stdout")
-    parser.add_argument("--recent", type=int, default=0, help="Only process articles from last N hours (for testing)")
+    parser.add_argument("--fetch-only", action="store_true", help="Only fetch RSS, skip AI")
+    parser.add_argument("--recent", type=int, default=0,
+                        help="[deprecated] Only process articles from last N hours")
     args = parser.parse_args()
+
+    # Determine mode
+    if args.fast:
+        mode = "fast"
+        age_hours = FAST_AGE_HOURS
+    elif args.daily or (args.fast == False and args.recent == 0):
+        mode = "daily"
+        age_hours = None
+    else:
+        # --recent is deprecated, treat as fast with custom hours
+        mode = "fast"
+        age_hours = args.recent
+        print("  \u26a0 --recent is deprecated, use --fast instead")
+
+    print(f"\n{'\U0001f680' if mode == 'daily' else '\U0001f4a9'} Peace Room AI Analyzer — {mode.upper()} mode\n")
+
+    # Inject custom categories
+    if args.categories:
+        print("\u2728 Injecting custom categories:")
+        for cat in args.categories:
+            parts = cat.split(":", 2)
+            if len(parts) == 3:
+                cat_id, name, desc = parts
+                inject_category(cat_id, name, desc)
+            elif len(parts) == 2:
+                cat_id, name = parts
+                inject_category(cat_id, name, f"{name} news and updates")
+            else:
+                print(f"  \u26a0 Invalid format: '{cat}' (expected id:name:description)")
 
     start = time.time()
 
     # 1. Fetch RSS
-    articles = fetch_all_feeds()
+    if age_hours is not None:
+        print(f"  [fast mode] fetching articles from last {age_hours}h")
+    else:
+        print(f"  [daily mode] fetching articles from last {MAX_AGE_DAYS}d")
+    articles = fetch_all_feeds(age_hours=age_hours)
     if not articles:
         print("No articles found, aborting.")
         return
-
-    # Filter to recent articles if requested
-    if args.recent > 0:
-        now = datetime.now(timezone.utc)
-        cutoff = now.timestamp() - (args.recent * 3600)
-        filtered = []
-        for a in articles:
-            try:
-                dt = datetime.fromisoformat(a["date"]).replace(tzinfo=timezone.utc)
-                if dt.timestamp() >= cutoff:
-                    filtered.append(a)
-            except Exception:
-                filtered.append(a)  # keep if we can't parse date
-        articles = filtered
-        print(f"  [--recent {args.recent}h] {len(articles)} articles from last {args.recent}h")
 
     # 2. AI Classification
     if args.fetch_only:
@@ -649,39 +792,15 @@ def main():
     # 3. Build output
     data = build_output(articles, classifications)
 
-    # 4. Merge with existing data if --recent (incremental scan)
-    existing_data = None
-    if args.recent > 0 and os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                existing_data = json.load(f)
-        except Exception:
-            existing_data = None
-
-    if existing_data:
-        # Merge new articles into existing solutions
-        for sol in existing_data.get("solutions", []):
-            sol_id = sol["id"]
-            # Append new events to existing ones
-            for new_sol in data["solutions"]:
-                if new_sol["id"] == sol_id:
-                    for ev in new_sol["events"]:
-                        sol["events"].append(ev)
-        # Add any new solution categories
-        existing_ids = {s["id"] for s in existing_data["solutions"]}
-        for new_sol in data["solutions"]:
-            if new_sol["id"] not in existing_ids:
-                existing_data["solutions"].append(new_sol)
-        data = existing_data
-        # Recompute phases/directions for merged data
-        for sol in data["solutions"]:
-            phase_index = compute_phase(sol["events"])
-            direction = compute_direction(sol["events"])
-            sol["phaseIndex"] = phase_index
-            sol["direction"] = direction
-            sol["keyMetric"] = {"label": "Events (7d)", "value": str(len(sol["events"]))}
-            sol["summary"] = sol["events"][0]["text"] if sol["events"] else ""
-            sol["confidence"] = "high" if len(sol["events"]) >= 5 else "medium"
+    # 4. Merge with existing data (fast mode) or overwrite (daily mode)
+    if mode == "fast":
+        existing = _load_existing_data()
+        if existing:
+            print(f"\u2192 Merging {len(articles)} new events into existing data")
+            data = _merge_with_existing(data, existing)
+        else:
+            print("  \u26a0 No existing data found, falling back to daily mode")
+    # daily mode: data already overwrites
 
     # 5. Dry run
     if args.dry_run:
@@ -700,14 +819,7 @@ def main():
         upload_to_cloudflare(data)
 
     elapsed = time.time() - start
-    print(f"\n\u2713 Done in {elapsed:.1f}s")
-    print(f"  {len(articles)} articles \u2192 {len(data['solutions'])} solutions")
-    print(f"  Momentum: {data['overallMomentum']['label']}")
-
-    for sol in data["solutions"]:
-        d = "\U0001f7e2" if sol["direction"] == "advancing" else "\U0001f7e5" if sol["direction"] == "stalling" else "\U0001f7e1"
-        phase = sol["phases"][sol["phaseIndex"]]
-        print(f"  {sol['icon']} {sol['name']:35s} {sol['direction']:10s} {d} {sol['keyMetric']['value']} events \u2192 {phase}")
+    _print_summary(data, len(articles), elapsed)
 
 
 if __name__ == "__main__":
