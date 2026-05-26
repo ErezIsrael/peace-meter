@@ -1,22 +1,18 @@
 /*
  * /peace-room/data.json — Cloudflare Pages Function
  *
- * Architecture:
- *  1. Fetch 18 RSS feeds in parallel (news + humanitarian + thinktank + govt)
- *  2. Filter to ME-related, deduplicate
- *  3. Classify each article into a solution bucket via keyword + context matching
- *  4. Compute sentiment, direction, phase progress per solution
- *  5. Return JSON matching Peace Room frontend schema
- *
- * Browser caches 3h via Cache-Control. Falls back to static data.json on error.
+ * Serves the AI-generated solutions.json from the static deployment.
+ * Falls back to live RSS keyword classification if solutions.json is stale
+ * (older than 12 hours) or missing.
  */
 
+const MAX_STALE_MS = 12 * 60 * 60 * 1000; // 12 hours
+
 /* ═══════════════════════════════════════════════════════════
-   RSS FEEDS — categorized by type for balanced coverage
+   RSS FEEDS — fallback only (used when AI data is stale)
    ═══════════════════════════════════════════════════════════ */
 
 const RSS_FEEDS = [
-  // ── General ME news (broad coverage, high volume) ──
   { url: 'https://feeds.bbci.co.uk/news/world/middle_east/rss.xml', source: 'BBC ME', cap: 6 },
   { url: 'https://www.aljazeera.com/xml/rss/all.xml', source: 'Al Jazeera', cap: 6 },
   { url: 'https://www.theguardian.com/world/israel/rss', source: 'Guardian', cap: 5 },
@@ -26,22 +22,16 @@ const RSS_FEEDS = [
   { url: 'https://www.middleeastmonitor.com/feed/', source: 'ME Monitor', cap: 5 },
   { url: 'https://www.middleeasteye.net/rss', source: 'ME Eye', cap: 4 },
   { url: 'https://www.france24.com/en/middle-east/rss', source: 'France24', cap: 4 },
-
-  // ── Israel-focused (English) ──
   { url: 'https://www.timesofisrael.com/feed/', source: 'Times of Israel', cap: 5 },
   { url: 'https://www.haaretz.com/srv/haaretz-latest-headlines', source: 'Haaretz', cap: 5 },
   { url: 'https://rss.jpost.com/rss/rssfeedsfrontpage.aspx', source: 'JPost', cap: 4 },
   { url: 'https://www.i24news.tv/en/rss', source: 'i24NEWS', cap: 4 },
   { url: 'https://www.israel21c.org/feed/', source: 'Israel21c', cap: 3 },
   { url: 'https://www.israelnationalnews.com/Rss.aspx?act=.1', source: 'Arutz Sheva', cap: 3 },
-
-  // ── Humanitarian / UN / NGO ──
   { url: 'https://news.un.org/feed/subscribe/en/news/region/middle-east/feed/rss.xml', source: 'UN News', cap: 5 },
   { url: 'https://www.amnesty.org/en/location/middle-east-and-north-africa/feed/', source: 'Amnesty', cap: 3 },
   { url: 'https://forward.com/rss/', source: 'The Forward', cap: 3 },
   { url: 'https://www.idf.il/en/rss/', source: 'IDF', cap: 3 },
-
-  // ── Think tanks / analysis ──
   { url: 'https://www.brookings.edu/topic/middle-east-north-africa/feed/', source: 'Brookings', cap: 3 },
   { url: 'https://www.crisisgroup.org/rss/91', source: 'Crisis Group', cap: 3 },
   { url: 'https://mitvim.org.il/en/feed/', source: 'Mitvim', cap: 3 },
@@ -49,13 +39,9 @@ const RSS_FEEDS = [
   { url: 'https://feeds.feedburner.com/lsemiddleeastcentre', source: 'LSE ME Centre', cap: 2 },
 ];
 
-/* ═══════════════════════════════════════════════════════════
-   SOLUTIONS — 8 tracks covering the current conflict landscape
-   ═══════════════════════════════════════════════════════════ */
-
 const SOLUTIONS = {
   'ceasefire': {
-    icon: '🕊', name: 'Ceasefire & De-escalation',
+    icon: '\u{1f54a}', name: 'Ceasefire & De-escalation',
     phases: ['Active Fighting', 'Ceasefire Talks', 'Draft Agreement', 'Signed', 'Holding'],
     primary: ['ceasefire', 'truce', 'cease fire', 'cease-fire', 'armistice',
               'end hostilities', 'de-escalation', 'deescalation',
@@ -71,7 +57,7 @@ const SOLUTIONS = {
     },
   },
   'diplomacy': {
-    icon: '🤝', name: 'Diplomacy & Regional Deals',
+    icon: '\u{1f91d}', name: 'Diplomacy & Regional Deals',
     phases: ['Isolated', 'Back-channel', 'Framework', 'New Partners', 'Regional Peace'],
     primary: ['abraham accords', 'normalization', 'normalize relations',
               'diplomatic ties', 'peace deal', 'iraq peace deal',
@@ -89,7 +75,7 @@ const SOLUTIONS = {
     },
   },
   'governance': {
-    icon: '🏛', name: 'Post-War Governance',
+    icon: '\u{1f3db}', name: 'Post-War Governance',
     phases: ['No Framework', 'Proposals', 'Consensus', 'Interim Gov', 'Sustainable'],
     primary: ['gaza governance', 'post-war', 'interim authority',
               'palestinian authority', 'pa reform', 'elections gaza',
@@ -107,7 +93,7 @@ const SOLUTIONS = {
     },
   },
   'infrastructure': {
-    icon: '💧', name: 'Infrastructure & Recovery',
+    icon: '\U0001f4a7', name: 'Infrastructure & Recovery',
     phases: ['Destroyed', 'Emergency Repairs', 'Partial', 'Reconstruction', 'Full Recovery'],
     primary: ['reconstruction', 'rebuild gaza', 'infrastructure',
               'water treatment', 'power grid', 'al-shifa',
@@ -125,7 +111,7 @@ const SOLUTIONS = {
     },
   },
   'iran': {
-    icon: '☣️', name: 'Iran Nuclear & War',
+    icon: '\u2623\ufe0f', name: 'Iran Nuclear & War',
     phases: ['War', 'Ceasefire Talks', 'Armistice', 'Nuclear Deal', 'Resolution'],
     primary: ['iran us', 'us iran', 'iran deal', 'iran agreement',
               'iran war', 'iran ceasefire', 'nuclear deal',
@@ -140,7 +126,7 @@ const SOLUTIONS = {
     },
   },
   'lebanon': {
-    icon: '🇱🇧', name: 'Lebanon & Hezbollah',
+    icon: '\U0001f1f1\U0001f1e7', name: 'Lebanon & Hezbollah',
     phases: ['Active Fighting', 'De-escalation', 'Ceasefire', 'Withdrawal', 'Stable'],
     primary: ['lebanon', 'hezbollah', 'southern lebanon', 'south lebanon'],
     context: {
@@ -152,7 +138,7 @@ const SOLUTIONS = {
     },
   },
   'gaza-crisis': {
-    icon: '🏚', name: 'Gaza Humanitarian Crisis',
+    icon: '\U0001f3da', name: 'Gaza Humanitarian Crisis',
     phases: ['Blockade', 'Aid Inflow', 'Recovery', 'Rebuilding', 'Stabilized'],
     primary: ['gaza crisis', 'gaza famine', 'gaza starvation', 'gaza death',
               'gaza hospital', 'gaza water', 'gaza medicine',
@@ -178,7 +164,7 @@ const SOLUTIONS = {
     },
   },
   'human-rights': {
-    icon: '⚖️', name: 'Human Rights & Intl Law',
+    icon: '\u2696\ufe0f', name: 'Human Rights & Intl Law',
     phases: ['Allegations', 'Investigations', 'Sanctions', 'Accountability', 'Reform'],
     primary: ['human rights', 'war crimes', 'icc', 'icj',
               'genocide', 'flotilla', 'activists arrested',
@@ -193,7 +179,7 @@ const SOLUTIONS = {
     },
   },
   'domestic-politics': {
-    icon: '🏛', name: 'Israeli Domestic Politics',
+    icon: '\U0001f3db', name: 'Israeli Domestic Politics',
     phases: ['Fractured', 'Coalition Shift', 'Policy Change', 'Elections', 'Stability'],
     primary: ['netanyahu', 'herzog', 'knesset', 'coalition',
               'israeli election', 'israeli politics',
@@ -207,7 +193,7 @@ const SOLUTIONS = {
     },
   },
   'west-bank': {
-    icon: '🔥', name: 'West Bank & Settlements',
+    icon: '\U0001f525', name: 'West Bank & Settlements',
     phases: ['Escalation', 'Violence Spike', 'Mediation', 'Calming', 'Frozen Conflict'],
     primary: ['west bank', 'settler violence', 'settlements',
               'east jerusalem', 'hebron', 'nablus',
@@ -220,7 +206,7 @@ const SOLUTIONS = {
     },
   },
   'regional': {
-    icon: '🌍', name: 'Regional Relations',
+    icon: '\U0001f30d', name: 'Regional Relations',
     phases: ['Tensions', 'Diplomatic Push', 'Accord', 'Integration', 'Cooperation'],
     primary: ['jordan', 'egypt', 'turkey', 'turkiye', 'morocco',
               'saudi arabia', 'uae', 'qatar', 'arab league',
@@ -235,7 +221,7 @@ const SOLUTIONS = {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   SENTIMENT
+   SENTIMENT (fallback)
    ═══════════════════════════════════════════════════════════ */
 
 const POSITIVE_WORDS = ['agreed', 'signed', 'resumed', 'reopened', 'released',
@@ -264,7 +250,7 @@ function classifySentiment(text) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RSS PARSING
+   RSS PARSING (fallback)
    ═══════════════════════════════════════════════════════════ */
 
 function decodeHTML(text) {
@@ -301,7 +287,7 @@ function parseRSS(xml, sourceName) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ME RELEVANCE FILTER
+   ME RELEVANCE FILTER (fallback)
    ═══════════════════════════════════════════════════════════ */
 
 const ME_KEYWORDS = [
@@ -311,7 +297,7 @@ const ME_KEYWORDS = [
   'amman', 'bahrain', 'morocco', 'tunis', 'iraq', 'baghdad',
   'tel aviv', 'jerusalem', 'beirut', 'damascus', 'riyadh',
   'middle east', 'sinai', 'dead sea', 'isfahan', 'hormuz',
-  'arab', 'mideast', 'mideast',
+  'arab', 'mideast',
 ];
 
 function isMiddleEastRelated(text) {
@@ -320,7 +306,7 @@ function isMiddleEastRelated(text) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SMART CLASSIFIER — primary + context-aware
+   SMART CLASSIFIER — primary + context-aware (fallback)
    ═══════════════════════════════════════════════════════════ */
 
 function classifyArticle(title) {
@@ -328,14 +314,12 @@ function classifyArticle(title) {
   const matches = [];
 
   for (const [solId, cfg] of Object.entries(SOLUTIONS)) {
-    // Primary keywords — highest confidence (score 3)
     for (const kw of cfg.primary) {
       if (lower.includes(kw)) {
         matches.push({ solution: solId, score: 3 });
         break;
       }
     }
-    // Context patterns — only if location hint present (score 2)
     if (!matches.some(m => m.solution === solId) && cfg.context && cfg.context.locations.length > 0) {
       const hasLocation = cfg.context.locations.some(loc => lower.includes(loc));
       if (hasLocation) {
@@ -350,21 +334,18 @@ function classifyArticle(title) {
   }
 
   if (matches.length === 0) return null;
-  // Primary (score 3) wins; among ties, first match wins
   matches.sort((a, b) => b.score - a.score);
   return matches[0].solution;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   PHASE INDEX — computed from event patterns
+   PHASE / DIRECTION (fallback)
    ═══════════════════════════════════════════════════════════ */
 
 function computePhaseIndex(events) {
   if (events.length === 0) return 0;
   const total = events.length;
   const now = Date.now();
-
-  // Weighted sentiment ratio (recent events count double)
   let weightedPos = 0, weightedTotal = 0;
   for (const ev of events) {
     const age = now - new Date(ev.date).getTime();
@@ -373,20 +354,11 @@ function computePhaseIndex(events) {
     if (ev.sentiment === 'positive') weightedPos += weight;
   }
   const weightedRatio = weightedTotal > 0 ? weightedPos / weightedTotal : 0;
-
-  // Map ratio → phase index (0-4)
   let phaseIndex = Math.min(4, Math.floor(weightedRatio * 5));
-
-  // If mostly negative, cap at phase 1
   const negative = events.filter(e => e.sentiment === 'negative').length;
   if ((negative / total) > 0.6) return Math.min(phaseIndex, 1);
-
   return phaseIndex;
 }
-
-/* ═══════════════════════════════════════════════════════════
-   DIRECTION — advancing / stable / stalling
-   ═══════════════════════════════════════════════════════════ */
 
 function computeDirection(events) {
   if (events.length === 0) return 'stable';
@@ -399,13 +371,11 @@ function computeDirection(events) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   BUILD PEACE ROOM DATA
+   RSS FALLBACK BUILD
    ═══════════════════════════════════════════════════════════ */
 
-async function buildPeaceRoomData() {
+async function buildFallbackData() {
   const allArticles = [];
-
-  // Fetch all feeds in parallel
   const fetchPromises = RSS_FEEDS.map(async (feed) => {
     try {
       const res = await fetch(feed.url, { signal: AbortSignal.timeout(5000) });
@@ -415,31 +385,26 @@ async function buildPeaceRoomData() {
       return items.slice(0, feed.cap);
     } catch { return []; }
   });
-
   const results = await Promise.all(fetchPromises);
   for (const items of results) allArticles.push(...items);
-
-  // Filter to ME-related
   const meArticles = allArticles.filter(a => isMiddleEastRelated(a.title));
 
-  // Classify into solutions
   const solutionEvents = {};
   const now = Date.now();
-  const maxAgeMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+  const maxAgeMs = 7 * 24 * 60 * 60 * 1000;
 
   for (const article of meArticles) {
     if (now - article.timestamp > maxAgeMs) continue;
     const solutionId = classifyArticle(article.title);
     if (!solutionId) continue;
     if (!solutionEvents[solutionId]) solutionEvents[solutionId] = [];
-    const sentiment = classifySentiment(article.title);
     solutionEvents[solutionId].push({
-      date: article.date, text: article.title, sentiment,
+      date: article.date, text: article.title,
+      sentiment: classifySentiment(article.title),
       source: article.source, link: article.link,
     });
   }
 
-  // Sort & deduplicate per solution
   for (const sol of Object.keys(solutionEvents)) {
     solutionEvents[sol].sort((a, b) => new Date(b.date) - new Date(a.date));
     const seen = new Set();
@@ -450,19 +415,16 @@ async function buildPeaceRoomData() {
     });
   }
 
-  // Build solutions array — only solutions with events
   const solutions = [];
   const activeIds = [];
   let totalAdvancing = 0, totalStable = 0, totalStalling = 0;
 
   for (const [solId, cfg] of Object.entries(SOLUTIONS)) {
     const events = solutionEvents[solId] || [];
-    if (events.length === 0) continue;  // skip empty categories
+    if (events.length === 0) continue;
     activeIds.push(solId);
     const direction = computeDirection(events);
     const phaseIndex = computePhaseIndex(events);
-    const summary = events[0].text;
-
     if (direction === 'advancing') totalAdvancing++;
     else if (direction === 'stalling') totalStalling++;
     else totalStable++;
@@ -471,16 +433,13 @@ async function buildPeaceRoomData() {
       id: solId, icon: cfg.icon, name: cfg.name,
       phases: cfg.phases, phaseIndex, direction,
       keyMetric: { label: 'Events (7d)', value: String(events.length) },
-      summary, events: events.slice(0, 12),
+      summary: events[0].text, events: events.slice(0, 12),
       confidence: events.length > 5 ? 'high' : events.length > 2 ? 'medium' : 'low',
     });
   }
 
-  // Sort by event count desc, take top 8
   solutions.sort((a, b) => b.keyMetric.value - a.keyMetric.value);
   const top8 = solutions.slice(0, 8);
-
-  // Overall momentum
   let momentumDir, momentumLabel;
   if (totalAdvancing > totalStalling) { momentumDir = 'advancing'; momentumLabel = 'Net Positive'; }
   else if (totalStalling > totalAdvancing) { momentumDir = 'stalling'; momentumLabel = 'Net Negative'; }
@@ -490,14 +449,13 @@ async function buildPeaceRoomData() {
     solutions: top8,
     activeSolutions: top8.map(s => s.id),
     overallMomentum: {
-      direction: momentumDir,
-      label: momentumLabel,
-      summary: `${totalAdvancing} advancing, ${totalStable} stable, ${totalStalling} stalling. ${meArticles.length} ME articles from ${allArticles.length} total across ${RSS_FEEDS.length} feeds.`,
+      direction: momentumDir, label: momentumLabel,
+      summary: `${totalAdvancing} advancing, ${totalStable} stable, ${totalStalling} stalling (RSS fallback).`,
     },
     lastUpdated: new Date().toISOString(),
-    source: 'rss-live',
+    source: 'rss-fallback',
     feedCount: allArticles.length,
-    aiVersion: 'rss-live',
+    aiVersion: 'rss-fallback',
   };
 }
 
@@ -510,7 +468,7 @@ export async function onRequest(context) {
     'Access-Control-Allow-Origin': '*',
     'Content-Type': 'application/json; charset=utf-8',
     'X-Content-Type-Options': 'nosniff',
-    'Cache-Control': 'public, max-age=10800', // 3h browser cache
+    'Cache-Control': 'public, max-age=600', // 10 min for AI data
   };
 
   if (context.request.method === 'OPTIONS') {
@@ -518,11 +476,32 @@ export async function onRequest(context) {
   }
 
   try {
-    const data = await buildPeaceRoomData();
-    return new Response(JSON.stringify(data), { headers: corsHeaders });
+    // Try to load AI-generated solutions.json from static assets
+    const asset = await context.env.ASSETS.fetch('./solutions.json');
+    if (asset.ok) {
+      const aiData = await asset.json();
+      // Check if data is fresh (< 12 hours)
+      const lastUpdated = new Date(aiData.lastUpdated || 0).getTime();
+      const stale = Date.now() - lastUpdated > MAX_STALE_MS;
+
+      if (!stale) {
+        // Serve AI data directly
+        return new Response(JSON.stringify(aiData), { headers: corsHeaders });
+      }
+
+      // AI data is stale — fall back to live RSS
+      console.log(`[peace-room] AI data stale (${Math.round((Date.now()-lastUpdated)/3600000)}h old), using RSS fallback`);
+    } else {
+      console.log('[peace-room] No solutions.json found, using RSS fallback');
+    }
+
+    // RSS fallback
+    const fallbackData = await buildFallbackData();
+    return new Response(JSON.stringify(fallbackData), { headers: corsHeaders });
+
   } catch (err) {
-    console.error('Peace Room RSS fetch error:', err);
-    return new Response(JSON.stringify({ error: 'rss-unavailable', useFallback: true }), {
+    console.error('Peace Room error:', err);
+    return new Response(JSON.stringify({ error: 'unavailable', useFallback: true }), {
       status: 502, headers: corsHeaders,
     });
   }
