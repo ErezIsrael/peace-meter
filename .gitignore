@@ -38,9 +38,6 @@ peace-paths/taxonomy.json
 peace-paths/serve.bat
 peace-paths/*.OPML
 
-# Taxonomy admin — local tool only, never deploy
-peace-paths/taxonomy-admin/
-
 # Windows junk
 nul
 Thumbs.db
