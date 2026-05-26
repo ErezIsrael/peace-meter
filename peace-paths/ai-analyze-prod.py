@@ -112,11 +112,6 @@ SOLUTIONS = {
         "phases": ["Active Fighting", "Ceasefire Talks", "Draft Agreement", "Signed", "Holding"],
         "description": "Ceasefire negotiations, de-escalation efforts, truce agreements across all conflict zones",
     },
-    "aid": {
-        "icon": "\U0001f69a", "name": "Humanitarian Aid",
-        "phases": ["Blocked", "Limited Access", "Corridors Open", "Steady Flow", "Full Access"],
-        "description": "Humanitarian aid delivery, relief supplies, food/water/medicine access, crossing operations",
-    },
     "diplomacy": {
         "icon": "\U0001f91d", "name": "Diplomacy & Regional Deals",
         "phases": ["Isolated", "Back-channel", "Framework", "New Partners", "Regional Peace"],
@@ -145,7 +140,12 @@ SOLUTIONS = {
     "gaza-crisis": {
         "icon": "🏚", "name": "Gaza Humanitarian Crisis",
         "phases": ["Blockade", "Aid Inflow", "Recovery", "Rebuilding", "Stabilized"],
-        "description": "Gaza humanitarian crisis, displacement, medicine/food blockade, disease, civilian suffering",
+        "description": "Gaza humanitarian crisis, displacement, medicine/food blockade, aid delivery, disease, civilian suffering",
+    },
+    "infrastructure": {
+        "icon": "\U0001f4a7", "name": "Infrastructure & Recovery",
+        "phases": ["Destroyed", "Emergency Repairs", "Partial", "Reconstruction", "Full Recovery"],
+        "description": "Infrastructure reconstruction, power/water/hospitals rebuilding, recovery efforts",
     },
     "human-rights": {
         "icon": "⚖️", "name": "Human Rights & Intl Law",
@@ -488,13 +488,13 @@ def classify_articles(articles):
 
 KEYWORD_MAP = {
     "ceasefire": ["ceasefire", "truce", "cease fire", "armistice", "de-escalation", "peace talks"],
-    "aid": ["humanitarian aid", "aid", "relief", "wfp", "unrwa", "food delivery", "medical"],
     "diplomacy": ["abraham accords", "normalization", "diplomatic", "saudi", "nuclear deal"],
     "governance": ["governance", "authority", "two state", "pa reform", "election"],
     "infrastructure": ["reconstruction", "rebuild", "infrastructure", "hospital", "water"],
     "iran": ["iran war", "iran nuclear", "iran us", "us iran", "iran deal", "iran ceasefire", "khamenei", "isfahan", "strait of hormuz"],
     "lebanon": ["lebanon", "hezbollah", "beirut", "southern lebanon", "south lebanon"],
-    "gaza-crisis": ["gaza crisis", "gaza famine", "gaza blockade", "gaza siege", "sumud", "flotilla"],
+    "gaza-crisis": ["gaza crisis", "gaza famine", "gaza blockade", "gaza siege", "sumud", "flotilla",
+                     "humanitarian aid", "aid", "relief", "wfp", "unrwa", "food delivery", "medical"],
     "human-rights": ["war crime", "icj", "icc", "genocide", "human rights", "flotilla", "torture"],
     "domestic-politics": ["netanyahu", "herzog", "knesset", "coalition", "arab parties", "liberal center", "death penalty"],
     "west-bank": ["west bank", "settler", "east jerusalem", "occupied"],
@@ -503,7 +503,7 @@ KEYWORD_MAP = {
 
 # Priority order — checked first wins on tie
 KEYWORD_PRIORITY = [
-    "ceasefire", "aid", "lebanon", "gaza-crisis", "west-bank",
+    "ceasefire", "lebanon", "gaza-crisis", "west-bank",
     "iran", "infrastructure", "human-rights", "domestic-politics",
     "diplomacy", "governance", "regional",
 ]

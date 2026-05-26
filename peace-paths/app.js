@@ -1,7 +1,7 @@
 /* ── Peace Room — Frontend App v3 ───────────────────── */
 
 const CATEGORIES = {
-  active:     ['ceasefire', 'hostages', 'aid'],
+  active:     ['ceasefire', 'gaza-crisis'],
   regional:   ['abraham-accords'],
   structural: ['governance', 'infrastructure'],
 };
