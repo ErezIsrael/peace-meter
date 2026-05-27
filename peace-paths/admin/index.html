@@ -250,7 +250,7 @@ async function loadData() {
     const [resC, resT, resH] = await Promise.all([
       fetch(`${API}/categories`),
       fetch(`${API}/taxonomy`),
-      fetch(`${API}/ai-health`).catch(() => ({ok:true, json:()=>({status:'unknown',refusals:0,refusalRate:0}))})
+fetch(`${API}/ai-health`).catch(() => ({ok:true, json:()=>Promise.resolve({status:'unknown',refusals:0,refusalRate:0})}))
     ]);
     categories = await resC.json();
     taxonomy = await resT.json();
