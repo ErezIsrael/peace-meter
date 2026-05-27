@@ -108,100 +108,65 @@ RSS_FEEDS = [
     ("Alma", "https://israel-alma.org/feed/"),
 ]
 
-# ─── Solution Definitions ───────────────────────────────────────────
+# ─── Categories (loaded from categories.json) ────────────────────────
 
-SOLUTIONS = {
-    "ceasefire": {
-        "icon": "\U0001f54a", "name": "Ceasefire & De-escalation",
-        "phases": ["Active Fighting", "Ceasefire Talks", "Draft Agreement", "Signed", "Holding"],
-        "description": "Ceasefire negotiations, de-escalation efforts, truce agreements across all conflict zones",
-    },
-    "diplomacy": {
-        "icon": "\U0001f91d", "name": "Diplomacy & Regional Deals",
-        "phases": ["Isolated", "Back-channel", "Framework", "New Partners", "Regional Peace"],
-        "description": "Diplomatic normalization, Abraham Accords expansion, peace deals, regional cooperation",
-    },
-    "governance": {
-        "icon": "\U0001f3db", "name": "Post-War Governance",
-        "phases": ["No Framework", "Proposals", "Consensus", "Interim Gov", "Sustainable"],
-        "description": "Post-war governance plans, Palestinian Authority reform, transitional authority, political frameworks",
-    },
-    "infrastructure": {
-        "icon": "\U0001f4a7", "name": "Infrastructure & Recovery",
-        "phases": ["Destroyed", "Emergency Repairs", "Partial", "Reconstruction", "Full Recovery"],
-        "description": "Infrastructure reconstruction, power/water/hospitals rebuilding, recovery efforts",
-    },
-    "iran": {
-        "icon": "\u2623\ufe0f", "name": "Iran Nuclear & War",
-        "phases": ["War", "Ceasefire Talks", "Armistice", "Nuclear Deal", "Resolution"],
-        "description": "Iran-US conflict, nuclear program, Strait of Hormuz, Iran peace negotiations",
-    },
-    "lebanon": {
-        "icon": "\U0001f1f1\U0001f1e7", "name": "Lebanon & Hezbollah",
-        "phases": ["Active Fighting", "De-escalation", "Ceasefire", "Withdrawal", "Stable"],
-        "description": "Lebanon conflict, Hezbollah-Israel hostilities, southern Lebanon situation",
-    },
-    "gaza-crisis": {
-        "icon": "🏚", "name": "Gaza Humanitarian Crisis",
-        "phases": ["Blockade", "Aid Inflow", "Recovery", "Rebuilding", "Stabilized"],
-        "description": "Gaza humanitarian crisis, displacement, medicine/food blockade, aid delivery, disease, civilian suffering",
-    },
-    "human-rights": {
-        "icon": "⚖️", "name": "Human Rights & Intl Law",
-        "phases": ["Allegations", "Investigations", "Sanctions", "Accountability", "Reform"],
-        "description": "Human rights violations, war crimes, flotilla activists, ICC/ICJ, international law, abuse allegations",
-    },
-    "domestic-politics": {
-        "icon": "🏛", "name": "Israeli Domestic Politics",
-        "phases": ["Fractured", "Coalition Shift", "Policy Change", "Elections", "Stability"],
-        "description": "Israeli internal politics, coalition dynamics, Knesset, party struggles, Netanyahu, Herzog, liberal center",
-    },
-    "west-bank": {
-        "icon": "🔥", "name": "West Bank & Settlements",
-        "phases": ["Escalation", "Violence Spike", "Mediation", "Calming", "Frozen Conflict"],
-        "description": "West Bank settler violence, occupation policies, East Jerusalem, Palestinian communities",
-    },
-    "regional": {
-        "icon": "🌍", "name": "Regional Relations",
-        "phases": ["Tensions", "Diplomatic Push", "Accord", "Integration", "Cooperation"],
-        "description": "Regional diplomacy, Arab states positions, Jordan, Egypt, Syria, Türkiye, Morocco, UAE, China influence",
-    },
-    "gulf-regional-politics": {
-        "icon": "🌍", "name": "Gulf & Regional Politics",
-        "phases": ["Tensions", "Diplomatic Push", "Accord", "Integration", "Cooperation"],
-        "description": "Gulf state politics, UAE, Saudi Arabia, Oman, Qatar regional affairs and geopolitics",
-    },
-    "diaspora-antisemitism": {
-        "icon": "🕍", "name": "Diaspora & Antisemitism",
-        "phases": ["Allegations", "Investigations", "Public Debate", "Policy Action", "Resolution"],
-        "description": "Antisemitism, anti-Israel sentiment, diaspora Jewish community issues, campus protests, hate incidents abroad",
-    },
-    "iran-domestic-affairs": {
-        "icon": "🇮🇷", "name": "Iran Domestic Affairs",
-        "phases": ["Crisis", "Unrest", "Transition", "Stabilization", "Resolution"],
-        "description": "Iran domestic politics, internal affairs, protests, leadership, economy, internet restrictions",
-    },
-}
-
-SOLUTION_IDS = list(SOLUTIONS.keys())
+CATEGORIES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "categories.json")
 
 
-def inject_category(cat_id, name, description, icon=None):
-    """Inject a custom category before AI classification.
-
-    Usage: --categories "armistice:Ceasefire across all fronts:Ceasefire talks, armistice negotiations, truce"
+def load_categories():
+    """Load categories from categories.json.
+    Returns (categories_dict, all_ids, core_ids, all_kws).
     """
-    if cat_id in SOLUTIONS:
+    if not os.path.exists(CATEGORIES_FILE):
+        print(f"\u274c {CATEGORIES_FILE} not found. Run admin to configure categories.")
+        sys.exit(1)
+    with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
+        cats = json.load(f)
+    # Build dict {id: category_obj}
+    cat_map = {c["id"]: c for c in cats}
+    all_ids = list(cat_map.keys())
+    core_ids = [c["id"] for c in cats if c.get("core", False)]
+    # Build keyword map for fallback classifier
+    all_kws = {}
+    for c in cats:
+        kws = c.get("keywords", [])
+        if kws:
+            all_kws[c["id"]] = kws
+    return cat_map, all_ids, core_ids, all_kws
+
+
+def save_categories(cat_map):
+    """Save categories dict back to categories.json."""
+    cats_list = []
+    for c in cat_map.values():
+        cats_list.append({
+            "id": c["id"],
+            "icon": c.get("icon", "\U0001f4cc"),
+            "name": c["name"],
+            "description": c.get("description", ""),
+            "phases": c.get("phases", []),
+            "keywords": c.get("keywords", []),
+            "core": c.get("core", False),
+        })
+    with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
+        json.dump(cats_list, f, indent=2, ensure_ascii=False)
+
+
+def inject_category(cat_map, cat_id, name, description, icon=None):
+    """Inject a custom category. Usage: --categories "id:name:description" """
+    if cat_id in cat_map:
         print(f"  \u26a0 Category '{cat_id}' already exists, updating description.")
-        SOLUTIONS[cat_id]["description"] = description
+        cat_map[cat_id]["description"] = description
     else:
-        SOLUTIONS[cat_id] = {
+        cat_map[cat_id] = {
+            "id": cat_id,
             "icon": icon or "\U0001f4cc",
             "name": name,
             "phases": ["Emerged", "Developing", "Gaining Traction", "Maturing", "Resolved"],
             "description": description,
+            "keywords": [],
+            "core": False,
         }
-        SOLUTION_IDS.append(cat_id)
     print(f"  \u2713 Category '{cat_id}' ({name})")
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -346,8 +311,9 @@ _DEFAULT_EMOJIS = ["\U0001f54a", "🏚", "\U0001f91d", "\U0001f3db", "\U0001f4a7
                    "\u2623\ufe0f", "\U0001f1f1\U0001f1e7", "⚖️", "\U0001f3db", "🔥", "🌍", "📌"]
 
 
-def propose_taxonomy(articles):
+def propose_taxonomy(articles, core_cats=None):
     """Phase 1: Ask LLM to propose a taxonomy from all article titles.
+    Uses core categories as the base and asks LLM to suggest additions.
     Returns dict {categories: [{id, name, description, icon}], assignments: {idx: cat_id}}
     or None on failure.
     """
@@ -357,13 +323,29 @@ def propose_taxonomy(articles):
         lines.append(f"{i+1}. {a['title']}")
     articles_text = "\n".join(lines)
 
+    # Build core categories block if provided
+    core_block = ""
+    if core_cats:
+        core_lines = []
+        for c in core_cats:
+            core_lines.append(f"  - {c['id']}: {c['name']} — {c['description']}")
+        core_block = (
+            "\n\n"
+            "You already have these CORE categories that MUST be included in your output.\n"
+            "You may add NEW categories beyond these if the articles warrant it.\n"
+            "Do not remove or rename core categories.\n\n"
+            "Core categories:\n"
+            + "\n".join(core_lines)
+        )
+
     prompt = (
         "You are a Middle East news analyst. Review the articles below and propose"
         " a taxonomy of categories that best organizes them."
-        "\n\n"
+        f"{core_block}"
+        "\n"
         "RULES:"
         "\n"
-        "- Propose 6-12 categories max. No fewer than 4."
+        "- Propose 6-14 categories total (core + new). No fewer than 4."
         "\n"
         "- Each category must have: id (lowercase-hyphen), name (title case),"
         " description (one sentence), icon (one emoji)"
@@ -449,29 +431,31 @@ def _build_taxonomy_prompt(categories):
 # Phase 2: AI Classification via llama.cpp (single-article inference)
 # ═══════════════════════════════════════════════════════════════════════
 
-# Pre-build the category descriptions block (reused per article)
-_CATEGORY_BLOCK = "\n".join(
-    f"  {sid}: {sol['description']}" for sid, sol in SOLUTIONS.items()
-)
-_CATEGORY_LIST = ", ".join(SOLUTION_IDS)
+def _make_classifier_prompt(cat_map):
+    """Build the system prompt from the loaded category map."""
+    cat_ids = list(cat_map.keys())
+    block = "\n".join(
+        f"  {cid}: {cat_map[cid]['description']}" for cid in cat_ids
+    )
+    cat_list = ", ".join(cat_ids)
+    return (
+        "You are a precise Middle East news classifier. "
+        "Your task is to analyze the provided news text and output a single, valid JSON object."
+        "\n\n"
+        "CRITICAL RULES:"
+        "\n"
+        "1. Choose the MOST SPECIFIC category from the list below. Do NOT invent new category IDs."
+        "\n"
+        "2. If the article is not about the Middle East, set me_relevant to false."
+        "\n"
+        "3. Output ONLY raw JSON. No explanations, no markdown code blocks."
+        "\n\n"
+        f"Valid categories (use ONLY these IDs):\n{block}"
+        f"\n\nValid IDs: {cat_list}"
+    ), cat_ids
 
 
-# Pre-built system prompt (static, reused per article)
-_SYSTEM_PROMPT = (
-    "You are a precise Middle East news classifier. "
-    "Your task is to analyze the provided news text and output a single, valid JSON object."
-    "\n\n"
-    "CRITICAL RULES:"
-    "\n"
-    "1. Choose the MOST SPECIFIC category. Do NOT put general news into 'iran' or 'lebanon'—use 'regional' or 'diplomacy' instead."
-    "\n"
-    "2. Output ONLY raw JSON. No explanations, no markdown code blocks."
-    "\n\n"
-    f"Categories:\n{_CATEGORY_BLOCK}"
-)
-
-
-def _classify_article(article, system_prompt=None):
+def _classify_article(article, system_prompt, valid_ids):
     """Classify a single article via llama.cpp chat API.
     Returns dict {me_relevant, category, sentiment, risk} or None on failure.
     """
@@ -491,13 +475,13 @@ def _classify_article(article, system_prompt=None):
         "\n\n"
         "Output exactly in this JSON format:"
         "\n"
-        '{"me_relevant": true, "category": "ceasefire", "sentiment": "neutral", "risk": 4}'
+        '{"me_relevant": true, "category": "<one-of-the-valid-ids>", "sentiment": "positive|negative|neutral", "risk": 5}'
     )
 
     body = {
         "model": "Qwen3.6-27B",
         "messages": [
-            {"role": "system", "content": system_prompt if system_prompt else _SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
         "max_tokens": 8000,
@@ -542,12 +526,11 @@ def _classify_article(article, system_prompt=None):
     return None
 
 
-def classify_articles(articles, system_prompt=None):
+def classify_articles(articles, system_prompt, valid_ids):
     """Classify each article individually via llama.cpp.
     Articles with me_relevant=false are silently dropped.
     Returns list of (article, {solution, sentiment, risk}) pairs.
-
-    If system_prompt is provided, uses it instead of the default hardcoded taxonomy.
+    Enforces that category must be one of valid_ids.
     """
     # Lightweight pre-filter: skip obvious noise before LLM call (saves tokens + time)
     HARD_EXCLUDE = {
@@ -556,8 +539,7 @@ def classify_articles(articles, system_prompt=None):
         "hollywood", "celebrity", "sydney sweeney", "euphoria", "tv show",
         "secondhand smoke", "smoke in public", "sponsored",
     }
-    mode_label = "custom taxonomy" if system_prompt else "default taxonomy"
-    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp (1-by-1) [{mode_label}]...")
+    print(f"\U0001f916 Classifying {len(articles)} articles via llama.cpp (1-by-1) [{len(valid_ids)} categories]...")
     pairs = []  # list of (article, classification)
     relevant = 0
     dropped = 0
@@ -572,14 +554,14 @@ def classify_articles(articles, system_prompt=None):
             continue
 
         t0 = time.time()
-        result = _classify_article(article, system_prompt=system_prompt)
+        result = _classify_article(article, system_prompt, valid_ids)
         elapsed = time.time() - t0
 
         if result is None:
             ai_failures += 1
             if ai_failures <= 3:
                 # Retry once
-                result = _classify_article(article, system_prompt=system_prompt)
+                result = _classify_article(article, system_prompt, valid_ids)
                 elapsed = time.time() - t0
                 if result:
                     ai_failures = 0
@@ -589,8 +571,11 @@ def classify_articles(articles, system_prompt=None):
                 break
 
         if result.get("me_relevant"):
-            # LLM returns 'category', we map to our internal 'solution' key
-            sol = result.get("category") or result.get("solution") or "regional"
+            # Enforce: category must be one of the known valid IDs
+            sol = result.get("category") or result.get("solution")
+            if sol not in valid_ids:
+                sol = _fallback_classify(article, all_kws) or "regional"
+                print(f"  \u26a0 Unknown category '{result.get('category')}', fallback → '{sol}'")
             pairs.append((article, {
                 "solution": sol,
                 "sentiment": result.get("sentiment", "neutral"),
@@ -610,72 +595,38 @@ def classify_articles(articles, system_prompt=None):
 # Keyword fallback classifier
 # ═══════════════════════════════════════════════════════════════════════
 
-KEYWORD_MAP = {
-    "ceasefire": ["ceasefire", "truce", "cease fire", "armistice", "de-escalation", "peace talks"],
-    "diplomacy": ["abraham accords", "normalization", "diplomatic", "saudi", "nuclear deal"],
-    "governance": ["governance", "authority", "two state", "pa reform", "election"],
-    "infrastructure": ["reconstruction", "rebuild", "infrastructure", "hospital", "water"],
-    "iran": ["iran war", "iran nuclear", "iran us", "us iran", "iran deal", "iran ceasefire", "khamenei", "isfahan", "strait of hormuz"],
-    "lebanon": ["lebanon", "hezbollah", "beirut", "southern lebanon", "south lebanon"],
-    "gaza-crisis": ["gaza crisis", "gaza famine", "gaza blockade", "gaza siege", "sumud", "flotilla",
-                     "humanitarian aid", "aid", "relief", "wfp", "unrwa", "food delivery", "medical"],
-    "human-rights": ["war crime", "icj", "icc", "genocide", "human rights", "flotilla", "torture"],
-    "domestic-politics": ["netanyahu", "herzog", "knesset", "coalition", "arab parties", "liberal center", "death penalty"],
-    "west-bank": ["west bank", "settler", "east jerusalem", "occupied"],
-    "regional": ["jordan", "egypt", "syria", "türkiye", "turkey", "turkiye", "morocco", "uae", "qatar", "china", "arab"],
-    "gulf-regional-politics": ["gulf states", "uae", "saudi arabia", "oman", "qatar", "kuwait", "bahrein", "arabian gulf", "persian gulf", "gulf war"],
-    "diaspora-antisemitism": ["antisemitism", "anti-semitism", "jewish", "diaspora", "anti-israel", "adl", "campus protest", "holocaust denial"],
-    "iran-domestic-affairs": ["iran internet", "iran protest", "iran economy", "iran president", "iran parliament", "iran domestic"],
-}
-
-# Priority order — checked first wins on tie
-KEYWORD_PRIORITY = [
-    "ceasefire", "lebanon", "gaza-crisis", "west-bank",
-    "iran", "iran-domestic-affairs", "infrastructure", "human-rights", "domestic-politics",
-    "diplomacy", "governance", "gulf-regional-politics", "diaspora-antisemitism", "regional",
-]
-
 POSITIVE_WORDS = ["agreed", "signed", "resumed", "reopened", "released", "deal", "progress", "restored"]
 NEGATIVE_WORDS = ["killed", "attack", "strike", "bombing", "destroyed", "escalat", "crisis", "failed"]
 
 
-def keyword_classify(articles):
-    """Fallback keyword-based classification with priority tie-breaking.
+def _fallback_classify(article, kw_map):
+    """Fallback keyword classifier using keywords from categories.json."""
+    lower = article["title"].lower()
+    scores = {}
+    for cat_id, kws in kw_map.items():
+        for kw in kws:
+            if kw in lower:
+                weight = 2 if " " in kw else 1
+                scores[cat_id] = scores.get(cat_id, 0) + weight
+    if scores:
+        max_score = max(scores.values())
+        best = [k for k, v in scores.items() if v == max_score]
+        # Pick first match (categories.json order)
+        return best[0]
+    return None
 
-    Multi-word keywords get a score of 2 (more specific), single-word gets 1.
-    Among tied scores, higher priority category wins.
-    """
+
+def keyword_classify(articles, kw_map):
+    """Fallback keyword-based classification using categories.json keywords."""
     results = []
     for article in articles:
-        lower = article["title"].lower()
-
-        scores = {}
-        for sol, kws in KEYWORD_MAP.items():
-            for kw in kws:
-                if kw in lower:
-                    # Multi-word keywords are more specific → score 2
-                    weight = 2 if " " in kw else 1
-                    scores[sol] = scores.get(sol, 0) + weight
-
-        if scores:
-            # Among tied scores, prefer higher priority category
-            max_score = max(scores.values())
-            best = None
-            for sol in KEYWORD_PRIORITY:
-                if scores.get(sol, 0) == max_score:
-                    best = sol
-                    break
-            if best is None:
-                best = max(scores, key=scores.get)
-        else:
-            continue  # drop unclassifiable articles
-
-        pos = sum(1 for w in POSITIVE_WORDS if w in lower)
-        neg = sum(1 for w in NEGATIVE_WORDS if w in lower)
-        sentiment = "positive" if pos > neg else "negative" if neg > pos else "neutral"
-
-        results.append({"solution": best, "sentiment": sentiment, "risk": 5})
-
+        cat = _fallback_classify(article, kw_map)
+        if cat:
+            lower = article["title"].lower()
+            pos = sum(1 for w in POSITIVE_WORDS if w in lower)
+            neg = sum(1 for w in NEGATIVE_WORDS if w in lower)
+            sentiment = "positive" if pos > neg else "negative" if neg > pos else "neutral"
+            results.append((article, {"solution": cat, "sentiment": sentiment, "risk": 5}))
     return results
 
 
@@ -733,16 +684,17 @@ def compute_phase(events):
 # Build Output Data
 # ═══════════════════════════════════════════════════════════════════════
 
-def build_output(articles, classifications):
+def build_output(articles, classifications, cat_map):
     """Build the final JSON structure for the Peace Room frontend.
 
     arguments: If 'classifications' is a list of (article, classification) tuples,
     articles is ignored and pairs are iterated directly.
+    cat_map: dict of category definitions from categories.json
     """
     now = datetime.now(timezone.utc)
 
-    # Group articles by solution
-    solution_events = {sid: [] for sid in SOLUTIONS}
+    # Group articles by solution (use category IDs from categories.json)
+    solution_events = {cid: [] for cid in cat_map}
 
     # Handle new format: list of (article, classification) pairs
     if classifications and isinstance(classifications[0], tuple):
@@ -773,9 +725,7 @@ def build_output(articles, classifications):
     counts = {"advancing": 0, "stable": 0, "stalling": 0}
     active_solutions = []  # only solutions with recent articles
 
-    # Process ALL solution IDs — known from SOLUTIONS or dynamic from AI
-    all_sol_ids = set(solution_events.keys())
-    for sol_id in all_sol_ids:
+    for sol_id in cat_map:
         events = solution_events[sol_id]
         if not events:
             continue
@@ -784,23 +734,24 @@ def build_output(articles, classifications):
         phase_index = compute_phase(events)
         counts[direction] += 1
 
-        sol_cfg = SOLUTIONS.get(sol_id)
-        if sol_cfg:
-            # Known category — use its config
+        cat = cat_map.get(sol_id)
+        if cat:
+            # Known category from categories.json — use its config
             solutions.append({
                 "id": sol_id,
-                "icon": sol_cfg["icon"],
-                "name": sol_cfg["name"],
-                "phases": sol_cfg["phases"],
+                "icon": cat.get("icon", "\U0001f4cc"),
+                "name": cat["name"],
+                "phases": cat.get("phases", ["Emerged", "Developing", "Maturing", "Resolved"]),
                 "phaseIndex": phase_index,
                 "direction": direction,
                 "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
                 "summary": events[0]["text"],
                 "events": events,
                 "confidence": "high" if len(events) > 5 else "medium" if len(events) > 2 else "low",
+                "core": cat.get("core", False),
             })
         else:
-            # Dynamic category discovered by AI — generate default
+            # Unknown category — generate default (shouldn't happen with enforcement)
             name = sol_id.replace("-", " ").replace("_", " ").title()
             solutions.append({
                 "id": sol_id,
@@ -813,6 +764,7 @@ def build_output(articles, classifications):
                 "summary": events[0]["text"],
                 "events": events,
                 "confidence": "low",
+                "core": False,
             })
 
     if not active_solutions:
@@ -1007,12 +959,19 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Print output JSON to stdout")
     parser.add_argument("--fetch-only", action="store_true", help="Only fetch RSS, skip AI")
     parser.add_argument("--review-taxonomy", action="store_true",
-                        help="Phase 1 only: propose taxonomy, save to taxonomy.json, wait for approval")
+                        help="Phase 1 only: propose taxonomy using core categories as base, save to taxonomy.json")
     parser.add_argument("--use-taxonomy", type=str, default=None,
-                        help="Use approved taxonomy from file (or 'auto' to load taxonomy.json)")
+                        help="[deprecated] Use approved taxonomy from file. Categories now come from categories.json.")
     parser.add_argument("--recent", type=int, default=0,
                         help="[deprecated] Only process articles from last N hours")
     args = parser.parse_args()
+
+    # Load categories from categories.json (source of truth)
+    cat_map, all_ids, core_ids, all_kws = load_categories()
+    print(f"\U0001f4c5 Loaded {len(all_ids)} categories ({len(core_ids)} core) from categories.json")
+
+    if args.use_taxonomy:
+        print("  \u26a0 --use-taxonomy is deprecated. Categories are now in categories.json.")
 
     # Determine mode
     if args.fast:
@@ -1022,26 +981,28 @@ def main():
         mode = "daily"
         age_hours = None
     else:
-        # --recent is deprecated, treat as fast with custom hours
         mode = "fast"
         age_hours = args.recent
         print("  \u26a0 --recent is deprecated, use --fast instead")
 
     print(f"\n{'\U0001f680' if mode == 'daily' else '\U0001f4a9'} Peace Room AI Analyzer — {mode.upper()} mode\n")
 
-    # Inject custom categories
+    # Inject custom categories (merges into cat_map)
     if args.categories:
         print("\u2728 Injecting custom categories:")
         for cat in args.categories:
             parts = cat.split(":", 2)
             if len(parts) == 3:
                 cat_id, name, desc = parts
-                inject_category(cat_id, name, desc)
+                inject_category(cat_map, cat_id, name, desc)
             elif len(parts) == 2:
                 cat_id, name = parts
-                inject_category(cat_id, name, f"{name} news and updates")
+                inject_category(cat_map, cat_id, name, f"{name} news and updates")
             else:
                 print(f"  \u26a0 Invalid format: '{cat}' (expected id:name:description)")
+        # Rebuild lists after injection
+        all_ids = list(cat_map.keys())
+        all_kws = {c["id"]: c.get("keywords", []) for c in cat_map.values() if c.get("keywords")}
 
     start = time.time()
 
@@ -1055,28 +1016,26 @@ def main():
         print("No articles found, aborting.")
         return
 
-    # ── Phase 1: Taxonomy Proposal ──
-    custom_system_prompt = None
+    # ── Phase 1: Taxonomy Proposal (uses core categories as base) ──
+    system_prompt, valid_ids = _make_classifier_prompt(cat_map)
     if args.review_taxonomy:
-        print(f"\n\U0001f50d Phase 1: Proposing taxonomy from {len(articles)} articles...")
-        taxonomy = propose_taxonomy(articles)
+        core_cats = [c for c in cat_map.values() if c.get("core", False)]
+        print(f"\n\U0001f50d Phase 1: Proposing taxonomy from {len(articles)} articles ({len(core_cats)} core categories as base)...")
+        taxonomy = propose_taxonomy(articles, core_cats=core_cats)
         if taxonomy is None:
-            print("  \u274c Taxonomy proposal failed. Falling back to default.")
-            taxonomy = None
+            print("  \u274c Taxonomy proposal failed.")
+            return
 
         if taxonomy and "categories" in taxonomy:
-            # Save proposed taxonomy
             with open(TAXONOMY_FILE, "w", encoding="utf-8") as f:
                 json.dump(taxonomy, f, indent=2, ensure_ascii=False)
             print(f"\n\u2713 Proposed taxonomy saved to {TAXONOMY_FILE}")
 
-            # Display proposed taxonomy
             print("\n--- PROPOSED CATEGORIES ---")
             for cat in taxonomy["categories"]:
                 print(f"  {cat.get('icon', '📌')} {cat['id']:25s} → {cat['name']}")
                 print(f"       {cat['description']}")
 
-            # Show article counts per category
             cat_counts = {}
             for idx_str, cat_id in taxonomy.get("assignments", {}).items():
                 cat_counts[cat_id] = cat_counts.get(cat_id, 0) + 1
@@ -1085,41 +1044,24 @@ def main():
                 count = cat_counts.get(cat["id"], 0)
                 print(f"  {cat['id']:25s} → {count} articles")
 
-            print(f"\nEdit {TAXONOMY_FILE} to adjust categories, then run:")
-            print(f"  python ai-analyze-prod.py --use-taxonomy taxonomy.json --{mode}")
+            print(f"\nReview {TAXONOMY_FILE}, then add new categories to categories.json via admin panel.")
+            print(f"Then run:  python ai-analyze-prod.py --{mode}")
             return
         else:
-            print("  \u274c Taxonomy proposal failed, using default taxonomy.")
-
-    elif args.use_taxonomy:
-        # Load approved taxonomy
-        taxonomy_path = "taxonomy.json" if args.use_taxonomy == "auto" else args.use_taxonomy
-        try:
-            with open(taxonomy_path, encoding="utf-8") as f:
-                taxonomy = json.load(f)
-            categories = taxonomy.get("categories", [])
-            if not categories:
-                print(f"  \u26a0 No categories in {taxonomy_path}, using default.")
-            else:
-                custom_system_prompt = _build_taxonomy_prompt(categories)
-                print(f"\n\u2728 Using approved taxonomy from {taxonomy_path} ({len(categories)} categories)")
-                for cat in categories:
-                    print(f"  {cat.get('icon', '📌')} {cat['id']:25s} → {cat['name']}")
-        except FileNotFoundError:
-            print(f"  \u26a0 {taxonomy_path} not found, using default taxonomy.")
+            print("  \u274c Taxonomy proposal failed, proceeding with existing categories.")
 
     # 2. AI Classification
     if args.fetch_only:
         print("[--fetch-only] Using keyword fallback")
-        classified_pairs = [(a, c) for a, c in zip(articles, keyword_classify(articles))]
+        classified_pairs = keyword_classify(articles, all_kws)
     else:
-        classified_pairs = classify_articles(articles, system_prompt=custom_system_prompt)
+        classified_pairs = classify_articles(articles, system_prompt, valid_ids)
         if not classified_pairs:
             print("  \u26a0 AI failed, falling back to keyword classification")
-            classified_pairs = [(a, c) for a, c in zip(articles, keyword_classify(articles))]
+            classified_pairs = keyword_classify(articles, all_kws)
 
     # 3. Build output
-    data = build_output(articles, classified_pairs)
+    data = build_output(articles, classified_pairs, cat_map)
 
     # 4. Merge with existing data (fast mode) or overwrite (daily mode)
     if mode == "fast":

@@ -31,6 +31,7 @@ TEST_DATA_JSON = APP_DIR / "test-data.json"  # local dev only
 SOLUTIONS_JSON = PROJECT_ROOT / "peace-paths" / "solutions.json"
 SCRIPT = PROJECT_ROOT / "peace-paths" / "ai-analyze-prod.py"
 TAXONOMY_FILE = PROJECT_ROOT / "peace-paths" / "taxonomy.json"
+CATEGORIES_FILE = PROJECT_ROOT / "peace-paths" / "categories.json"
 
 # Track analysis job state
 analysis_status = {"running": False, "pid": None, "started": None, "log": "", "proc": None}
@@ -173,136 +174,20 @@ def load_taxonomy():
     return result
 
 
-def decode_icon(raw):
-    """Decode Python unicode escape sequences in icon strings."""
-    BACKSLASH = chr(92)
-    if not raw:
-        return "\U0001f4cc"
-    # Check if it contains Python escape sequences (literal backslash-U or backslash-u)
-    if (BACKSLASH + "U") in raw or (BACKSLASH + "u") in raw:
-        result = raw
-        # Manual replacement of \uXXXX
-        tag_u = BACKSLASH + "u"
-        while tag_u in result:
-            idx = result.index(tag_u)
-            hex_str = result[idx + 2:idx + 6]
-            if len(hex_str) == 4 and all(c in '0123456789abcdefABCDEF' for c in hex_str):
-                result = result[:idx] + chr(int(hex_str, 16)) + result[idx + 6:]
-            else:
-                break  # not a valid \uXXXX, stop
-        # Manual replacement of \UXXXXXXXX
-        tag_U = BACKSLASH + "U"
-        while tag_U in result:
-            idx = result.index(tag_U)
-            hex_str = result[idx + 2:idx + 10]
-            if len(hex_str) == 8 and all(c in '0123456789abcdefABCDEF' for c in hex_str):
-                result = result[:idx] + chr(int(hex_str, 16)) + result[idx + 10:]
-            else:
-                break
-        return result
-    # Already real unicode characters — return as-is
-    return raw
+def load_categories():
+    """Load categories from categories.json."""
+    if not CATEGORIES_FILE.exists():
+        return []
+    with open(CATEGORIES_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 
-def parse_script_categories():
-    """Extract SOLUTIONS and KEYWORD_MAP from ai-analyze-prod.py by reading and parsing the dicts."""
-    script = SCRIPT.read_text(encoding="utf-8")
+def save_categories(categories):
+    """Save categories list to categories.json."""
+    with open(CATEGORIES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(categories, f, indent=2, ensure_ascii=False)
+    print(f"  [Admin] Saved {len(categories)} categories to categories.json")
 
-
-    # Extract SOLUTIONS dict
-    sol_match = re.search(r'SOLUTIONS\s*=\s*\{(.*?)\n\}', script, re.DOTALL)
-    solutions = {}
-    if sol_match:
-        sol_block = sol_match.group(1)
-        # Parse each category block
-        for m in re.finditer(r'"([\w-]+)"\s*:\s*\{([^}]+)\}', sol_block, re.DOTALL):
-            cat_id = m.group(1)
-            block = m.group(2)
-            icon = re.search(r'"icon"\s*:\s*"([^"]+)"', block)
-            name = re.search(r'"name"\s*:\s*"([^"]+)"', block)
-            phases = re.search(r'"phases"\s*:\s*\[([^\]]+)\]', block)
-            desc = re.search(r'"description"\s*:\s*"([^"]+)"', block)
-            solutions[cat_id] = {
-                "id": cat_id,
-                "icon": decode_icon(icon.group(1)) if icon else "\U0001f4cc",
-                "name": name.group(1) if name else cat_id,
-                "phases": [p.strip().strip('"\'') for p in phases.group(1).split(',')] if phases else [],
-                "description": desc.group(1) if desc else "",
-                "keywords": [],
-            }
-
-    # Extract KEYWORD_MAP
-    kw_match = re.search(r'KEYWORD_MAP\s*=\s*\{(.*?)\n\}', script, re.DOTALL)
-    if kw_match:
-        kw_block = kw_match.group(1)
-        for m in re.finditer(r'"([\w-]+)"\s*:\s*\[([^\]]+)\]', kw_block):
-            cat_id = m.group(1)
-            kws = [decode_icon(k.strip().strip('"\'')) for k in m.group(2).split(',')]
-            if cat_id in solutions:
-                solutions[cat_id]["keywords"] = kws
-
-
-    return list(solutions.values())
-
-
-def encode_icon_for_python(icon):
-    """Encode an emoji/icon for safe writing into Python source code."""
-    BACKSLASH = chr(92)
-    result = []
-    for ch in icon:
-        cp = ord(ch)
-        if cp < 128:
-            result.append(ch)
-        elif cp < 0x10000:
-            result.append(BACKSLASH + f"u{cp:04x}")
-        else:
-            result.append(BACKSLASH + f"U{cp:08x}")
-    return ''.join(result)
-
-
-def write_script_categories(categories):
-    """Reconstruct SOLUTIONS and KEYWORD_MAP dicts and patch ai-analyze-prod.py."""
-    text = SCRIPT.read_text(encoding="utf-8")
-
-    # Build SOLUTIONS dict string
-    sol_parts = []
-    for c in categories:
-        phases_json = json.dumps(c.get("phases", []), ensure_ascii=False)
-        icon_safe = encode_icon_for_python(c.get("icon", "\U0001f4cc"))
-        sol_parts.append(
-            f'    "{c["id"]}": {{\n'
-            f'        "icon": "{icon_safe}", "name": "{c["name"]}",\n'
-            f'        "phases": {phases_json},\n'
-            f'        "description": "{c["description"]}",\n'
-            f'    }},'
-        )
-    new_sol = "SOLUTIONS = {\n" + "\n".join(sol_parts) + "\n}\n"
-
-    # Build KEYWORD_MAP dict string
-    kw_parts = []
-    for c in categories:
-        kws = c.get("keywords", [])
-        if kws:
-            # Decode Python unicode escapes in keywords (e.g. \u00fc -> ü)
-            clean_kws = []
-            for k in kws:
-                decoded = decode_icon(k)  # reuse decode_icon for \u/\U escapes
-                clean_kws.append(decoded)
-            kw_json = json.dumps(clean_kws, ensure_ascii=False)
-            kw_parts.append(f'    "{c["id"]}": {kw_json},')
-    new_kw = "KEYWORD_MAP = {\n" + "\n".join(kw_parts) + "\n}"
-
-    # Patch SOLUTIONS — find the match and replace manually (avoid re.sub \U escape issues)
-    m = re.search(r'SOLUTIONS\s*=\s*\{.*?\n\}', text, flags=re.DOTALL)
-    if m:
-        text = text[:m.start()] + new_sol + text[m.end():]
-    # Patch KEYWORD_MAP
-    m2 = re.search(r'KEYWORD_MAP\s*=\s*\{.*?\n\}', text, flags=re.DOTALL)
-    if m2:
-        text = text[:m2.start()] + new_kw + text[m2.end():]
-
-    SCRIPT.write_text(text, encoding="utf-8")
-    print(f"  [Admin] Wrote {len(categories)} categories to ai-analyze-prod.py")
 
 
 class DevHandler(http.server.BaseHTTPRequestHandler):
@@ -316,7 +201,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
         # Admin API
         if self.path == "/api/admin/categories":
 
-            cats = parse_script_categories()
+            cats = load_categories()
             self._json_response(cats)
             return
         if self.path == "/api/admin/taxonomy":
@@ -427,15 +312,15 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
             return
         if self.path == "/api/admin/categories":
             data = self._read_json()
-            parse_script_categories()  # validate readability
+            load_categories()  # validate readability
             try:
-                categories = parse_script_categories()
+                categories = load_categories()
                 # Check for duplicate ID
                 if any(c["id"] == data["id"] for c in categories):
                     self._json_error(f"Category '{data['id']}' already exists")
                     return
                 categories.append(data)
-                write_script_categories(categories)
+                save_categories(categories)
                 self._json_response({"ok": True})
             except Exception as e:
                 print(f"  [ERROR] POST /api/admin/categories: {e}", flush=True)
@@ -444,7 +329,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
         if self.path == "/api/admin/categories/bulk-import":
             data = self._read_json()
             try:
-                existing = parse_script_categories()
+                existing = load_categories()
                 existing_ids = {c["id"] for c in existing}
                 imported = []
                 for cat in data.get("categories", []):
@@ -453,7 +338,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
                         existing_ids.add(cat["id"])
                         imported.append(cat["id"])
                 if imported:
-                    write_script_categories(existing)
+                    save_categories(existing)
                 self._json_response({"ok": True, "imported": imported})
             except Exception as e:
                 self._json_error(str(e))
@@ -472,11 +357,11 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
             data = self._read_json()
             ids = data.get("ids", [])
             try:
-                categories = parse_script_categories()
+                categories = load_categories()
                 before = len(categories)
                 categories = [c for c in categories if c["id"] not in set(ids)]
                 deleted = before - len(categories)
-                write_script_categories(categories)
+                save_categories(categories)
                 self._json_response({"ok": True, "deleted": deleted, "ids": ids})
             except Exception as e:
                 self._json_error(str(e))
@@ -505,7 +390,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
                 if not tax_cat:
                     self._json_error(f"Taxonomy category '{cat_id}' not found")
                     return
-                existing = parse_script_categories()
+                existing = load_categories()
                 if any(c["id"] == cat_id for c in existing):
                     self._json_error(f"Category '{cat_id}' already exists in SOLUTIONS")
                     return
@@ -513,7 +398,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
                 tax_cat["phases"] = tax_cat.get("phases") or ["Emerged", "Developing", "Gaining Traction", "Maturing", "Resolved"]
                 tax_cat["keywords"] = tax_cat.get("keywords") or []
                 existing.append(tax_cat)
-                write_script_categories(existing)
+                save_categories(existing)
                 self._json_response({"ok": True, "imported": cat_id})
             except Exception as e:
                 self._json_error(str(e))
@@ -526,7 +411,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
             data = self._read_json()
             data["id"] = cat_id  # ensure ID matches URL
             try:
-                categories = parse_script_categories()
+                categories = load_categories()
                 for i, c in enumerate(categories):
                     if c["id"] == cat_id:
                         categories[i] = data
@@ -534,7 +419,7 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
                 else:
                     self._json_error(f"Category '{cat_id}' not found")
                     return
-                write_script_categories(categories)
+                save_categories(categories)
                 self._json_response({"ok": True})
             except Exception as e:
                 self._json_error(str(e))
@@ -545,9 +430,9 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/admin/categories/"):
             cat_id = self.path.split("/")[-1]
             try:
-                categories = parse_script_categories()
+                categories = load_categories()
                 categories = [c for c in categories if c["id"] != cat_id]
-                write_script_categories(categories)
+                save_categories(categories)
                 self._json_response({"ok": True})
             except Exception as e:
                 self._json_error(str(e))
@@ -583,7 +468,7 @@ def deploy_categories(target, selected_ids=None):
     selected_ids: if provided, only deploy those categories; otherwise deploy all.
     """
     dest = TEST_DATA_JSON if target == "test" else LIVE_DATA_JSON
-    current_cats = parse_script_categories()
+    current_cats = load_categories()
     taxonomy_cats = load_taxonomy()
     current_ids = {c["id"] for c in current_cats}
 
@@ -600,7 +485,7 @@ def deploy_categories(target, selected_ids=None):
         # Auto-import suggested categories into ai-analyze-prod.py so analysis works
         if suggested_to_import:
             current_cats.extend(suggested_to_import)
-            write_script_categories(current_cats)
+            save_categories(current_cats)
     else:
         categories = current_cats
     # Build solutions.json structure
