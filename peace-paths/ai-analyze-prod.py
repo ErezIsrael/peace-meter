@@ -1106,8 +1106,14 @@ def main():
         result = subprocess.run(
             cmd, shell=True,
             cwd=project_root,
-            capture_output=True, text=True, encoding='utf-8', errors='replace'
+            capture_output=True
         )
+        # Decode bytes output (wrangler uses non-ASCII chars)
+        try:
+            result.stdout = result.stdout.decode('utf-8', errors='replace')
+            result.stderr = result.stderr.decode('utf-8', errors='replace')
+        except Exception:
+            pass
         if result.returncode == 0:
             for line in result.stdout.split("\n"):
                 if "Deploying" in line or ".pages.dev" in line or "Success" in line:

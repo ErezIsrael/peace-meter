@@ -91,6 +91,7 @@ def run_analysis(mode="--fast"):
             log_lines.append(text)
             print(f"  [Analysis] {text}")
             analysis_status["log"] = "\n".join(log_lines)
+        proc.stdout.close()
         proc.wait()
         analysis_status["running"] = False
         analysis_status["log"] = "\n".join(log_lines)
@@ -473,8 +474,14 @@ def deploy_categories(target, selected_ids=None):
         result = subprocess.run(
             cmd, shell=True,
             cwd=project_root,
-            capture_output=True, text=True, encoding='utf-8', errors='replace'
+            capture_output=True
         )
+        # Decode bytes output (wrangler uses non-ASCII chars)
+        try:
+            result.stdout = result.stdout.decode('utf-8', errors='replace')
+            result.stderr = result.stderr.decode('utf-8', errors='replace')
+        except Exception:
+            pass
         if result.returncode == 0:
             # Extract deployment URL from output
             for line in result.stdout.split("\n"):
