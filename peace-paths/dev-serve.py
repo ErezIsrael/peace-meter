@@ -452,13 +452,12 @@ def deploy_categories(target, selected_ids=None):
         # Deploy to Cloudflare Pages via wrangler
         print("  [Deploy] Uploading to Cloudflare Pages...")
         project_root = str(SOLUTIONS_JSON.parent.parent)
+        # Use shell=True for Windows (npx not in PATH) / cross-platform
+        cmd = "npx wrangler pages deploy app --project-name=peace-meter --skip-caching --commit-dirty=true"
         result = subprocess.run(
-            ["npx", "wrangler", "pages", "deploy", "app",
-             "--project-name=peace-meter",
-             "--skip-caching",
-             "--commit-dirty=true"],
+            cmd, shell=True,
             cwd=project_root,
-            capture_output=True, text=True
+            capture_output=True, text=True, encoding='utf-8', errors='replace'
         )
         if result.returncode == 0:
             # Extract deployment URL from output
