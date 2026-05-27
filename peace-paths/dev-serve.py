@@ -472,7 +472,13 @@ def deploy_categories(target, selected_ids=None):
         return {"error": "No analysis data found. Run analysis first."}
 
     data = json.loads(SOLUTIONS_JSON.read_text(encoding="utf-8"))
-    count = len(data.get("solutions", []))
+
+    # Filter out solutions for categories no longer in categories.json
+    cat_ids = {c["id"] for c in load_categories()}
+    data["solutions"] = [s for s in data.get("solutions", []) if s["id"] in cat_ids]
+    # Recalculate activeSolutions
+    data["activeSolutions"] = [s["id"] for s in data["solutions"]]
+    count = len(data["solutions"])
 
     # Always sync to data.json so the dev server serves the latest data
     LIVE_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")

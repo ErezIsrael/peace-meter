@@ -133,7 +133,8 @@
       "global",
       "international",
       "world"
-    ]
+    ],
+    "core": false
   },
   {
     "id": "miscellaneous",
@@ -151,6 +152,7 @@
       "middle",
       "east",
       "region"
-    ]
+    ],
+    "core": false
   }
 ]
