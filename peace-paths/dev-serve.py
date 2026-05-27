@@ -504,7 +504,7 @@ def deploy_categories(target, selected_ids=None):
     elif target == "live":
         # Deploy to Cloudflare Pages via wrangler
         print("  [Deploy] Uploading to Cloudflare Pages...")
-        project_root = str(SOLUTIONS_JSON.parent.parent)
+        project_root = str(PROJECT_ROOT)
         cmd = "npx wrangler pages deploy app --project-name=peace-meter --skip-caching --commit-dirty=true"
         result = subprocess.run(
             cmd, shell=True,
