@@ -368,6 +368,22 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
             except Exception as e:
                 self._json_error(str(e))
             return
+        if self.path == "/api/admin/categories/bulk-core-toggle":
+            data = self._read_json()
+            ids = data.get("ids", [])
+            set_core = data.get("setCore", True)
+            try:
+                categories = load_categories()
+                updated = 0
+                for cat in categories:
+                    if cat["id"] in set(ids):
+                        cat["core"] = set_core
+                        updated += 1
+                save_categories(categories)
+                self._json_response({"ok": True, "updated": updated, "core": set_core})
+            except Exception as e:
+                self._json_error(str(e))
+            return
         self._json_error("Not found")
 
     def do_PUT(self):
