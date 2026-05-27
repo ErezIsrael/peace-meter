@@ -99,7 +99,11 @@ function buildActivityFeed() {
       all.push({ ...ev, solutionId: sol.id, solutionName: sol.name });
     });
   });
-  all.sort((a, b) => new Date(b.date) - new Date(a.date));
+  all.sort((a, b) => {
+    const da = parseDate(a.date) || new Date(0);
+    const db = parseDate(b.date) || new Date(0);
+    return db - da;
+  });
   activityFeedEvents = all;
   renderActivityFeed();
 }
