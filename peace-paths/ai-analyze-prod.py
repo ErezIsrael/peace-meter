@@ -1149,7 +1149,8 @@ def main():
     if args.deploy:
         # Deploy via wrangler (preferred)
         print(f"\n\U0001f4a9 Deploying to Cloudflare Pages via wrangler...")
-        project_root = os.path.dirname(os.path.dirname(DATA_FILE))
+        # Go up from DATA_FILE (app/peace-room/solutions.json) to repo root (peace-meter)
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(DATA_FILE)))
         import subprocess
         cmd = "npx wrangler pages deploy app --project-name=peace-meter --skip-caching --commit-dirty=true"
         result = subprocess.run(
