@@ -510,9 +510,13 @@ def _classify_article(article, system_prompt, valid_ids):
         return None
 
     result_text = response.get("choices", [{}])[0].get("message", {}).get("content", "")
+    result_text = result_text.strip()
+
+    # Empty response — LLM content filter blocked
+    if not result_text:
+        return {"_refused": True, "_text": "(empty response)"}
 
     # Strip markdown code fences if LLM wraps them
-    result_text = result_text.strip()
     if result_text.startswith("```"):
         lines = result_text.split("\n")
         result_text = "\n".join(lines[1:-1]).strip() if len(lines) > 2 else "".join(lines[1:]).strip()
@@ -528,7 +532,8 @@ def _classify_article(article, system_prompt, valid_ids):
                 return obj
         except json.JSONDecodeError:
             pass
-    return None
+    # No valid JSON found — LLM returned prose (refusal) or garbled output
+    return {"_refused": True, "_text": result_text[:100]}
 
 
 def classify_articles(articles, system_prompt, valid_ids):
@@ -550,6 +555,7 @@ def classify_articles(articles, system_prompt, valid_ids):
     dropped = 0
     pre_filtered = 0
     ai_failures = 0
+    ai_refusals = 0
 
     for idx, article in enumerate(articles):
         # Pre-filter: skip obvious noise
@@ -561,6 +567,13 @@ def classify_articles(articles, system_prompt, valid_ids):
         t0 = time.time()
         result = _classify_article(article, system_prompt, valid_ids)
         elapsed = time.time() - t0
+
+        # Content filter refusal — LLM refused to classify
+        if isinstance(result, dict) and result.get("_refused"):
+            ai_refusals += 1
+            if ai_refusals <= 3:
+                print(f"  \u26d4 AI content filter blocked: {result.get('_text', '?')}...")
+            continue  # skip this article, try next
 
         if result is None:
             ai_failures += 1
@@ -593,8 +606,11 @@ def classify_articles(articles, system_prompt, valid_ids):
         if (idx + 1) % 20 == 0 or idx == len(articles) - 1:
             print(f"  [{idx+1}/{len(articles)}] {relevant} relevant, {dropped} dropped")
 
-    print(f"  Total: {relevant} relevant, {dropped} dropped by LLM, {pre_filtered} pre-filtered / {len(articles)} articles")
-    return pairs
+    print(f"  Total: {relevant} relevant, {dropped} dropped by LLM, {ai_refusals} AI refusals, {pre_filtered} pre-filtered / {len(articles)} articles")
+    if ai_refusals > 0:
+        pct = ai_refusals / len(articles) * 100
+        print(f"  \U0001f6a8\ufe0f WARNING: AI content filter triggered on {ai_refusals} articles ({pct:.1f}%)")
+    return pairs, ai_refusals
 
 # ═══════════════════════════════════════════════════════════════════════
 # Keyword fallback classifier
@@ -1061,11 +1077,13 @@ def main():
     if args.fetch_only:
         print("[--fetch-only] Using keyword fallback")
         classified_pairs = keyword_classify(articles, all_kws)
+        ai_refusals = 0
     else:
-        classified_pairs = classify_articles(articles, system_prompt, valid_ids)
+        classified_pairs, ai_refusals = classify_articles(articles, system_prompt, valid_ids)
         if not classified_pairs:
             print("  \u26a0 AI failed, falling back to keyword classification")
             classified_pairs = keyword_classify(articles, all_kws)
+            ai_refusals = 0
 
     # 3. Build output
     data = build_output(articles, classified_pairs, cat_map)
@@ -1079,6 +1097,19 @@ def main():
         else:
             print("  \u26a0 No existing data found, falling back to daily mode")
     # daily mode: data already overwrites
+
+    # Add AI health metadata
+    data["aiHealth"] = {
+        "refusals": ai_refusals,
+        "totalClassified": len(classified_pairs),
+        "refusalRate": round(ai_refusals / max(len(articles), 1) * 100, 1),
+        "lastRun": datetime.now(timezone.utc).isoformat(),
+    }
+    if ai_refusals > 0:
+        pct = data["aiHealth"]["refusalRate"]
+        data["aiHealth"]["status"] = "warning" if pct > 5 else "ok"
+    else:
+        data["aiHealth"]["status"] = "healthy"
 
     # 5. Dry run
     if args.dry_run:

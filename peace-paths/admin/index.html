@@ -59,6 +59,12 @@
     border-radius: 6px; color: #c9d1d9; font-size: 12px; width: 180px;
   }
   .toolbar .search-input:focus { outline: none; border-color: #388bfd; }
+
+  /* AI Health bar */
+  .ai-health-healthy { background: #1c2d1c; border: 1px solid #238636; color: #3fb950; }
+  .ai-health-warning { background: #2d2d1c; border: 1px solid #9e6a03; color: #d29922; }
+  .ai-health-critical { background: #2d1c1c; border: 1px solid #6e2a2a; color: #f85149; }
+
   .status { margin-left: auto; font-size: 11px; color: #6e7681; }
   .status.running { color: #d29922; }
   .status.done { color: #3fb950; }
@@ -165,6 +171,12 @@
   <button class="run" id="stopAnalysisBtn" onclick="cancelAnalysis()" style="display:none;background:#b62324">⏹ Stop</button>
 </div>
 
+<!-- AI Health indicator -->
+<div id="aiHealthBar" style="display:none;padding:6px 10px;margin:6px 0;border-radius:6px;font-size:11px;align-items:center;gap:8px;">
+  <span id="aiHealthIcon"></span>
+  <span id="aiHealthText"></span>
+</div>
+
 <!-- Progress bar -->
 <div class="progress-label" id="progressLabel">Analyzing… 0%</div>
 <div class="progress-bar" id="progressBar">
@@ -235,14 +247,37 @@ let selectedIds = new Set();  // selected row ids (for bulk ops)
 /* ── Load ──────────────────────────────────────────── */
 async function loadData() {
   try {
-    const [resC, resT] = await Promise.all([
+    const [resC, resT, resH] = await Promise.all([
       fetch(`${API}/categories`),
-      fetch(`${API}/taxonomy`)
+      fetch(`${API}/taxonomy`),
+      fetch(`${API}/ai-health`).catch(() => ({ok:true, json:()=>({status:'unknown',refusals:0,refusalRate:0}))})
     ]);
     categories = await resC.json();
     taxonomy = await resT.json();
+    const health = await resH.json();
     renderTable();
+    renderAIHealth(health);
   } catch(e) { showToast('Failed to load data', 'error'); }
+}
+
+/* ── AI Health Indicator ─────────────────────────── */
+function renderAIHealth(h) {
+  const bar = document.getElementById('aiHealthBar');
+  const icon = document.getElementById('aiHealthIcon');
+  const text = document.getElementById('aiHealthText');
+  if (!h || h.status === 'unknown') {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  bar.className = `ai-health-${h.status === 'healthy' ? 'healthy' : h.refusalRate > 10 ? 'critical' : 'warning'}`;
+  if (h.status === 'healthy') {
+    icon.textContent = '✅';
+    text.textContent = `AI healthy — ${h.totalClassified} classified, ${h.refusals} refusals (${h.refusalRate}%) — ${new Date(h.lastRun).toLocaleTimeString()}`;
+  } else {
+    icon.textContent = h.refusalRate > 10 ? '🚨' : '⚠️';
+    text.textContent = `AI content filter triggered ${h.refusals} times (${h.refusalRate}% of ${h.totalClassified} articles) — ${new Date(h.lastRun).toLocaleTimeString()}`;
+  }
 }
 
 /* ── Selection ─────────────────────────────────────── */

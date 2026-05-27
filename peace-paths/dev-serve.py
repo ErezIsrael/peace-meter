@@ -192,6 +192,19 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
             cats = load_taxonomy()
             self._json_response(cats)
             return
+        if self.path == "/api/admin/ai-health":
+            for p in (SOLUTIONS_JSON, LIVE_DATA_JSON):
+                if p.exists():
+                    try:
+                        data = json.loads(p.read_text(encoding="utf-8"))
+                        health = data.get("aiHealth", None)
+                        if health:
+                            self._json_response(health)
+                            return
+                    except:
+                        pass
+            self._json_response({"status": "unknown", "refusals": 0, "refusalRate": 0})
+            return
         if self.path == "/api/analysis/status":
             # Strip proc object before serializing
             status = {k: v for k, v in analysis_status.items() if k != "proc"}
