@@ -231,7 +231,7 @@ function renderTable(filter='') {
       tr.innerHTML = `
         <td><input type="checkbox" class="chk" ${selectedIds.has(c.id)?'checked':''} onchange="toggleSelect('${c.id}', this)"></td>
         <td class="icon-cell">${c.icon}</td>
-        <td class="icon-cell">${c.core?'⭐':'<span style="color:#30363d">·</span>'}</td>
+        <td class="icon-cell" style="cursor:pointer" onclick="toggleCore('${c.id}')" title="${c.core?'Remove from core':'Make core'}">${c.core?'⭐':'☆'}</td>
         <td style="color:#8b949e;font-family:monospace;font-size:11px">${c.id}</td>
         <td>${c.name}</td>
         <td style="color:#8b949e;font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.description)}">${c.description}</td>
@@ -240,6 +240,7 @@ function renderTable(filter='') {
         <td><span class="badge current">current</span></td>
         <td><div class="actions">
           <button onclick="editCategory('${c.id}','current')">Edit</button>
+          <button class="toggle-core" onclick="toggleCore('${c.id}')" title="${c.core?'Remove from core':'Make core'}" style="background:${c.core?'#2d2d1c;border-color:#9e6a03;color:#d29922':'#0d1117;border-color:#30363d;color:#6e7681'}">${c.core?'⭐':'☆'}</button>
           <button class="del" onclick="deleteCategory('${c.id}')">Del</button>
         </div></td>
       `;
@@ -385,6 +386,22 @@ async function saveCategory() {
 }
 
 function editCategory(id, source) { openModal(id, source); }
+
+/* ── Toggle Core ───────────────────────────────────── */
+async function toggleCore(id) {
+  const cat = categories.find(c => c.id === id);
+  if (!cat) return;
+  const newCore = !cat.core;
+  const res = await fetch(`${API}/categories/${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ ...cat, core: newCore })
+  });
+  const j = await res.json();
+  if (!res.ok) { alert(j.error); return; }
+  showToast(`"${id}" ${newCore ? 'made core' : 'removed from core'}`, 'success');
+  await loadData();
+}
 
 /* ── Delete ────────────────────────────────────────── */
 async function deleteCategory(id) {
