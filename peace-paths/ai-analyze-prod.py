@@ -1096,6 +1096,31 @@ def main():
     with open(DATA_JSON, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+    # Back-propagate new category IDs to categories.json
+    # (e.g., keyword fallback created a solution for a category not in categories.json)
+    solution_ids = {s["id"] for s in data.get("solutions", [])}
+    missing = solution_ids - set(cat_map.keys())
+    if missing:
+        for sid in missing:
+            sol = next((s for s in data.get("solutions", []) if s["id"] == sid), None)
+            inject_category(cat_map, sid, sol["name"] if sol else sid, f"{sid} news and updates")
+            print(f"  \u2795 Auto-added missing category: {sid}")
+        # Re-read categories.json to preserve categories not used this run,
+        # then merge new ones into it
+        existing = load_categories()
+        for cid, cdata in cat_map.items():
+            if cid not in existing:
+                existing[cid] = {
+                    "id": cid,
+                    "icon": cdata.get("icon", "\U0001f4cc"),
+                    "name": cdata["name"],
+                    "description": cdata.get("description", f"{cid} news and updates"),
+                    "phases": cdata.get("phases", ["Emerged", "Developing", "Gaining Traction", "Maturing", "Resolved"]),
+                    "keywords": cdata.get("keywords", []),
+                    "core": False,
+                }
+        save_categories(existing)
+
     # 7. Upload to Cloudflare
     if args.deploy:
         # Deploy via wrangler (preferred)

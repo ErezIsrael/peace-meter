@@ -1,322 +1,156 @@
 [
   {
-    "id": "ceasefire",
-    "icon": "🕊",
-    "name": "Ceasefire & De-escalation",
-    "description": "Ceasefire negotiations, de-escalation efforts, truce agreements across all conflict zones",
+    "id": "iran-us-conflict",
+    "icon": "🇺🇸🇮🇷",
+    "name": "Iran-US Conflict",
+    "description": "Iran-US military and diplomatic developments",
     "phases": [
-      "Active Fighting",
-      "Ceasefire Talks",
-      "Draft Agreement",
-      "Signed",
-      "Holding"
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
     ],
     "keywords": [
-      "ceasefire",
-      "truce",
-      "cease fire",
-      "armistice",
-      "de-escalation",
-      "peace talks"
+      "iran",
+      "us",
+      "sanctions",
+      "conflict"
     ],
     "core": true
   },
   {
-    "id": "diplomacy",
-    "icon": "🤝",
-    "name": "Diplomacy & Regional Deals",
-    "description": "Diplomatic normalization, Abraham Accords expansion, peace deals, regional cooperation",
+    "id": "israel-lebanon-war",
+    "icon": "🇮🇱🇱🇧",
+    "name": "Israel-Lebanon War",
+    "description": "Israel-Hezbollah conflict and ceasefire talks",
     "phases": [
-      "Isolated",
-      "Back-channel",
-      "Framework",
-      "New Partners",
-      "Regional Peace"
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
     ],
     "keywords": [
-      "abraham accords",
-      "normalization",
-      "diplomatic",
-      "saudi",
-      "nuclear deal"
-    ],
-    "core": true
-  },
-  {
-    "id": "governance",
-    "icon": "🏛",
-    "name": "Post-War Governance",
-    "description": "Post-war governance plans, Palestinian Authority reform, transitional authority, political frameworks",
-    "phases": [
-      "No Framework",
-      "Proposals",
-      "Consensus",
-      "Interim Gov",
-      "Sustainable"
-    ],
-    "keywords": [
-      "governance",
-      "authority",
-      "two state",
-      "pa reform",
-      "election"
-    ],
-    "core": true
-  },
-  {
-    "id": "infrastructure",
-    "icon": "💧",
-    "name": "Infrastructure & Recovery",
-    "description": "Infrastructure reconstruction, power/water/hospitals rebuilding, recovery efforts",
-    "phases": [
-      "Destroyed",
-      "Emergency Repairs",
-      "Partial",
-      "Reconstruction",
-      "Full Recovery"
-    ],
-    "keywords": [
-      "reconstruction",
-      "rebuild",
-      "infrastructure",
-      "hospital",
-      "water"
-    ],
-    "core": true
-  },
-  {
-    "id": "iran",
-    "icon": "☣️",
-    "name": "Iran Nuclear & War",
-    "description": "Iran-US conflict, nuclear program, Strait of Hormuz, Iran peace negotiations",
-    "phases": [
-      "War",
-      "Ceasefire Talks",
-      "Armistice",
-      "Nuclear Deal",
-      "Resolution"
-    ],
-    "keywords": [
-      "iran war",
-      "iran nuclear",
-      "iran us",
-      "us iran",
-      "iran deal",
-      "iran ceasefire",
-      "khamenei",
-      "isfahan",
-      "strait of hormuz"
-    ],
-    "core": true
-  },
-  {
-    "id": "lebanon",
-    "icon": "🇱🇧",
-    "name": "Lebanon & Hezbollah",
-    "description": "Lebanon conflict, Hezbollah-Israel hostilities, southern Lebanon situation",
-    "phases": [
-      "Active Fighting",
-      "De-escalation",
-      "Ceasefire",
-      "Withdrawal",
-      "Stable"
-    ],
-    "keywords": [
+      "israel",
       "lebanon",
       "hezbollah",
-      "beirut",
-      "southern lebanon",
-      "south lebanon"
+      "war"
     ],
     "core": true
   },
   {
-    "id": "gaza-crisis",
-    "icon": "🏚",
-    "name": "Gaza Humanitarian Crisis",
-    "description": "Gaza humanitarian crisis, displacement, medicine/food blockade, aid delivery, disease, civilian suffering",
+    "id": "israel-gaza-conflict",
+    "icon": "🇮🇱🇵🇸",
+    "name": "Israel-Gaza Conflict",
+    "description": "Gaza war, humanitarian conditions, Hamas",
     "phases": [
-      "Blockade",
-      "Aid Inflow",
-      "Recovery",
-      "Rebuilding",
-      "Stabilized"
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
     ],
     "keywords": [
-      "gaza crisis",
-      "gaza famine",
-      "gaza blockade",
-      "gaza siege",
-      "sumud",
-      "flotilla",
-      "humanitarian aid",
-      "aid",
-      "relief",
-      "wfp",
-      "unrwa",
-      "food delivery",
-      "medical"
+      "gaza",
+      "hamas",
+      "israel",
+      "conflict"
     ],
     "core": true
   },
   {
-    "id": "human-rights",
+    "id": "israeli-domestic-affairs",
+    "icon": "🏛️",
+    "name": "Israeli Domestic Affairs",
+    "description": "Internal Israeli politics and legal issues",
+    "phases": [
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
+    ],
+    "keywords": [
+      "israel",
+      "domestic",
+      "politics",
+      "legal"
+    ],
+    "core": true
+  },
+  {
+    "id": "energy-economy",
+    "icon": "📈",
+    "name": "Energy & Economy",
+    "description": "Oil markets and economic impacts of war",
+    "phases": [
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
+    ],
+    "keywords": [
+      "energy",
+      "economy",
+      "oil",
+      "markets"
+    ]
+  },
+  {
+    "id": "humanitarian-rights",
     "icon": "⚖️",
-    "name": "Human Rights & Intl Law",
-    "description": "Human rights violations, war crimes, flotilla activists, ICC/ICJ, international law, abuse allegations",
+    "name": "Humanitarian & Rights",
+    "description": "Civilian casualties and human rights violations",
     "phases": [
-      "Allegations",
-      "Investigations",
-      "Sanctions",
-      "Accountability",
-      "Reform"
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
     ],
     "keywords": [
-      "war crime",
-      "icj",
-      "icc",
-      "genocide",
-      "human rights",
-      "flotilla",
-      "torture"
-    ],
-    "core": true
+      "humanitarian",
+      "rights",
+      "casualties",
+      "violations"
+    ]
   },
   {
-    "id": "domestic-politics",
-    "icon": "🏛",
-    "name": "Israeli Domestic Politics",
-    "description": "Israeli internal politics, coalition dynamics, Knesset, party struggles, Netanyahu, Herzog, liberal center",
+    "id": "global-non-mideast",
+    "icon": "🌐",
+    "name": "Global Non-Middle East",
+    "description": "International coverage of ME events from global sources",
     "phases": [
-      "Fractured",
-      "Coalition Shift",
-      "Policy Change",
-      "Elections",
-      "Stability"
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
     ],
     "keywords": [
-      "netanyahu",
-      "herzog",
-      "knesset",
-      "coalition",
-      "arab parties",
-      "liberal center",
-      "death penalty"
-    ],
-    "core": true
+      "global",
+      "international",
+      "world"
+    ]
   },
   {
-    "id": "west-bank",
-    "icon": "🔥",
-    "name": "West Bank & Settlements",
-    "description": "West Bank settler violence, occupation policies, East Jerusalem, Palestinian communities",
+    "id": "miscellaneous",
+    "icon": "📰",
+    "name": "Miscellaneous",
+    "description": "Relevant ME articles that do not fit other categories",
     "phases": [
-      "Escalation",
-      "Violence Spike",
-      "Mediation",
-      "Calming",
-      "Frozen Conflict"
+      "Emerged",
+      "Developing",
+      "Gaining Traction",
+      "Maturing",
+      "Resolved"
     ],
     "keywords": [
-      "west bank",
-      "settler",
-      "east jerusalem",
-      "occupied"
-    ],
-    "core": true
-  },
-  {
-    "id": "regional",
-    "icon": "🌍",
-    "name": "Regional Relations",
-    "description": "Regional diplomacy, Arab states positions, Jordan, Egypt, Syria, Türkiye, Morocco, UAE, China influence",
-    "phases": [
-      "Tensions",
-      "Diplomatic Push",
-      "Accord",
-      "Integration",
-      "Cooperation"
-    ],
-    "keywords": [
-      "jordan",
-      "egypt",
-      "syria",
-      "türkiye",
-      "turkey",
-      "turkiye",
-      "morocco",
-      "uae",
-      "qatar",
-      "china",
-      "arab"
-    ],
-    "core": true
-  },
-  {
-    "id": "iran-domestic-affairs",
-    "icon": "????",
-    "name": "Iran Domestic Affairs",
-    "description": "Iranian internal politics, protests, economy, and government affairs",
-    "phases": [
-      "Crisis",
-      "Unrest",
-      "Transition",
-      "Stabilization",
-      "Resolution"
-    ],
-    "keywords": [
-      "iran domestic,iran protests,tehran economy,iran president,iran parliament,iranian government"
-    ],
-    "core": false
-  },
-  {
-    "id": "gulf-regional-politics",
-    "icon": "🌍",
-    "name": "Gulf & Regional Politics",
-    "description": "Gulf state politics, UAE, Saudi Arabia, Oman, Qatar regional affairs and geopolitics",
-    "phases": [
-      "Tensions",
-      "Diplomatic Push",
-      "Accord",
-      "Integration",
-      "Cooperation"
-    ],
-    "keywords": [
-      "gulf states",
-      "uae",
-      "saudi arabia",
-      "oman",
-      "qatar",
-      "kuwait",
-      "bahrein",
-      "arabian gulf",
-      "persian gulf",
-      "gulf war"
-    ],
-    "core": false
-  },
-  {
-    "id": "diaspora-antisemitism",
-    "icon": "🕍",
-    "name": "Diaspora & Antisemitism",
-    "description": "Antisemitism, anti-Israel sentiment, diaspora Jewish community issues, campus protests, hate incidents abroad",
-    "phases": [
-      "Allegations",
-      "Investigations",
-      "Public Debate",
-      "Policy Action",
-      "Resolution"
-    ],
-    "keywords": [
-      "antisemitism",
-      "anti-semitism",
-      "jewish",
-      "diaspora",
-      "anti-israel",
-      "adl",
-      "campus protest",
-      "holocaust denial"
-    ],
-    "core": false
+      "middle",
+      "east",
+      "region"
+    ]
   }
 ]
