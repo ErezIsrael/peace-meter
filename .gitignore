@@ -23,6 +23,7 @@ SITE_STRUCTURE.md
 
 # Generated data — produced by the analyzer, not source
 app/peace-room/solutions.json
+app/peace-room/test-data.json
 peace-paths/solutions.json
 peace-paths/full_run.json
 

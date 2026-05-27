@@ -27,7 +27,6 @@ APP_DIR = PROJECT_ROOT / "app" / "peace-room"
 ADMIN_DIR = PROJECT_ROOT / "peace-paths" / "admin"
 DATA_FILE = APP_DIR / "solutions.json"
 LIVE_DATA_JSON = APP_DIR / "data.json"  # deployed to Cloudflare via /peace-room/data.json
-TEST_DATA_JSON = APP_DIR / "test-data.json"  # local dev only
 SOLUTIONS_JSON = PROJECT_ROOT / "peace-paths" / "solutions.json"
 SCRIPT = PROJECT_ROOT / "peace-paths" / "ai-analyze-prod.py"
 TAXONOMY_FILE = PROJECT_ROOT / "peace-paths" / "taxonomy.json"
@@ -38,7 +37,7 @@ analysis_status = {"running": False, "pid": None, "started": None, "log": "", "p
 
 
 def sync_data():
-    """Copy solutions.json -> data.json and test-data.json.
+    """Copy solutions.json -> data.json for local dev.
 
     NOTE: Admin panel is NOT synced to APP_DIR — it is served directly from
     ADMIN_DIR by the dev server only. This keeps it out of Cloudflare Pages deploys.
@@ -57,44 +56,11 @@ def sync_data():
             if "activeSolutions" in existing:
                 print(f"  skipping sync — {LIVE_DATA_JSON} was deployed")
         except Exception:
-            LIVE_DATA_JSON.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            LIVE_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
             print(f"  synced {DATA_FILE} -> {LIVE_DATA_JSON}")
     else:
-        LIVE_DATA_JSON.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        LIVE_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  synced {DATA_FILE} -> {LIVE_DATA_JSON}")
-
-    # Sync to test-data.json, merging with deployed test categories
-    if TEST_DATA_JSON.exists():
-        try:
-            test_existing = json.loads(TEST_DATA_JSON.read_text(encoding="utf-8"))
-            test_map = {s["id"]: s for s in test_existing.get("solutions", [])}
-            new_map = {s["id"]: s for s in data.get("solutions", [])}
-            # Merge: analysis data from solutions.json overrides test data,
-            # but test-only categories (from taxonomy deploy) are preserved
-            for tid, tsol in test_map.items():
-                if tid in new_map:
-                    # Merge analysis data into test category
-                    for k in ("phaseIndex", "direction", "keyMetric", "summary", "events"):
-                        if new_map[tid].get(k):
-                            test_map[tid][k] = new_map[tid][k]
-            # Add any new solutions from analysis not in test
-            for nid, nsol in new_map.items():
-                if nid not in test_map:
-                    test_map[nid] = nsol
-            test_data = {
-                "solutions": list(test_map.values()),
-                "activeSolutions": list(test_map.keys()),
-                "overallMomentum": data.get("overallMomentum", {}),
-                "lastUpdated": data.get("lastUpdated", ""),
-                "source": data.get("source", ""),
-                "feedCount": data.get("feedCount", 0),
-            }
-            TEST_DATA_JSON.write_text(json.dumps(test_data, indent=2, ensure_ascii=False), encoding="utf-8")
-            print(f"  synced {DATA_FILE} -> {TEST_DATA_JSON} ({len(test_map)} solutions)")
-        except Exception:
-            TEST_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    else:
-        TEST_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     print(f"  {len(data.get('solutions', []))} solutions, "
           f"{sum(len(s.get('events', [])) for s in data.get('solutions', []))} events")
@@ -270,9 +236,9 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
         # Map '/' or directory paths to index.html
         if path == '/':
             path = '/index.html'
-        # Serve test-data.json as /data.json so the local app reads test data
-        if path == '/data.json' and TEST_DATA_JSON.exists():
-            fpath = TEST_DATA_JSON
+        # Serve solutions.json as /data.json so the local app reads latest analysis
+        if path == '/data.json' and SOLUTIONS_JSON.exists():
+            fpath = SOLUTIONS_JSON
         else:
             fpath = APP_DIR / path.removeprefix('/')
         if fpath.is_dir():
@@ -346,9 +312,8 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
         if self.path == "/api/admin/deploy":
             data = self._read_json()
             target = data.get("target", "")  # 'test' or 'live'
-            selected = data.get("selected")  # list of IDs, or None for all
             try:
-                result = deploy_categories(target, selected_ids=selected)
+                result = deploy_categories(target)
                 self._json_response(result)
             except Exception as e:
                 self._json_error(str(e))
@@ -458,94 +423,55 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
 
 
 def deploy_categories(target, selected_ids=None):
-    """Deploy selected (or all) categories to test or live environment.
+    """Deploy solutions.json to test or live environment.
 
-    Handles both current SOLUTIONS categories and taxonomy-suggested categories.
-    Suggested categories that are selected will be included directly from taxonomy.
-
-    target: 'test' -> writes to test-data.json (local dev only)
-    target: 'live' -> writes to data.json (deployed to Cloudflare)
-    selected_ids: if provided, only deploy those categories; otherwise deploy all.
+    target: 'test' -> copies solutions.json to test-data.json (local dev)
+    target: 'live' -> copies to data.json + wrangler pages deploy
+    selected_ids: unused now (deploy uses latest analysis output)
     """
-    dest = TEST_DATA_JSON if target == "test" else LIVE_DATA_JSON
-    current_cats = load_categories()
-    taxonomy_cats = load_taxonomy()
-    current_ids = {c["id"] for c in current_cats}
+    import shutil
 
-    if selected_ids:
-        sel_set = set(selected_ids)
-        # Gather current categories that are selected
-        categories = [c for c in current_cats if c["id"] in sel_set]
-        # Identify taxonomy-suggested categories to import into SOLUTIONS
-        suggested_to_import = []
-        for tc in taxonomy_cats:
-            if tc["id"] in sel_set and tc["id"] not in current_ids:
-                suggested_to_import.append(tc)
-                categories.append(tc)
-        # Auto-import suggested categories into ai-analyze-prod.py so analysis works
-        if suggested_to_import:
-            current_cats.extend(suggested_to_import)
-            save_categories(current_cats)
-    else:
-        categories = current_cats
-    # Build solutions.json structure
-    # Load existing analysis data to preserve keyMetric, summary, events, etc.
-    # solutions.json (latest analysis) takes priority over the target data.json
-    existing_solutions = {}
-    for fpath in (SOLUTIONS_JSON, dest):
-        if fpath.exists():
-            try:
-                existing = json.loads(fpath.read_text(encoding="utf-8"))
-                for s in existing.get("solutions", []):
-                    eid = s["id"]
-                    if eid in existing_solutions:
-                        # Merge: only fill in missing keys from data.json
-                        for k in ("keyMetric", "summary", "events", "phaseIndex", "direction"):
-                            if k not in existing_solutions[eid] or not existing_solutions[eid][k]:
-                                if k in s and s[k]:
-                                    existing_solutions[eid][k] = s[k]
-                    else:
-                        existing_solutions[eid] = s
-            except Exception:
-                pass
+    if not SOLUTIONS_JSON.exists():
+        return {"error": "No analysis data found. Run analysis first."}
 
-    solutions = []
-    default_metric = {"label": "Events (7d)", "value": "0"}
-    for c in categories:
-        existing = existing_solutions.get(c["id"], {})
-        solutions.append({
-            "id": c["id"],
-            "icon": c["icon"],
-            "name": c["name"],
-            "description": c["description"],
-            "phases": c.get("phases", []),
-            "keywords": c.get("keywords", []),
-            "phaseIndex": existing.get("phaseIndex", 0),
-            "direction": existing.get("direction", "unknown"),
-            "keyMetric": existing.get("keyMetric") or default_metric,
-            "summary": existing.get("summary", ""),
-            "events": existing.get("events", []),
-        })
-    # Preserve overallMomentum, lastUpdated from solutions.json
-    meta = {}
-    if SOLUTIONS_JSON.exists():
-        try:
-            meta = json.loads(SOLUTIONS_JSON.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+    data = json.loads(SOLUTIONS_JSON.read_text(encoding="utf-8"))
+    count = len(data.get("solutions", []))
 
-    data = {
-        "solutions": solutions,
-        "activeSolutions": [s["id"] for s in solutions],
-        "overallMomentum": meta.get("overallMomentum", {}),
-        "lastUpdated": meta.get("lastUpdated", ""),
-        "source": meta.get("source", ""),
-        "feedCount": meta.get("feedCount", 0),
-    }
-    dest.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    imported = len([c for c in categories if c["id"] not in current_ids])
-    print(f"  [Deploy] Wrote {len(solutions)} categories to {dest} ({target}) (imported {imported} from taxonomy)")
-    return {"ok": True, "deployed": len(solutions), "imported": imported, "target": target}
+    if target == "test":
+        # Copy to test-data.json for dev server
+        test_file = APP_DIR / "test-data.json"
+        test_file.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  [Deploy] Wrote {count} solutions to {test_file} (test)")
+        return {"ok": True, "deployed": count, "target": "test"}
+
+    elif target == "live":
+        # Copy to data.json
+        LIVE_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"  [Deploy] Wrote {count} solutions to {LIVE_DATA_JSON}")
+
+        # Deploy to Cloudflare Pages via wrangler
+        print("  [Deploy] Uploading to Cloudflare Pages...")
+        project_root = str(SOLUTIONS_JSON.parent.parent)
+        result = subprocess.run(
+            ["npx", "wrangler", "pages", "deploy", "app",
+             "--project-name=peace-meter",
+             "--skip-caching",
+             "--commit-dirty=true"],
+            cwd=project_root,
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            # Extract deployment URL from output
+            for line in result.stdout.split("\n"):
+                if "Deploying" in line or ".pages.dev" in line:
+                    print(f"  [Deploy] {line.strip()}")
+            print("  [Deploy] Success — Cloudflare Pages updated")
+            return {"ok": True, "deployed": count, "target": "live", "url": "https://peace-meter.pages.dev"}
+        else:
+            print(f"  [Deploy] Wrangler failed: {result.stderr[:200]}")
+            return {"ok": False, "error": "Wrangler deploy failed", "stderr": result.stderr[:200]}
+
+    return {"error": f"Unknown target: {target}"}
 
 
 def main():

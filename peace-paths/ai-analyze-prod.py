@@ -16,8 +16,13 @@ Modes:
   --daily  — Daily: full fetch (7-day window), overwrite solutions.json
   (default) — Same as --daily
 
+Flags:
+  --deploy — After analysis, deploy to Cloudflare Pages via wrangler
+  --skip-upload — Skip Cloudflare API upload (use --deploy instead)
+
 Run: python ai-analyze-prod.py
 Run: python ai-analyze-prod.py --fast
+Run: python ai-analyze-prod.py --daily --deploy
 Run: python ai-analyze-prod.py --categories "id:name:description"
 
 Schedule: --fast every hour; --daily every 12h
@@ -955,7 +960,8 @@ def main():
                         help="Daily full run: fetch 7 days, overwrite solutions.json")
     parser.add_argument("--categories", type=str, nargs="*",
                         help="Inject custom categories (id:name:description). E.g., --categories \"armistice:Ceasefire Talks:Truce negotiations\"")
-    parser.add_argument("--skip-upload", action="store_true", help="Skip Cloudflare upload")
+    parser.add_argument("--skip-upload", action="store_true", help="Skip Cloudflare API upload")
+    parser.add_argument("--deploy", action="store_true", help="Deploy to Cloudflare Pages via wrangler after analysis")
     parser.add_argument("--dry-run", action="store_true", help="Print output JSON to stdout")
     parser.add_argument("--fetch-only", action="store_true", help="Only fetch RSS, skip AI")
     parser.add_argument("--review-taxonomy", action="store_true",
@@ -1091,10 +1097,31 @@ def main():
         json.dump(data, f, indent=2, ensure_ascii=False)
 
     # 7. Upload to Cloudflare
-    if not args.skip_upload:
+    if args.deploy:
+        # Deploy via wrangler (preferred)
+        print(f"\n\U0001f4a9 Deploying to Cloudflare Pages via wrangler...")
+        project_root = os.path.dirname(os.path.dirname(DATA_FILE))
+        import subprocess
+        result = subprocess.run(
+            ["npx", "wrangler", "pages", "deploy", "app",
+             "--project-name=peace-meter",
+             "--skip-caching",
+             "--commit-dirty=true"],
+            cwd=project_root,
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            for line in result.stdout.split("\n"):
+                if "Deploying" in line or ".pages.dev" in line or "Success" in line:
+                    print(f"  {line.strip()}")
+            print("  \u2713 Cloudflare Pages deployed successfully")
+        else:
+            print(f"  \u26a0 Wrangler deploy failed: {result.stderr[:300]}")
+            print("  Fallback: writing data.json locally")
+    elif not args.skip_upload:
         upload_to_cloudflare(data)
     else:
-        print(f"\n\u2139\ufe0f --skip-upload: Cloudflare upload skipped. Data written to {DATA_FILE} and {DATA_JSON}")
+        print(f"\n\u2139\ufe0f Cloudflare upload skipped. Data written to {DATA_FILE} and {DATA_JSON}")
 
     elapsed = time.time() - start
     _print_summary(data, len(classified_pairs), elapsed)
