@@ -23,8 +23,13 @@ set LOGFILE="%~dp0deploy-log.txt"
 
 echo [%date% %time%] === Peace Room Auto-Deploy (fast) === >> %LOGFILE%
 
-REM Run analysis + deploy
-python ai-analyze-prod.py --fast --deploy >> %LOGFILE% 2>&1
+REM Run analysis + deploy (use full paths for Task Scheduler compatibility)
+set PYTHON_PATH=C:\ProgramData\anaconda3\python.exe
+
+REM Verify python exists, fallback to PATH
+if not exist "%PYTHON_PATH%" set PYTHON_PATH=python
+
+"%PYTHON_PATH%" ai-analyze-prod.py --fast --deploy >> %LOGFILE% 2>&1
 
 set EXIT_CODE=%ERRORLEVEL%
 

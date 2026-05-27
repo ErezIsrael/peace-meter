@@ -20,7 +20,6 @@
       <Repetition>
         <Interval>PT1H</Interval>
         <Duration>P1D</Duration>
-        <StopAtEndOfSchedule>false</StopAtEndOfSchedule>
       </Repetition>
     </CalendarTrigger>
   </Triggers>
@@ -52,8 +51,7 @@
   <Actions Context="Author">
     <Exec>
       <Command>C:\Windows\System32\cmd.exe</Command>
-      <Arguments>/c "C:\Users\Erez\.pi\agent\projects\peace-meter\peace-paths\auto-deploy.bat"</Arguments>
-      <StartIn>C:\Users\Erez\.pi\agent\projects\peace-meter\peace-paths</StartIn>
+      <Arguments>/c "cd /d C:\Users\Erez\.pi\agent\projects\peace-meter\peace-paths &amp; C:\Users\Erez\.pi\agent\projects\peace-meter\peace-paths\auto-deploy.bat"</Arguments>
     </Exec>
   </Actions>
 </Task>
