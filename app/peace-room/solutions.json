@@ -1,212 +1,118 @@
 {
   "solutions": [
     {
-      "id": "gulf-regional-politics",
-      "icon": "🌍",
-      "name": "Gulf & Regional Politics",
+      "id": "gaza-crisis",
+      "icon": "🏚",
+      "name": "Gaza Humanitarian Crisis",
       "phases": [
-        "Emerged",
-        "Developing",
-        "Gaining Traction",
-        "Maturing",
-        "Resolved"
+        "Blockade",
+        "Aid Inflow",
+        "Recovery",
+        "Rebuilding",
+        "Stabilized"
       ],
-      "phaseIndex": 1,
-      "direction": "stable",
+      "phaseIndex": 0,
+      "direction": "stalling",
       "keyMetric": {
         "label": "Events (7d)",
         "value": "9"
       },
-      "summary": "The Iran War Has Remade the Gulf",
+      "summary": "Netanyahu says IDF targeted Hamas military chief in Gaza strike",
       "events": [
         {
-          "date": "Tue, 26 May 2026 20:16:36 +0000",
-          "text": "The Iran War Has Remade the Gulf",
+          "date": "Tue, 26 May 2026 23:29:41 +0300",
+          "text": "Netanyahu says IDF targeted Hamas military chief in Gaza strike",
           "sentiment": "negative",
-          "source": "Foreign Policy",
-          "link": "https://foreignpolicy.com/2026/05/26/iran-war-persian-gulf-uae-saudi-trump-usa/",
-          "snippet": "The region knows that Iran won the war—and is hedging its bets as a result.",
-          "ai_risk": 7
-        },
-        {
-          "date": "Tue, 26 May 2026 06:11:22 +0300",
-          "text": "Gulf states know they can't rely on Trump's America and may be forced into alliances with Iran",
-          "sentiment": "negative",
-          "source": "Haaretz - ME",
-          "link": "https://www.haaretz.com/middle-east-news/2026-05-26/ty-article/.premium/gulf-states-cant-rely-on-trumps-u-s-and-may-be-forced-into-alliance-with-iran/0000019e-623a-d121-a5df-7fbf477c0002",
-          "snippet": "As Donald Trump pushes an expansive, unrealistic fantasy of mandatory Abraham Accords, the region's actual strategic architecture has fractured: Left without a reliable American protector, the Gulf states are facing a dilemma that could force them to look to Tehran for new alliances",
-          "ai_risk": 7
-        },
-        {
-          "date": "Tue, 26 May 2026 05:00:47 +0000",
-          "text": "Abu Dhabi Fund for Development marks Africa day with major infrastructure milestones across the continent",
-          "sentiment": "positive",
-          "source": "ME News",
-          "link": "https://menews247.com/abu-dhabi-fund-for-development-marks-africa-day-with-major-infrastructure-milestones-across-the-continent/",
-          "snippet": "Photo Credit: ADFD Dubai, UAE — May 2026 — The Abu Dhabi Fund for Development has marked Africa Day with an update on the progress of three major road infrastructure projects across the continent, underscoring its commitment to sustainable development in partner nations. According to the Emirates News Agency, the Fund reported significant advancement across its active projects in Togo, Madagascar, and Nigeria. The rehabilitation of the Sokodé–Bassa road in Togo has reached 92% completion, while Madagascar’s road infrastructure project stands at 80 percent, and the Minna–Bida highway in Nigeria is 45% complete. Mohamed Saif Al Suwaidi, director general of ADFD, reaffirmed the Fund’s dedication to Africa’s development on the occasion of Africa Day, saying the Fund celebrates the shared values of unity, diversity, and progress that define the continent’s spirit and ambitions. He added that ADFD’s portfolio of projects across key sectors continues to support the African Union’s Agenda 2063, which aims to build a prosperous, integrated, and sustainable Africa. Project highlights The Sokodé–Bassa road rehabilitation in Togo spans 62 kilometers and includes flood and rainwater protection ",
-          "ai_risk": 1
-        },
-        {
-          "date": "Sun, 01 Mar 2026 12:19:00 +0000",
-          "text": "Gulf states in shock as Iranian missile strikes strain trust",
-          "sentiment": "negative",
-          "source": "Mitvim",
-          "link": "https://mitvim.org.il/en/gulf-states-in-shock-as-iranian-missile-strikes-strain-trust/",
-          "snippet": "As long as the present regime remains in power in Iran, there will be no genuine revival of Gulf-Iran relations. Only a new regime could mend the rifts. הפוסט Gulf states in shock as Iranian missile strikes strain trust הופיע לראשונה ב- Mitvim .",
-          "ai_risk": 7
-        },
-        {
-          "date": "Mon, 25 May 2026 15:38:20 +0000",
-          "text": "Aramco to Exit Malaysian Refining Venture as Petronas Takes Full Control",
-          "sentiment": "neutral",
-          "source": "ME News",
-          "link": "https://menews247.com/aramco-to-exit-malaysian-refining-venture-as-petronas-takes-full-control/",
-          "snippet": "Photo Credit : AFP Saudi Aramco is transferring its equity stakes in the PRefChem refining and petrochemical venture to Petronas , paving the way for the Malaysian energy giant to take full ownership of the integrated downstream business in Johor, Malaysia. The two companies confirmed on Monday that they had signed an agreement covering the transfer of Aramco’s stakes in Pengerang Refining Company Sdn. Bhd. and Pengerang Petrochemical Company Sdn. Bhd., collectively known as PRefChem. The facilities are located within the Pengerang Integrated Complex , one of Malaysia’s largest refining and petrochemical hubs. The transaction remains subject to customary closing conditions. Once completed, Petronas will assume complete ownership and operational control of PRefChem, strengthening its position across the refining and petrochemical value chain. Petronas said the move would allow the company to improve operational integration, increase flexibility across its supply chain and optimise its international network to maintain reliability under varying market conditions. For Aramco, the exit forms part of a broader downstream portfolio optimisation strategy, enabling the Saudi energy major t",
-          "ai_risk": 1
-        },
-        {
-          "date": "Mon, 25 May 2026 15:34:50 +0000",
-          "text": "Sharjah unveils 1.8km running track at Green Belt Park",
-          "sentiment": "positive",
-          "source": "ME News",
-          "link": "https://menews247.com/sharjah-unveils-1-8km-running-track-at-green-belt-park/",
-          "snippet": "Photo Credit : Sharjah Municipality Sharjah has opened a new 1.8-kilometre running and walking track at Green Belt Park, offering residents and visitors a dedicated outdoor fitness and leisure destination designed to promote healthier lifestyles and community wellbeing. The new rubberised track, officially opened by Sharjah City Municipality on Monday, has been built around the perimeter of the park and is designed in line with international safety and quality standards. The facility caters to walkers, joggers and runners, while also featuring eco-friendly lighting systems, landscaped greenery and seating areas to enhance the visitor experience. Municipality officials said the project was completed following the final construction and finishing works, with a strong focus on sustainability, comfort and long-term durability. The running surface has been specially engineered to provide flexibility for smooth movement while resisting wear and colour fading caused by weather conditions and heavy usage. Engineer Hassan Abdul Razzaq, Director of the Projects and Facilities Maintenance Department at Sharjah Municipality, said the walkway was implemented according to the highest internation",
-          "ai_risk": 1
-        },
-        {
-          "date": "Mon, 25 May 2026 12:42:48 +0000",
-          "text": "Experience Abu Dhabi launches interactive poetry experience at Zayed National Museum",
-          "sentiment": "positive",
-          "source": "ME News",
-          "link": "https://menews247.com/experience-abu-dhabi-launches-interactive-poetry-experience-at-zayed-national-museum/",
-          "snippet": "Photo Credit : WAM Experience Abu Dhabi is set to launch a unique poetry activation at Zayed National Museum on May 28, offering visitors a personal cultural experience through one-to-one conversations with poets in both Arabic and English. The activation invites guests to share their memories, reflections and stories with poets, who will then transform these conversations into original poems inspired by Abu Dhabi, its people and its culture. Open to UAE nationals, residents and tourists alike, the initiative aims to create meaningful exchanges through the power of poetry and storytelling. The experience forms part of the museum’s five-day “The Joy of Eid” programme, running from May 27 to 31, which celebrates Eid traditions through music, storytelling, hospitality, craftsmanship and cultural performances. Nassra Al Buainain, Director of Learning & Public Engagement at Zayed National Museum, said the initiative reflects the enduring cultural legacy of the UAE’s Founding Father, Sheikh Zayed bin Sultan Al Nahyan . She noted that Sheikh Zayed viewed poetry as deeply connected to leadership, culture and national identity, adding that the activation highlights how poetry continues to l",
-          "ai_risk": 1
-        },
-        {
-          "date": "2026-05-26T18:01:45-0400",
-          "text": "UN Security Council condemns attack on UAE nuclear plant",
-          "sentiment": "negative",
-          "source": "Al Monitor",
-          "link": "https://www.al-monitor.com/originals/2026/05/un-security-council-condemns-attack-uae-nuclear-plant",
-          "snippet": "<p>WASHINGTON, May 26 (Reuters) - The United Nations Security Council on Tuesday condemned the attack on Barakah Nuclear Plant in the United Arab Emirates, according to a statement, adding that theattack constituted a violation of international law.</p><p>The council did not attribute blame for the attack.</p>",
+          "source": "Haaretz - Domestic",
+          "link": "https://www.haaretz.com/gaza/2026-05-26/ty-article/.premium/netanyahu-says-idf-targeted-hamas-military-chief-in-gaza-strike/0000019e-65d7-d3a6-addf-e7d7cc5e0000",
+          "snippet": "Netanyahu and Defense Minister Israel Katz said a strike in Gaza City targeted a the 'architecht' of Hamas' October 7 attack and the head of its armed wing. The IDF also said troops destroyed 11 kilometers of tunnels in Beit Hanoun as fighting intensified across the enclave",
           "ai_risk": 8
         },
         {
-          "date": "2026-05-25T20:11:59+00:00",
-          "text": "More than 1.5m foreign pilgrims begin Hajj despite Iran war fears",
-          "sentiment": "neutral",
-          "source": "BBC ME",
-          "link": "https://www.bbc.com/news/articles/cwy22jx03ryo?at_medium=RSS&amp;at_campaign=rss",
-          "snippet": "Saudi Arabia says that is 11,000 more than the number of Muslims who travelled to the Gulf kingdom last year.",
-          "ai_risk": 2
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "id": "diaspora-antisemitism",
-      "icon": "🕍",
-      "name": "Diaspora & Antisemitism",
-      "phases": [
-        "Emerged",
-        "Developing",
-        "Gaining Traction",
-        "Maturing",
-        "Resolved"
-      ],
-      "phaseIndex": 0,
-      "direction": "stalling",
-      "keyMetric": {
-        "label": "Events (7d)",
-        "value": "8"
-      },
-      "summary": "Responding to the attack on Ambassador Leiter in the JPost",
-      "events": [
-        {
-          "date": "Tue, 26 May 2026 23:14:14 +0300",
-          "text": "Responding to the attack on Ambassador Leiter in the JPost",
+          "date": "Tue, 26 May 2026 22:22:21 +0000",
+          "text": "Hamas' new commander targeted days after taking charge",
           "sentiment": "negative",
-          "source": "Arutz Sheva",
-          "link": "https://www.israelnationalnews.com/news/427649",
-          "snippet": "J Street pressures Israel during wartime, legitimizes narratives weaponized against Israel internationally, and helps fracture bipartisan support for the Jewish state. And Sebastien Levi responds in the JPost by scolding the ambassador who critiicized it. Opinion.",
-          "ai_risk": 3
+          "source": "Al Bawaba",
+          "link": "https://www.albawaba.com/news/hamas-new-commander-targeted-days-after-1628665",
+          "snippet": "ALBAWABA - Israel said Monday it had targeted a Gaza bombing that killed Mohammed Odeh, who Israeli officials say is the new head of the Izz ad-Din al-Qassam Brigades, the armed branch of Hamas...",
+          "ai_risk": 8
         },
         {
-          "date": "Mon, 25 May 2026 18:50:46 +0000",
-          "text": "Texas candidate’s antisemitic rhetoric sparks outrage ahead of Tuesday runoff. Did it fuel her rise?",
+          "date": "Sun, 24 May 2026 12:00:00 +0000",
+          "text": "Displaced in Gaza: From home comforts to the shattering horror of war",
           "sentiment": "negative",
-          "source": "The Forward",
-          "link": "https://forward.com/fast-forward/827155/texas-candidates-antisemitic-rhetoric-sparks-outrage-ahead-of-tuesday-runoff-did-it-fuel-her-rise/",
-          "snippet": "( JTA ) — When Maureen Galindo finished first in a crowded Democratic primary for a newly redrawn South Texas congressional district in March, the result surprised even seasoned observers of San Antonio politics. With voters set to decide the Democratic nomination Tuesday, as Galindo faces off with sheriff’s deputy Johnny Garcia, local officials and political observers are grappling with how a little-known candidate with a history of inflammatory remarks about Israel and Jews has come within striking distance of a seat in Congress. The local housing activist went into the race with little political profile, having received less than 3% of the vote in a San Antonio City Council race last year. Local officials familiar with the contest chalked up Galindo’s success to a litany of factors, including low voter awareness of the candidates and a newly drawn Republican-leaning district that attracted few high-profile Democratic contenders. What they did not credit for her success was her antisemitic rhetoric . While the race heading into Tuesday night’s runoff has been defined by scrutiny and criticism of Galindo’s views toward Zionists, local political analysts and activists told the Jewi",
-          "ai_risk": 3
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167574",
+          "snippet": "In front of a simple tent in Gaza that offers no protection from the cold or the heat, in a crowded camp where tents lack privacy and basic services, Umm Ahmad&nbsp;sat down to speak to UN News about her life in Gaza before the war and what it has become now.&nbsp;",
+          "ai_risk": 9
         },
         {
-          "date": "2026-05-26T21:55:00+00:00",
-          "text": "Trump admin files second lawsuit against UCLA for ‘deliberate indifference’ to Jew-hatred",
+          "date": "Fri, 22 May 2026 12:00:00 +0000",
+          "text": "Gaza: Life-saving medicines blocked as killing continues, disease gains ground",
           "sentiment": "negative",
-          "source": "JNS",
-          "link": "https://www.jns.org/news/u-s-news/trump-admin-files-second-lawsuit-against-ucla-for-deliberate-indifference-to-jew-hatred",
-          "snippet": "The Trump administration announced it is suing the University of California, Los Angeles, for allegedly showing “deliberate indifference” to discrimination against Jewish and Israeli students on campus, particularly during anti-Israel protests at the school in 2024. The lawsuit, filed in the U.S. District Court for the Central District of California by the U.S. Department of Justice, alleges violations of Title VI of the Civil Rights Act of 1964, which bars discrimination based on race and national origin at federally funded institutions. “Earlier this year, we sued UCLA for subjecting its Jewish and Israeli employees to an antisemitic hostile work environment,” Harmeet Dhillon, assistant U.S. attorney general for civil rights, stated. “Now, the Department of Justice calls UCLA to account for its toleration of the equally appalling hostile educational environment against its Jewish and Israeli students.” The complaint centers on the anti-Israel encampment erected outside the public university’s Royce Hall in April 2024 amid nationwide campus protests following Hamas’s Oct. 7, 2023, attack on Israel and the ensuing war in Gaza. According to the suit, Jewish and Israeli students were",
-          "ai_risk": 6
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167572",
+          "snippet": "Dire conditions in Gaza marked by continuing violence, rodent infestations and the spread of infectious disease are being made worse by blockages of essential medical supplies, UN agencies warned on Friday.",
+          "ai_risk": 9
         },
         {
-          "date": "2026-05-26T20:35:00+00:00",
-          "text": "Suspect in anti-Israel graffiti incident in Cavendish turns self in to police; films apology video - WPTZ",
-          "sentiment": "neutral",
-          "source": "Google News Israel",
-          "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE9YeTZJRVBSdmdJbHpNR2lpNEk4dm1kZU9WV0RENC0xLXZhRkZkWEtlbnFfZzNrSEZSRjc2a21uaE9Fd3pjRi14YkpQQ0JCc0wyemRCUDlmYmlBXzNFT0xFN0FKbmdUeTNqdXRTT3pQdXNmQ01weENnS0JvOXhSQQ?oc=5",
-          "snippet": "<a href=\"https://news.google.com/rss/articles/CBMifkFVX3lxTE9YeTZJRVBSdmdJbHpNR2lpNEk4dm1kZU9WV0RENC0xLXZhRkZkWEtlbnFfZzNrSEZSRjc2a21uaE9Fd3pjRi14YkpQQ0JCc0wyemRCUDlmYmlBXzNFT0xFN0FKbmdUeTNqdXRTT3pQdXNmQ01weENnS0JvOXhSQQ?oc=5\" target=\"_blank\">Suspect in anti-Israel graffiti incident in Cavendish turns self in to police; films apology video</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">WPTZ</font>",
-          "ai_risk": 2
-        },
-        {
-          "date": "2026-05-26T20:30:26+00:00",
-          "text": "Massachusetts teachers union VP-elect backed call to drop ADL materials",
-          "sentiment": "negative",
-          "source": "JNS",
-          "link": "https://www.jns.org/news/u-s-news/massachusetts-teachers-union-vp-elect-backed-call-to-drop-adl-materials",
-          "snippet": "The Massachusetts Teachers Association elected as its next vice president Deb Gesualdo, a union leader who signed a letter urging the National Education Association to stop using educational materials from the Anti-Defamation League, accusing the Jewish civil rights group of promoting “Zionist supremacy.” Gesualdo, president of the Malden Education Association and a K-8 music teacher, was elected earlier this month alongside incoming MTA president Matt Bach. The pair will begin their two-year terms on July 15. The open letter Gesualdo signed specifically criticizes the NEA’s relationship with the ADL and opposes the use of the group’s educational resources. The letter accused the ADL of advancing “the antisemitic belief that Jewish people are a monolith” and described allegations of antisemitism as “bad-faith claims” meant to “undermine resistance to that genocide.” \"While NEA leadership claims it consulted with both Jewish and Muslim community groups on this issue, it is effectively promoting the ADL’s antisemitic belief that Jewish people are a monolith,\" the letter stated. \"Now more than ever, we must not be distracted by bad-faith claims of antisemitism designed to undermine re",
-          "ai_risk": 6
-        },
-        {
-          "date": "2026-05-26T20:11:13+00:00",
-          "text": "Hamas Insignia Discovered: Pro-Terrorist Propaganda Targets Israeli Soldiers on Foreign Soil",
+          "date": "2026-05-27T02:30:28+00:00",
+          "text": "Israel Strikes Again: Hamas’ New Gaza War Chief Dead",
           "sentiment": "negative",
           "source": "JFeed",
-          "link": "https://www.jfeed.com/antisemitism/hamas-propaganda-germany",
-          "snippet": "A series of highly inflammatory, anti-Israel billboards have clandestinely appeared at public transit shelters across Germany, prompting an immediate investigation by local law enforcement and intelligence networks tracking extremist activities. The large-scale posters, which were professionally printed and mounted within the glass advertisement panels of municipal bus stops, featured explicit, dual-language denunciations targeting defense personnel. The provocative text was displayed prominently in both German and Hebrew, directly utilizing severe criminal labels to characterize the actions of active duty regional forces. According to initial field reports compiled by independent monitors, the coordinated propaganda displays included severe slurs, branding all personnel as occupiers, rapists, and murderers while explicitly stating that they are entirely unwelcome in European territory. Investigative teams noted that at least one version of the illegal installations featured the official, verified insignia of Hamas terrorists, highlighting a direct logistical link to active foreign networks. The physical appearance of the materials has raised significant alarms within local communi",
-          "ai_risk": 6
+          "link": "https://www.jfeed.com/news/tfobhz",
+          "snippet": "Israel carried out a targeted strike in Gaza City on Tuesday night aimed at Mohammed Odeh, the newly appointed head of Hamas’ military wing in the Gaza Strip, Israeli officials said. Prime Minister Benjamin Netanyahu and Defense Minister Israel Katz said in a joint statement that the IDF had struck Odeh, describing him as the new commander of Hamas’ armed wing and “one of the architects” of the October 7 massacre. The strike took place in the Rimal neighborhood of Gaza City, the same area where Israel recently killed Odeh’s predecessor, Izz al-Din al-Haddad. Israeli assessments were growing Tuesday night that the strike have achieved its objective. Hamas had not publicly confirmed the result of the strike or Odeh’s reported appointment at the time of publication, but later confirmed his death. According to Israeli officials, Odeh was appointed only recently after al-Haddad was killed in an Israeli strike earlier this month. Odeh previously served as head of Hamas’ intelligence apparatus and was considered one of the few remaining senior figures from the group’s October 7 leadership structure. Israeli officials said Odeh played a major role in Hamas’ intelligence preparations before",
+          "ai_risk": 8
         },
         {
-          "date": "2026-05-26T20:00:00+00:00",
-          "text": "Are we asking the wrong questions about antisemitism?",
-          "sentiment": "neutral",
-          "source": "JNS",
-          "link": "https://www.jns.org/opinion/batsheva-neuer/are-we-asking-the-wrong-questions-about-antisemitism",
-          "snippet": "Anti-Zionism has never been a single doctrine with a single source. It has emerged from different religious, ideological and political traditions, some of which were not rooted in hostility toward Jews. One important strand of Jewish opposition to Zionism was theological and eschatological. Certain ultra-Orthodox groups, most notably Satmar Chassidism, rejected Zionism because they believed that the Jewish return to Zion must await messianic redemption. From this perspective, Zionism was not merely politically mistaken but religiously improper: an attempt to force redemption before its divinely-appointed time. Other forms of Jewish anti-Zionism were grounded in liberal, civic or universalist arguments. Some Jews in the modern period feared that defining Jews as a nation would undermine their claim to equal citizenship in liberal states. The 1885 Pittsburgh Platform of American Reform Judaism, for example, declared that Jews were no longer a nation but a religious community and expected neither a return to Zion nor the restoration of laws concerning a Jewish state. Bundist anti-Zionism, by contrast, emphasized doykeit (“hereness”) and argued that Jewish political and cultural life s",
-          "ai_risk": 1
+          "date": "2026-05-26T22:30:14-0400",
+          "text": "No feasts, no joy: Gazans mark a dark Eid",
+          "sentiment": "negative",
+          "source": "Al Monitor",
+          "link": "https://www.al-monitor.com/originals/2026/05/no-feasts-no-joy-gazans-mark-dark-eid",
+          "snippet": "<p>New clothes for children, sacrificial sheep and Eid biscuits, the hallmarks of the Muslim holiday, are all either unaffordable or unavailable in Gaza, casting a shadow over what is usually a time of celebration and joy.</p><p>\"I go to the market only to look around because I cannot afford to buy anything. Whenever I ask about prices, I return heartbroken,\" Nadia Abu Shamala, a Palestinian resident of Gaza, told AFP.</p>",
+          "ai_risk": 8
         },
         {
-          "date": "2026-05-25T09:00:00+00:00",
-          "text": "Jewish Democrats grapple with a changing party and Israel’s entrenched leadership - NBC News",
+          "date": "2026-05-26T21:23:06+00:00",
+          "text": "IDF attempted to assassinate Hamas military leader Mohammed Ouda, PM says",
+          "sentiment": "negative",
+          "source": "JPost",
+          "link": "https://www.jpost.com/israel-news/defense-news/article-897388",
+          "snippet": "<img align='right' src='https://images.jpost.com/image/upload/f_auto,fl_lossy/q_auto/c_fill,g_faces:center,h_2000,w_3000/719575' alt='(Illustrative) Palestinian members of al-Qassam Brigades, the armed wing of the Hamas movement. (photo credit: ABED RAHIM KHATIB/FLASH90)' title='(Illustrative) Palestinian members of al-Qassam Brigades, the armed wing of the Hamas movement. (photo credit: ABED RAHIM KHATIB/FLASH90)' /><br />Ouda served as head of military intelligence for the Qassam Brigades during the October 7 massacre.<br />",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T20:51:19+00:00",
+          "text": "Under the Crosshairs: The Tactical Rise and Calculated Tracking of Terror Chief Mohammad Ouda",
+          "sentiment": "negative",
+          "source": "JFeed",
+          "link": "https://www.jfeed.com/news-israel/mohammad-ouda-hamas-chief",
+          "snippet": "Mohammad Ouda, the newly elevated commander of the Izz al-Din al-Qassam Brigades, has become the focal point of intense military neutralization efforts following a dramatic, targeted air strike executed by the Air Force in Gaza. Ouda assumed supreme command of the terrorist organization's military wing exactly one week ago, stepping into the leadership vacuum created by the sudden elimination of his predecessor, Izz al-Din al-Haddad. Prior to his rapid ascension, Ouda functioned as the long-standing director of military intelligence for Hamas, establishing himself as one of the very last surviving operational architects of the October 7 atrocities still active within the coastal enclave. During his lengthy tenure as the head of the terrorist group's intelligence apparatus, Ouda focused his analytical resources on mapping out the precise defensive vulnerabilities, communication loops, and troop layouts of the border divisions. The highly detailed intelligence logs he compiled were routed directly to the supreme military council, forming the structural blueprint for the breaches utilized during the 2023 incursions. Following the successive deaths of supreme leaders Muhammad Deif and ",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T04:00:46+00:00",
+          "text": "Saint Levant: the pop star from Gaza caught between passionate fandom and bitter disapproval",
           "sentiment": "neutral",
-          "source": "Google News Israel",
-          "link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxQOWVpaERiakEtYjJraTJxSzdyTXpvakhsYm5NamRRVENNM2dqMWswcG1HS2hfZ2Fha0dtRU4zVkxXWHlCVFVpY29OUVpTaFdvcTluOTdtUWJ2djRtcjB3UjB5MHdxNjBHTGhvaWRzdDEyT3hnYXBxMkJ3bGp1OVZZZVNGTHBIVmxnSVFhcHV4Q3VEeVgxUlpvUXh1X2VRUzk3YVN5bVpyZFN4Q1JPdkNQbFA2dURNekFrTEtyeDlmbUdyV2dmOXc?oc=5",
-          "snippet": "<a href=\"https://news.google.com/rss/articles/CBMixgFBVV95cUxQOWVpaERiakEtYjJraTJxSzdyTXpvakhsYm5NamRRVENNM2dqMWswcG1HS2hfZ2Fha0dtRU4zVkxXWHlCVFVpY29OUVpTaFdvcTluOTdtUWJ2djRtcjB3UjB5MHdxNjBHTGhvaWRzdDEyT3hnYXBxMkJ3bGp1OVZZZVNGTHBIVmxnSVFhcHV4Q3VEeVgxUlpvUXh1X2VRUzk3YVN5bVpyZFN4Q1JPdkNQbFA2dURNekFrTEtyeDlmbUdyV2dmOXc?oc=5\" target=\"_blank\">Jewish Democrats grapple with a changing party and Israel’s entrenched leadership</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">NBC News</font>",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/news/2026/may/26/saint-levant-the-pop-star-from-gaza-caught-between-passionate-fandom-and-bitter-disapproval",
+          "snippet": "<p>His detractors say he shouldn’t be making pop music in times of war and destruction. His millions of fans say he has given them permission to celebrate their culture and their cause</p><p>The first time I heard a song by Saint Levant, only three years ago, was in a world that does not exist any more. Gaza’s buildings were intact, as were its schools and roads and markets and mosques. My home city of Khartoum in Sudan was standing, as it had for centuries. Back then, I could scroll for fun, not in dread. I could stumble, say, in late 2022, upon an arresting clip on TikTok of a song by an Arab artist with a pun for a name; Saint Levant, a play on Saint Laurent – the icon of western style had been Arabised in homage to the Middle East’s Levant region.</p><p>I began to see the same song all over my social media. In the video, Saint Levant, then 22, is in a white vest and brown trousers. A gold pendant chain dangles on his chest, a tattoo encircles his left arm. He starts by rapping in English, telling the woman he is wooing that “he’s not toxic, he’s broken baby”. And then, the twist, as he switches to Arabic, then French, then English again. Like a wholesome boy next door, he tells",
           "ai_risk": 2
         }
       ],
       "confidence": "high"
     },
     {
-      "id": "ceasefire",
-      "icon": "🕊",
-      "name": "Ceasefire & De-escalation",
+      "id": "regional",
+      "icon": "🌍",
+      "name": "Regional Relations",
       "phases": [
-        "Active Fighting",
-        "Ceasefire Talks",
-        "Draft Agreement",
-        "Signed",
-        "Holding"
+        "Tensions",
+        "Diplomatic Push",
+        "Accord",
+        "Integration",
+        "Cooperation"
       ],
       "phaseIndex": 0,
       "direction": "stalling",
@@ -214,79 +120,79 @@
         "label": "Events (7d)",
         "value": "8"
       },
-      "summary": "To Salvage the Israel-Lebanon Ceasefire, Work within Its Limits",
+      "summary": "Senator Graham slams Pakistan over long-standing animosity toward Israel",
       "events": [
         {
-          "date": "Wednesday, April 29, 2026 - 15:12",
-          "text": "To Salvage the Israel-Lebanon Ceasefire, Work within Its Limits",
-          "sentiment": "neutral",
-          "source": "Crisis Group",
-          "link": "https://www.crisisgroup.org/cmt/middle-east-north-africa/lebanon-israelpalestine-united-states-iran/salvage-israel-lebanon-ceasefire-work-within-its-limits",
-          "snippet": "<p><em><span lang=\"EN-GB\">The truce between Israel and Hizbollah, extended on 23 April, is hanging by a thread. The monitoring mechanism established for the previous ceasefire could help preserve the current one.</span></em></p>",
-          "ai_risk": 4
+          "date": "Wed, 27 May 2026 06:01:10 +0300",
+          "text": "Senator Graham slams Pakistan over long-standing animosity toward Israel",
+          "sentiment": "negative",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427660",
+          "snippet": "Senator Lindsey Graham criticizes Pakistan’s role as an Iran mediator after its Defense Minister rejects any normalization with Israel.",
+          "ai_risk": 3
         },
         {
-          "date": "Wednesday, April 29, 2026 - 10:00",
-          "text": "Iran Crisis Monitor #3",
-          "sentiment": "neutral",
-          "source": "Crisis Group",
-          "link": "https://www.crisisgroup.org/bnt/middle-east-north-africa/iran-israelpalestine-united-states/iran-crisis-monitor-3",
-          "snippet": "<p>In this weekly update, Crisis Group experts take stock of developments in the Middle East war and the progress of efforts to end it.</p>",
-          "ai_risk": 4
-        },
-        {
-          "date": "Wed, 20 May 2026 07:40:57 +0000",
-          "text": "The Direct Negotiation Between Israel and Lebanon: Situation Assessment and Recommendation",
-          "sentiment": "neutral",
+          "date": "Wed, 20 May 2026 09:01:12 +0000",
+          "text": "Turkey’s Military Buildup and Its Impact on the Construction and Employment of Syrian Force (April / May 2026)",
+          "sentiment": "negative",
           "source": "Alma",
-          "link": "https://israel-alma.org/the-direct-negotiation-between-israel-and-lebanon-situation-assessment-and-recommendation/",
-          "snippet": "Sarit Zehavi and Dr. Zoe Levornik While the IDF and Hezbollah continue exchanging daily attacks, despite the ceasefire that came into effect on the night between April 17 and 18, the third round of direct talks between Israel and Lebanon, mediated by the United States, took place on May 14–15. The U.S. State Department described the meeting as “productive talks” and announced a 45-day extension of the ceasefire agreement in order to allow progress in the negotiations. According to the established timetable, discussions on the political-diplomatic track are expected to continue in June, while the security track — the central and most sensitive component — is expected to begin on May 29. Despite the symbolic and political significance of holding direct talks between Israel and Lebanon, the likelihood that the negotiations will produce a peace agreement that meets the security needs of both sides is extremely low. The gaps between the parties’ demands are substantial, their fundamental approaches are contradictory, and in addition, the Lebanese government faces a fundamental difficulty in actually implementing security commitments, even in cases where there is a certain degree of poli",
+          "link": "https://israel-alma.org/turkeys-military-buildup-and-its-impact-on-the-construction-and-employment-of-syrian-force-april-may-2026/",
+          "snippet": "Executive Summary The month of April and the beginning of May 2026 were marked by a significant acceleration of activity along the Ankara–Damascus axis, against the backdrop of the Second Iran War and the escalating tensions between Israel and Turkey. During this period, Turkey continued to strengthen its position as a dominant security and political actor in the new Syria – two meetings took place between the two countries’ leaders at the Antalya Diplomacy Forum (April 16–19), the signing of a banking framework , the advancement of a joint free trade zone in Idlib, and a 12% jump in Turkey’s overall defense exports in the first quarter of the year. Turkey is establishing itself in Syria not as an equal partner but as a strategic patron, exploiting the weakening of Iran in order to fill the vacuum that has opened up — a move that the Turks hope will limit Israel’s freedom of action over the medium term. In parallel, Turkey unveiled for the first time a new surface-to-surface missile at a defense conference, with a declared range of 6,000 kilometers, named “Yıldırımhan” (meaning “Lightning of the Khan” in Turkish) — the first ballistic missile developed and produced in its entirety ",
+          "ai_risk": 7
+        },
+        {
+          "date": "Tuesday, May 5, 2026 - 17:45",
+          "text": "Türkiye Charts a Distinctive Course amid Middle East Turmoil",
+          "sentiment": "neutral",
+          "source": "Crisis Group",
+          "link": "https://www.crisisgroup.org/cmt/europe/turkiye-israelpalestine-iran-united-states/turkiye-charts-distinctive-course-amid-middle-east-turmoil",
+          "snippet": "<p><em><span lang=\"EN-GB\">Much is at stake for Türkiye, a growing regional power, amid the shaky truce in the U.S.-Israeli war with Iran. It will face new risks and opportunities in the post-war dispensation. For now, it wants to help end the confrontation as soon as possible.&nbsp;</span></em></p>",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 20:29:16 +0000",
+          "text": "The Wars in Ukraine and Iran Are More Alike Than You May Think",
+          "sentiment": "neutral",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/26/world/middleeast/iran-ukraine-wars-similarities.html",
+          "snippet": "Aspects such as drone technology and diplomacy show how the wars intersect on the battlefield and in global alignments, providing a model for future conflicts.",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 19:53:45 +0000",
+          "text": "Israeli forces bulldoze land during incursion into Syria’s Quneitra countryside",
+          "sentiment": "negative",
+          "source": "ME Monitor",
+          "link": "https://www.middleeastmonitor.com/20260526-israeli-forces-bulldoze-land-during-incursion-into-syrias-quneitra-countryside/",
+          "snippet": "An Israeli force entered the village of Al-Rafid in the countryside of Syria’s Quneitra province on Tuesday and conducted bulldozing operations west of the village, according to Syria’s state news agency, SANA, Anadolu reports. SANA reported that an Israeli military bulldozer advanced toward the village in southern Quneitra before conducting land-clearing operations in areas west of Al-Rafid. Syrian authorities did not immediately respond to the incident, and the motives for the operations are still unclear. The incident comes amid continued Israeli violations of Syrian sovereignty, particularly in the south. Israeli forces have carried out near-daily airstrikes and ground incursions in southern Syria, including setting up checkpoints, searching civilians, raiding homes and detaining residents, among them children and shepherds. Following the […]",
           "ai_risk": 6
         },
         {
-          "date": "Tuesday, May 5, 2026 - 18:48",
-          "text": "Iran Crisis Monitor #4",
-          "sentiment": "neutral",
-          "source": "Crisis Group",
-          "link": "https://www.crisisgroup.org/bnt/middle-east-north-africa/iran-israelpalestine-united-states/iran-crisis-monitor-4",
-          "snippet": "<p>In this weekly update, Crisis Group experts take stock of developments in the Middle East war and the progress of efforts to end it.</p>",
-          "ai_risk": 4
-        },
-        {
-          "date": "Tuesday, May 12, 2026 - 17:19",
-          "text": "Iran Crisis Monitor #5",
-          "sentiment": "neutral",
-          "source": "Crisis Group",
-          "link": "https://www.crisisgroup.org/bnt/middle-east-north-africa/iran-israelpalestine-united-states/iran-crisis-monitor-5",
-          "snippet": "<p>In this weekly update, Crisis Group experts take stock of developments in the Middle East war and the progress of efforts to end it.</p>",
-          "ai_risk": 4
-        },
-        {
-          "date": "Tue, 28 Apr 2026 23:01:00 +0000",
-          "text": "Middle East: World leaders must centre protection of civilians and agree an enduring and sustainable ceasefire",
-          "sentiment": "negative",
-          "source": "Amnesty",
-          "link": "https://www.amnesty.org/en/latest/news/2026/04/middle-east-world-leaders-must-centre-protection-of-civilians-and-agree-an-enduring-and-sustainable-ceasefire/",
-          "snippet": "The fragile, temporary ceasefires, between the United States and Iran, and between Israel and Lebanon, must be replaced by an enduring, sustained, and comprehensive regional ceasefire that covers all countries affected by this conflict, to avoid further catastrophic civilian suffering and pave the way for justice, respect for international law and long-term human rights protection for all, Amnesty International said today. Despite a reduction in armed hostilities this remains a critical and deeply precarious moment for civilians across the Middle East. Both current ceasefire agreements are fragile, temporary and in danger of collapse at any moment, endangering the lives of millions of civilians once more. The USA and Iran are continuing to trade threats and carry out attacks and ship seizures in the Strait of Hormuz. In Lebanon, as has been the case since 2024, the latest ceasefire has led to a reduction but not an end in hostilities and the Israeli military has remained on Lebanese territory, ordering residents in dozens of villages in border areas not to return. Meanwhile, civilians in Iran face dual risks of atrocity crimes linked to a resumption in unlawful US/Israeli attacks a",
-          "ai_risk": 8
-        },
-        {
-          "date": "Tue, 26 May 2026 17:55:53 +0000",
-          "text": "4 women killed in Israeli strike on southern Lebanon town despite ceasefire",
+          "date": "Tue, 26 May 2026 14:55:33 +0000",
+          "text": "Israel continues attacks, illegal settlement activity despite ceasefire: Turkish president",
           "sentiment": "negative",
           "source": "ME Monitor",
-          "link": "https://www.middleeastmonitor.com/20260526-4-women-killed-in-israeli-strike-on-southern-lebanon-town-despite-ceasefire/",
-          "snippet": "Four women were killed Tuesday in an Israeli airstrike targeting a house in the town of Maareke in southern Lebanon despite an ongoing ceasefire, Lebanese media reported, Anadolu reports. The state news agency NNA said civil defence teams recovered the bodies of four women from the rubble following the Israeli strike in the Tyre district. Rescue teams were continuing search operations for a missing family believed trapped beneath the debris of the destroyed building, the news agency added. Israel has continued attacks on Lebanon despite a US-mediated ceasefire that took effect on April 17 and was extended for 45 days starting May 17. Earlier Tuesday, Israeli strikes on the southern Lebanese towns of Kherbet Selem and Srifa killed two people, […]",
-          "ai_risk": 8
+          "link": "https://www.middleeastmonitor.com/20260526-israel-continues-attacks-illegal-settlement-activity-despite-ceasefire-turkish-president/",
+          "snippet": "Even as the Muslim world seeks an atmosphere of peace, Israel continues its “occupation, destruction, massacres, and illegal settlement activities” from Gaza to the West Bank, East Jerusalem and Lebanon, flouting ceasefires that are in effect, said Turkish President Recep Tayyip Erdogan on Tuesday, Anadolu reports. In a message marking the Muslim holiday of Eid al-Adha, Erdogan gave thanks to God for allowing Turkiye to reach another holiday in good health and peace of mind, but also lamented how the negative effects of the Iran war “triggered by Israel’s provocations” are being felt across multiple international sectors, including energy, agriculture, trade, transportation, economy and security. He said Turkiye continues to stand out as an oasis of stability even as the region […]",
+          "ai_risk": 7
         },
         {
-          "date": "Mercredi, avril 29, 2026 - 17:05",
-          "text": "Sauver le cessez-le-feu entre Israël et le Liban en composant avec ses limites",
+          "date": "Mon, 25 May 2026 12:00:12 +0000",
+          "text": "What to Make of Morocco’s Most Famous Anti-Colonial Hero?",
           "sentiment": "neutral",
-          "source": "Crisis Group",
-          "link": "https://www.crisisgroup.org/fr/cmt/middle-east-north-africa/lebanon-israelpalestine-united-states-iran/salvage-israel-lebanon-ceasefire-work-within-its-limits",
-          "snippet": "<p><em><span lang=\"EN-GB\">La trêve entre Israël et le Hezbollah, prolongée le 23 avril, ne tient qu’à un fil. Le mécanisme de surveillance mis en place pour le précédent cessez-le-feu pourrait aider à préserver l’actuel.</span></em></p>",
-          "ai_risk": 4
+          "source": "Foreign Policy",
+          "link": "https://foreignpolicy.com/2026/05/25/abd-el-karim-morocco-rif-colonialism-rebellion-monarchy/",
+          "snippet": "A century later, the meaning of Abd el-Karim and the Rif Rebellion is still up for grabs.",
+          "ai_risk": 1
+        },
+        {
+          "date": "2026-05-27T02:36:08+00:00",
+          "text": "Shekel Stuns Markets After Rate Cut, Dollar Falls To 2.84\n",
+          "sentiment": "positive",
+          "source": "JFeed",
+          "link": "https://www.jfeed.com/news/shekel-strengthens-rate-cut",
+          "snippet": "The U.S. dollar dropped sharply against the Israeli shekel on Tuesday, falling around 1.2% to roughly NIS 2.84, just one day after the Bank of Israel cut its benchmark interest rate from 4% to 3.75%. The euro also weakened, trading slightly above NIS 3.30 after falling about 1.4%. The move surprised those who expected the rate cut to ease pressure on exporters by weakening the shekel. Instead, the Israeli currency continued to gain strength, driven by optimism over diplomatic contacts, lower global fuel prices, and market confidence in Israel’s inflation outlook. The Bank of Israel’s Monetary Committee announced Monday that it was lowering the interest rate to 3.75%, saying policy would continue to focus on price stability, economic activity, and financial-market stability. The central bank said future rate decisions would depend on inflation, economic activity, geopolitical uncertainty, and fiscal developments. The latest cut came after the shekel had already strengthened significantly and inflation remained within the government’s target range. Market data and economic reports indicate that the decision was supported by a strong shekel, contained inflation, and hopes for a possib",
+          "ai_risk": 2
         }
       ],
       "confidence": "high"
@@ -296,36 +202,36 @@
       "icon": "🇮🇷",
       "name": "Iran Domestic Affairs",
       "phases": [
-        "Emerged",
-        "Developing",
-        "Gaining Traction",
-        "Maturing",
-        "Resolved"
+        "Crisis",
+        "Unrest",
+        "Transition",
+        "Stabilization",
+        "Resolution"
       ],
       "phaseIndex": 0,
-      "direction": "stalling",
+      "direction": "advancing",
       "keyMetric": {
         "label": "Events (7d)",
-        "value": "8"
+        "value": "7"
       },
-      "summary": "Iran’s new Supreme Leader calls Israel a ‘cancerous tumor’, Sa’ar: Sounds familiar",
+      "summary": "Iran partially lifts internet blackout after more than two months, watchdogs' data shows",
       "events": [
         {
-          "date": "Wed, 27 May 2026 00:13:28 +0300",
-          "text": "Iran’s new Supreme Leader calls Israel a ‘cancerous tumor’, Sa’ar: Sounds familiar",
-          "sentiment": "negative",
-          "source": "Arutz Sheva",
-          "link": "https://www.israelnationalnews.com/news/427652",
-          "snippet": "Iran's new leader Mojtaba Khamenei follows in his father’s footsteps with a series of anti-Israel posts on social media.",
-          "ai_risk": 6
+          "date": "Wed, 27 May 2026 06:37:18 +0300",
+          "text": "Iran partially lifts internet blackout after more than two months, watchdogs' data shows",
+          "sentiment": "neutral",
+          "source": "Haaretz - Domestic",
+          "link": "https://www.haaretz.com/israel-news/israel-security/2026-05-27/ty-article-live/iran-partially-lifts-internet-blackout-after-over-two-months-watchdog-says/0000019e-677b-d1b9-a9bf-ffffa1c70000",
+          "snippet": "",
+          "ai_risk": 3
         },
         {
-          "date": "Tue, 26 May 2026 22:03:07 +0100",
-          "text": "Iran’s Pezeshkian says Muslim unity key to confronting threats",
+          "date": "Wed, 27 May 2026 00:28:03 +0000",
+          "text": "How decision-making happens in Iran",
           "sentiment": "neutral",
-          "source": "Middle East Eye",
-          "link": "https://www.middleeasteye.net/live-blog/live-blog-update/irans-pezeshkian-says-muslim-unity-key-confronting-threats",
-          "snippet": "<article data-history-node-id=\"441116\" about=\"https://www.middleeasteye.net/live-blog/live-blog-update/irans-pezeshkian-says-muslim-unity-key-confronting-threats\" class=\"live-blog-update default clearfix\"> <h2> <a href=\"https://www.middleeasteye.net/live-blog/live-blog-update/irans-pezeshkian-says-muslim-unity-key-confronting-threats\" rel=\"bookmark\"> <span class=\"field field-title\">Iran’s Pezeshkian says Muslim unity key to confronting threats</span> </a> </h2> <div class=\"content\"> <div class=\"field field-field-text\"><p>Iranian President Masoud Pezeshkian said he spoke with the leaders of Iraq, Oman, Qatar, Turkiye, Tajikistan, Egypt, Kyrgyzstan, and Azerbaijan on the occasion of Eid al-Adha.</p> <p>“I expressed my hope that God may bring the hearts of us Muslims closer together and that we may witness the expansion of cooperation in all areas and comprehensive support for one another in the face of threats,” Pezeshkian wrote on X.</p> </div> </div> </article>",
+          "source": "Al Jazeera",
+          "link": "https://www.aljazeera.com/video/newsfeed/2026/5/27/aje-onl-nf_draft-3-dnrexp-260526-hashema-iran_decision_making-260526?traffic_source=rss",
+          "snippet": "Iran’s negotiators follow a mandate set by the Supreme National Security Council and approved by the Supreme Leader.",
           "ai_risk": 2
         },
         {
@@ -371,244 +277,65 @@
           "source": "France24",
           "link": "https://www.france24.com/en/middle-east/20260526-iran-partially-restores-internet-access-after-88-day-blackout",
           "snippet": "Iranian authorities on Tuesday partially restored internet access after an almost three-month nationwide shutdown imposed during the war with Israel and the United States. While home broadband connections resumed in some areas, mobile internet remained largely blocked, leaving many Iranians still reliant on VPNs to access international websites and social media.",
-          "ai_risk": 4
-        },
-        {
-          "date": "2026-05-25T21:42:41+00:00",
-          "text": "Iran war latest: Tehran makes new internet claim - after 'longest nationwide shutdown in modern history' - Sky News",
-          "sentiment": "negative",
-          "source": "Google News Israel",
-          "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOMFhqMExTRTlmT3cyZlZLQnBZYkxORl8tSzdqVkRpaXB1bzhYcnZ0N3N5WWx2blljVEdJSi1oV25XODZlOTBzaDU3Y09DREYxMmFpU194YVpTUXRyYkE4eEJBZ2VhWllkYWVEcEcxdmNFSVNYQ1RMTEFGcUp2QmI1akNILW1lTURTQjdOaDJpRTZkUkRnLWx5cUJzcWFLUGlRQ1dF?oc=5",
-          "snippet": "<a href=\"https://news.google.com/rss/articles/CBMiowFBVV95cUxOMFhqMExTRTlmT3cyZlZLQnBZYkxORl8tSzdqVkRpaXB1bzhYcnZ0N3N5WWx2blljVEdJSi1oV25XODZlOTBzaDU3Y09DREYxMmFpU194YVpTUXRyYkE4eEJBZ2VhWllkYWVEcEcxdmNFSVNYQ1RMTEFGcUp2QmI1akNILW1lTURTQjdOaDJpRTZkUkRnLWx5cUJzcWFLUGlRQ1dF?oc=5\" target=\"_blank\">Iran war latest: Tehran makes new internet claim - after 'longest nationwide shutdown in modern history'</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Sky News</font>",
           "ai_risk": 6
         }
       ],
       "confidence": "high"
     },
     {
-      "id": "iran",
-      "icon": "☣️",
-      "name": "Iran Nuclear & War",
+      "id": "governance",
+      "icon": "🏛",
+      "name": "Post-War Governance",
       "phases": [
-        "War",
-        "Ceasefire Talks",
-        "Armistice",
-        "Nuclear Deal",
-        "Resolution"
+        "No Framework",
+        "Proposals",
+        "Consensus",
+        "Interim Gov",
+        "Sustainable"
       ],
       "phaseIndex": 0,
       "direction": "stalling",
       "keyMetric": {
         "label": "Events (7d)",
-        "value": "8"
+        "value": "4"
       },
-      "summary": "IRGC says 25 ships crossed Hormuz under Iranian coordination",
+      "summary": "Palestinian Authority Claims Success in Local Elections amid Spiralling Crises",
       "events": [
         {
-          "date": "Tue, 26 May 2026 21:39:52 +0100",
-          "text": "IRGC says 25 ships crossed Hormuz under Iranian coordination",
-          "sentiment": "negative",
-          "source": "Middle East Eye",
-          "link": "https://www.middleeasteye.net/live-blog/live-blog-update/irgc-says-25-ships-crossed-hormuz-under-iranian-coordination",
-          "snippet": "<article data-history-node-id=\"441115\" about=\"https://www.middleeasteye.net/live-blog/live-blog-update/irgc-says-25-ships-crossed-hormuz-under-iranian-coordination\" class=\"live-blog-update default clearfix\"> <h2> <a href=\"https://www.middleeasteye.net/live-blog/live-blog-update/irgc-says-25-ships-crossed-hormuz-under-iranian-coordination\" rel=\"bookmark\"> <span class=\"field field-title\">IRGC says 25 ships crossed Hormuz under Iranian coordination</span> </a> </h2> <div class=\"content\"> <div class=\"field field-field-text\"><p>In a statement carried by Tasnim news agency, Iran’s Islamic Revolutionary Guard Corps said 25 ships passed through the Strait of Hormuz in coordination with its navy and after receiving Tehran’s permission.</p> <p>The vessels included oil tankers, container ships and other commercial vessels, the statement said.</p> <p>“Any aggression will be responded to with crushing blows,” the IRGC added.</p> </div> </div> </article>",
-          "ai_risk": 7
-        },
-        {
-          "date": "Tue, 26 May 2026 17:28:37 +0000",
-          "text": "CENTCOM denies reports of US Navy escort operations in Strait of Hormuz",
+          "date": "Thursday, April 30, 2026 - 16:37",
+          "text": "Palestinian Authority Claims Success in Local Elections amid Spiralling Crises",
           "sentiment": "neutral",
-          "source": "ME Monitor",
-          "link": "https://www.middleeastmonitor.com/20260526-centcom-denies-reports-of-us-navy-escort-operations-in-strait-of-hormuz/",
-          "snippet": "The US Central Command (CENTCOM) denied media reports Tuesday that the American Navy resumed escorting commercial vessels through the Strait of Hormuz, Anadolu reports. In a statement on US social media company X, CENTCOM rejected claims that the “Project Freedom” initiative had restarted, saying US forces are not assisting commercial shipping through the strategic waterway. Earlier Tuesday, the Wall Street Journal, citing US military officials, reported that the navy guided a Greek supertanker carrying 2 million barrels of crude oil through the strategic waterway off the coast of Oman. The vessel had been stranded in the region since early March and is now bound for India to deliver its cargo, according to the US military officials cited in the report. […]",
-          "ai_risk": 5
-        },
-        {
-          "date": "Tue, 26 May 2026 15:02:53 +0300",
-          "text": "Trump's Iran deal: Netanyahu's 2018 dream is the world's 2026 nightmare",
-          "sentiment": "negative",
-          "source": "Haaretz - ME",
-          "link": "https://www.haaretz.com/israel-news/2026-05-26/ty-article-magazine/.premium/trumps-iran-deal-netanyahus-2018-dream-is-the-worlds-2026-nightmare/0000019e-635d-d38b-a3df-7bdd153e0000",
-          "snippet": "Will anyone – Netanyahu, Trump, the Republican Party, AIPAC – apologize, or even just do some soul-searching, for fighting down the 2015 Iran plan negotiated by Obama?",
-          "ai_risk": 7
-        },
-        {
-          "date": "2026-05-26T21:23:24+00:00",
-          "text": "Fifteen Years to Live: Irans Hidden Supreme Leader Declares Expiration Date for Israel",
-          "sentiment": "negative",
-          "source": "JFeed",
-          "link": "https://www.jfeed.com/middleeast/iran-supreme-leader-israel-threats",
-          "snippet": "The newly elevated Supreme Leader of Iran, Mojtaba Khamenei, has issued his first major strategic declaration since assuming absolute power, unleashing a series of severe threats targeting the sovereign existence of Israel and the foundational security of United States deployments across the Middle East. The aggressive messages, which were broadcast universally over Iranian state television networks and distributed via an official Telegram account designated for the 2026 Hajj pilgrimage, arrive at an incredibly delicate geopolitical moment. The fiery rhetoric reasserts the fundamentalist regime's absolute hostility toward its primary international adversaries, even as diplomatic intermediaries attempt to finalize a comprehensive treaty to bring a permanent end to the recent war. Khamenei explicitly stated during the official transmission that Israel will not live to see another fifteen years, drastically shortening a notorious timeline previously articulated by his deceased father. The newly installed cleric affirmed that the traditional, foundational slogans of the Islamic Republic remain entirely unaltered, emphasizing that the state infrastructure is still fundamentally guided b",
-          "ai_risk": 9
-        },
-        {
-          "date": "2026-05-26T16:51:08+00:00",
-          "text": "צ'ייני מזהיר מהמהלך האיראני: \"תמונות נוראות שלא רוצים לראות\"",
-          "sentiment": "negative",
-          "source": "Maariv",
-          "link": "https://www.maariv.co.il/news/military/article-1325861",
-          "snippet": "<img height='80' width='100' align='right' src='https://images.maariv.co.il/image/upload/f_auto,fl_lossy/c_fill,g_faces:center,h_438,w_778/1100281' /><br/>אלוף במיל' אליעזר מרום התייחס ב-103FM להדחת הפצ\"רית לשעבר, הזהיר מהאירועים במפרץ הפרסי וקרא להנהגה להתייצב מול תושבי הצפון<br/>",
-          "ai_risk": 7
-        },
-        {
-          "date": "2026-05-26T16:36:39-0400",
-          "text": "Tanker reports external explosion off Oman coast, crew safe, UKMTO says",
-          "sentiment": "neutral",
-          "source": "Al Monitor",
-          "link": "https://www.al-monitor.com/originals/2026/05/tanker-reports-external-explosion-oman-coast-crew-safe-ukmto-says",
-          "snippet": "<p>DUBAI/OSLO, May 26 (Reuters) - United Kingdom Maritime Trade Operations said on Tuesday that a tanker had reported an external explosion on the vessel's port side, close to the waterline, 60 nautical miles off Oman's capital Muscat.</p><p>UKMTO said the vessel, identified as the Olympic Life, and its crew were safe, although the tanker reported some bunker fuel had been discharged into the sea. It said the cause of the incident was unknown.</p>",
-          "ai_risk": 6
-        },
-        {
-          "date": "2026-05-26T15:22:33+00:00",
-          "text": "'How to shoot down an F-18': Videos show Iran militia members training to use anti-aircraft missiles",
-          "sentiment": "negative",
-          "source": "France24",
-          "link": "https://www.france24.com/en/middle-east/20260526-iran-manpads-basij-training-us-israeli-aircraft",
-          "snippet": "Iran’s military forces are preparing for a potential new round of US-Israeli attacks by deploying more man-portable air defence systems, or MANPADS, drawing on lessons from the recent war and the downing of multiple US and Israeli aircraft. FRANCE 24 obtained documents and videos revealing mass training by the Revolutionary Guards for members of the Basij, the IRGC’s paramilitary force, on how to fire MANPADS.",
-          "ai_risk": 8
-        },
-        {
-          "date": "2026-05-26T12:00:50+00:00",
-          "text": "Israel has 'drawn near final stages of their cursed demise,' Khamenei says in latest statement",
-          "sentiment": "negative",
-          "source": "JPost",
-          "link": "https://www.jpost.com/middle-east/iran-news/article-897323",
-          "snippet": "<img align='right' src='https://images.jpost.com/image/upload/f_auto,fl_lossy/q_auto/c_fill,g_faces:center,h_3508,w_5261/722692' alt='An Iranian man holds a poster of Supreme Leader Ayatollah Mojtaba Khamenei as locals gather for an anti-Israel and anti-US ceremony in Tehran, May 24, 2026; illustrative. (photo credit: Atta Kenare/AFP via Getty Images)' title='An Iranian man holds a poster of Supreme Leader Ayatollah Mojtaba Khamenei as locals gather for an anti-Israel and anti-US ceremony in Tehran, May 24, 2026; illustrative. (photo credit: Atta Kenare/AFP via Getty Images)' /><br />Khamenei threatened US bases across the Middle East, claimed Israel was nearing its demise, and praised Hezbollah’s operations against Israel.<br />",
-          "ai_risk": 8
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "id": "west-bank",
-      "icon": "🔥",
-      "name": "West Bank & Settlements",
-      "phases": [
-        "Escalation",
-        "Violence Spike",
-        "Mediation",
-        "Calming",
-        "Frozen Conflict"
-      ],
-      "phaseIndex": 0,
-      "direction": "stalling",
-      "keyMetric": {
-        "label": "Events (7d)",
-        "value": "5"
-      },
-      "summary": "Guterres condemns Israeli move to militarise seized compound in occupied East Jerusalem",
-      "events": [
-        {
-          "date": "Wed, 20 May 2026 12:00:00 +0000",
-          "text": "Guterres condemns Israeli move to militarise seized compound in occupied East Jerusalem",
-          "sentiment": "negative",
-          "source": "UN News",
-          "link": "https://news.un.org/feed/view/en/story/2026/05/1167560",
-          "snippet": "UN Secretary-General António Guterres on Wednesday strongly condemned Israel’s decision to establish military facilities at a seized UNRWA compound in occupied East Jerusalem, calling the move “wholly unacceptable”.",
-          "ai_risk": 6
-        },
-        {
-          "date": "Tue, 26 May 2026 20:43:15 +0100",
-          "text": "Palestinian Authority warns against 'dangerous' plan to strip Jordan of Al-Aqsa custodianship",
-          "sentiment": "negative",
-          "source": "Middle East Eye",
-          "link": "https://www.middleeasteye.net/news/palestinian-authority-warns-against-plan-strip-jordan-al-aqsa-custodianship",
-          "snippet": "<article data-history-node-id=\"441111\" about=\"https://www.middleeasteye.net/news/palestinian-authority-warns-against-plan-strip-jordan-al-aqsa-custodianship\" class=\"story default clearfix\"> <h2> <a href=\"https://www.middleeasteye.net/news/palestinian-authority-warns-against-plan-strip-jordan-al-aqsa-custodianship\" rel=\"bookmark\"> <span class=\"field field-title\">Palestinian Authority warns against 'dangerous' plan to strip Jordan of Al-Aqsa custodianship</span> </a> </h2> <footer> <div class=\"author\"> Submitted by <span class=\"field field-uid\"><a title=\"View user profile.\" href=\"https://www.middleeasteye.net/users/faisal-edroos\" lang about=\"https://www.middleeasteye.net/users/faisal-edroos\" typeof=\"schema:Person\" property=\"schema:name\" datatype>Faisal Edroos</a></span> on <span class=\"field field-created\"><time datetime=\"2026-05-26T20:45:24+01:00\" title=\"26 May 2026 20:45 BST\">Tue, 05/26/2026 - 20:45</time> </span> </div> </footer> <div class=\"content\"> <div class=\"field field-field-subhead\">Jerusalem governorate says the plan, if implemented, will have 'serious repercussions for security and stability in the region'</div> <div class=\"field field-field-main-image\"> <picture> <source",
-          "ai_risk": 7
-        },
-        {
-          "date": "Tue, 26 May 2026 19:34:55 +0000",
-          "text": "Israel says French-Palestinian lawyer operated East Jerusalem terror network from overseas",
-          "sentiment": "negative",
-          "source": "Times of Israel",
-          "link": "https://www.timesofisrael.com/israel-says-french-palestinian-lawyer-operated-terror-network-from-overseas/",
-          "snippet": "Salah Hamouri, whose Jerusalem residency was revoked over PFLP ties, allegedly recruited five East Jerusalemites to 'promote militant terror activity,' say Shin Bet, police The post Israel says French-Palestinian lawyer operated East Jerusalem terror network from overseas appeared first on The Times of Israel .",
-          "ai_risk": 6
-        },
-        {
-          "date": "Friday, May 8, 2026 - 18:45",
-          "text": "Briefing to UN Security Council on the Situation in the West Bank",
-          "sentiment": "negative",
           "source": "Crisis Group",
-          "link": "https://www.crisisgroup.org/spc/middle-east-north-africa/israelpalestine/briefing-un-security-council-situation-west-bank",
-          "snippet": "<p><span style=\"background-color:#ffffff;color:#222222;font-family:Arial,sans-serif;font-size:11pt;font-style:normal;font-variant:normal;font-weight:400;text-decoration:none;vertical-align:baseline;white-space:pre-wrap;\">Max Rodenbeck, Crisis Group’s Project Director for Israel-Palestine, spoke to the UN Security Council about what is happening in the West Bank – including Israel's accelerating de facto annexation, rising Israeli settler violence and mounting economic pressure – and why the world must pay attention.</span></p>",
+          "link": "https://www.crisisgroup.org/anb/middle-east-north-africa/israelpalestine/palestinian-authority-claims-success-local-elections-amid-spiralling-crises",
+          "snippet": "<p>Crisis Group expert Amjad Iraqi explains the outcome of municipal elections in the West Bank and in one Gazan city, and why their impact is likely to be limited</p>",
+          "ai_risk": 3
+        },
+        {
+          "date": "Thu, 21 May 2026 12:00:00 +0000",
+          "text": "Gaza risks ‘permanent’ state of limbo if transition plan stalls, Security Council hears",
+          "sentiment": "negative",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167568",
+          "snippet": "As Gaza’s fragile ceasefire frays and humanitarian conditions deteriorate, a senior UN envoy warned the Security Council on Thursday that delays in implementing the Council-backed transition plan for the enclave will only increase suffering and undermine recovery.",
           "ai_risk": 7
         },
         {
-          "date": "2026-05-26T21:47:11+00:00",
-          "text": "Shin Bet, police bust east Jerusalem terror cell headed by PFLP terrorist in France",
-          "sentiment": "negative",
-          "source": "JPost",
-          "link": "https://www.jpost.com/israel-news/crime-in-israel/article-897383",
-          "snippet": "<img align='right' src='https://images.jpost.com/image/upload/f_auto,fl_lossy/q_auto/c_fill,g_faces:center,h_3311,w_4967/722782' alt='A person wearing the headband of the Popular Front for the Liberation of Palestine (PFLP) attends a march to demand the release of Mahmoud Khalil on March 11, 2025 in New York City. (photo credit: David Dee Delgado/Getty Images)' title='A person wearing the headband of the Popular Front for the Liberation of Palestine (PFLP) attends a march to demand the release of Mahmoud Khalil on March 11, 2025 in New York City. (photo credit: David Dee Delgado/Getty Images)' /><br />Five PFLP-linked east Jerusalem residents were arrested in November and December of 2025 for questioning after they were suspected of having been recruited by Salah Hamouri, a senior PFLP terrorist.<br />",
-          "ai_risk": 6
-        }
-      ],
-      "confidence": "medium"
-    },
-    {
-      "id": "gaza-crisis",
-      "icon": "🏚",
-      "name": "Gaza Humanitarian Crisis",
-      "phases": [
-        "Blockade",
-        "Aid Inflow",
-        "Recovery",
-        "Rebuilding",
-        "Stabilized"
-      ],
-      "phaseIndex": 0,
-      "direction": "stalling",
-      "keyMetric": {
-        "label": "Events (7d)",
-        "value": "5"
-      },
-      "summary": "Children perform ‘mini Hajj’ in Gaza as Israel blocks pilgrims",
-      "events": [
-        {
-          "date": "Tue, 26 May 2026 19:47:18 +0000",
-          "text": "Children perform ‘mini Hajj’ in Gaza as Israel blocks pilgrims",
-          "sentiment": "negative",
-          "source": "Al Jazeera",
-          "link": "https://www.aljazeera.com/video/newsfeed/2026/5/26/children-perform-mini-hajj-in-gaza-as-israel-blocks-pilgrims?traffic_source=rss",
-          "snippet": "A Gaza City school taught children how to perform the entire Hajj, as Palestinians miss the pilgrimage for a third year.",
-          "ai_risk": 6
-        },
-        {
-          "date": "Sun, 24 May 2026 12:00:00 +0000",
-          "text": "Displaced in Gaza: From home comforts to the shattering horror of war",
+          "date": "Thu, 21 May 2026 12:00:00 +0000",
+          "text": "Security Council LIVE: Ambassadors debate future of Gaza amid stalled progress on lasting peace",
           "sentiment": "negative",
           "source": "UN News",
-          "link": "https://news.un.org/feed/view/en/story/2026/05/1167574",
-          "snippet": "In front of a simple tent in Gaza that offers no protection from the cold or the heat, in a crowded camp where tents lack privacy and basic services, Umm Ahmad&nbsp;sat down to speak to UN News about her life in Gaza before the war and what it has become now.&nbsp;",
-          "ai_risk": 8
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167563",
+          "snippet": "The Security Council is discussing the stalled progress in Gaza as the fragile ceasefire there limps on, and deteriorating conditions across the West Bank amid continued civilian casualties and mounting humanitarian needs. Discussions are likely to focus on who governs Gaza, and how - with no disarmament in sight, together with efforts to support recovery.",
+          "ai_risk": 7
         },
         {
-          "date": "Fri, 22 May 2026 12:00:00 +0000",
-          "text": "Gaza: Life-saving medicines blocked as killing continues, disease gains ground",
-          "sentiment": "negative",
-          "source": "UN News",
-          "link": "https://news.un.org/feed/view/en/story/2026/05/1167572",
-          "snippet": "Dire conditions in Gaza marked by continuing violence, rodent infestations and the spread of infectious disease are being made worse by blockages of essential medical supplies, UN agencies warned on Friday.",
-          "ai_risk": 9
-        },
-        {
-          "date": "2026-05-26T10:39:24+00:00",
-          "text": "Palestine's Eid dampened by consequences of war on livestock",
-          "sentiment": "negative",
-          "source": "France24",
-          "link": "https://www.france24.com/en/palestine-s-eid-dampened-by-consequences-of-war-on-livestock",
-          "snippet": "Palestinians in Gaza facing another grim Eid holiday, which starts Tuesday evening. The livestock sector there has been destroyed by the war, and Israel isn't allowing the import of live animals, making the traditional animal sacrifice nearly impossible. Restrictions on border crossings also mean Palestinians are unable to perform the pilgrimage to Mecca.",
-          "ai_risk": 6
-        },
-        {
-          "date": "2026-05-26T04:00:46+00:00",
-          "text": "Saint Levant: the pop star from Gaza caught between passionate fandom and bitter disapproval",
+          "date": "2026-05-27T07:36:45+00:00",
+          "text": "Exiled Gaza security chief Dahlan met with multiple Shin Bet officials in recent years - report",
           "sentiment": "neutral",
-          "source": "Guardian",
-          "link": "https://www.theguardian.com/news/2026/may/26/saint-levant-the-pop-star-from-gaza-caught-between-passionate-fandom-and-bitter-disapproval",
-          "snippet": "<p>His detractors say he shouldn’t be making pop music in times of war and destruction. His millions of fans say he has given them permission to celebrate their culture and their cause</p><p>The first time I heard a song by Saint Levant, only three years ago, was in a world that does not exist any more. Gaza’s buildings were intact, as were its schools and roads and markets and mosques. My home city of Khartoum in Sudan was standing, as it had for centuries. Back then, I could scroll for fun, not in dread. I could stumble, say, in late 2022, upon an arresting clip on TikTok of a song by an Arab artist with a pun for a name; Saint Levant, a play on Saint Laurent – the icon of western style had been Arabised in homage to the Middle East’s Levant region.</p><p>I began to see the same song all over my social media. In the video, Saint Levant, then 22, is in a white vest and brown trousers. A gold pendant chain dangles on his chest, a tattoo encircles his left arm. He starts by rapping in English, telling the woman he is wooing that “he’s not toxic, he’s broken baby”. And then, the twist, as he switches to Arabic, then French, then English again. Like a wholesome boy next door, he tells",
-          "ai_risk": 2
+          "source": "JPost",
+          "link": "https://www.jpost.com/middle-east/article-897414",
+          "snippet": "<img align='right' src='https://images.jpost.com/image/upload/f_auto,fl_lossy/q_auto/c_fill,g_faces:center,h_3354,w_5184/615073' alt=' MOHAMMED DAHLAN sits in his office in Abu Dhabi, in 2016. Today, his international influence extends far and wide, the writer explains. (photo credit: REUTERS)' title=' MOHAMMED DAHLAN sits in his office in Abu Dhabi, in 2016. Today, his international influence extends far and wide, the writer explains. (photo credit: REUTERS)' /><br />Dahlan, who has been exiled in Abu Dhabi since 2011, has still been described by one source to KAN News as \"the most powerful man in the Gaza Strip\" because of his fundraising. <br />",
+          "ai_risk": 3
         }
       ],
       "confidence": "medium"
@@ -642,12 +369,12 @@
           "ai_risk": 3
         },
         {
-          "date": "Tue, 26 May 2026 22:38:42 +0100",
-          "text": "Why Trump is using Iran talks to revive the Abraham Accords",
+          "date": "Tue, 26 May 2026 17:54:50 +0000",
+          "text": "Why the U.S. Should Wind Down Military Aid to Israel",
           "sentiment": "negative",
-          "source": "Middle East Eye",
-          "link": "https://www.middleeasteye.net/news/why-trump-using-iran-talks-to-revive-abraham-accords",
-          "snippet": "<article data-history-node-id=\"441117\" about=\"https://www.middleeasteye.net/news/why-trump-using-iran-talks-to-revive-abraham-accords\" class=\"story default clearfix\"> <h2> <a href=\"https://www.middleeasteye.net/news/why-trump-using-iran-talks-to-revive-abraham-accords\" rel=\"bookmark\"> <span class=\"field field-title\">Why Trump is using Iran talks to revive the Abraham Accords</span> </a> </h2> <footer> <div class=\"author\"> Submitted by <span class=\"field field-uid\"><a title=\"View user profile.\" href=\"https://www.middleeasteye.net/users/sean-mathews\" lang about=\"https://www.middleeasteye.net/users/sean-mathews\" typeof=\"schema:Person\" property=\"schema:name\" datatype>Sean Mathews</a></span> on <span class=\"field field-created\"><time datetime=\"2026-05-26T21:56:05+01:00\" title=\"26 May 2026 21:56 BST\">Tue, 05/26/2026 - 21:56</time> </span> </div> </footer> <div class=\"content\"> <div class=\"field field-field-subhead\">Trump's injection of the Abraham Accords into Iran ceasefire talks is a deep misreading of where US Arab allies are at, experts say</div> <div class=\"field field-field-main-image\"> <picture> <source srcset=\"https://www.middleeasteye.net/sites/default/files/styles/article_page/",
+          "source": "Foreign Policy",
+          "link": "https://foreignpolicy.com/2026/05/26/israel-united-states-military-aid-gaza-trump-netanyahu/",
+          "snippet": "Washington should no longer be liable for Israeli misdeeds.",
           "ai_risk": 6
         },
         {
@@ -670,25 +397,730 @@
         }
       ],
       "confidence": "medium"
+    },
+    {
+      "id": "iran",
+      "icon": "☣️",
+      "name": "Iran Nuclear & War",
+      "phases": [
+        "War",
+        "Ceasefire Talks",
+        "Armistice",
+        "Nuclear Deal",
+        "Resolution"
+      ],
+      "phaseIndex": 0,
+      "direction": "stalling",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "36"
+      },
+      "summary": "Live updates: US-Iran deal to be announced 'within hours'",
+      "events": [
+        {
+          "date": "Wed, 27 May 2026 07:50:00 +0300",
+          "text": "Live updates: US-Iran deal to be announced 'within hours'",
+          "sentiment": "neutral",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/423124",
+          "snippet": "Months after Israel and US launched strikes against the Iranian regime, reports say Iran rebuilding army and renewing some UAV production, on timetable faster than anticipated; US Pres. Trump announces impending deal. Live Updates.",
+          "ai_risk": 7
+        },
+        {
+          "date": "Wed, 27 May 2026 05:22:13 +0300",
+          "text": "Iran accuses US of truce violations after strikes near Strait of Hormuz",
+          "sentiment": "negative",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427658",
+          "snippet": "Iran claims the US violated the ceasefire after CENTCOM launched self-defense strikes in the Gulf.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 20:58:54 +0000",
+          "text": "Iran Threatens to Renew Strikes Against U.S. Amid Push for Diplomatic Deal",
+          "sentiment": "negative",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/26/world/middleeast/iran-threats-strikes-us-ceasefire.html",
+          "snippet": "The warnings came after U.S. forces struck military sites in Iran. Secretary of State Marco Rubio said on Tuesday that negotiations to end the war were continuing.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 20:25:29 +0000",
+          "text": "U.S. Launches ‘Self-Defense’ Strikes on Iran",
+          "sentiment": "negative",
+          "source": "Foreign Policy",
+          "link": "https://foreignpolicy.com/2026/05/26/us-strikes-iran-self-defense-abraham-accords-israel-trump-rubio/",
+          "snippet": "Still, Washington insists that it is committed to peace talks with Tehran.",
+          "ai_risk": 9
+        },
+        {
+          "date": "Tue, 26 May 2026 19:03:49 +0000",
+          "text": "U.S. Said to Have Observed Series of Iranian Threats Before Latest Strikes",
+          "sentiment": "negative",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/26/world/middleeast/us-iran-strikes.html",
+          "snippet": "Two U.S. officials said Iran launched drones near American ships, sent speedboats to mine the Strait of Hormuz and stepped up activity at some of its missile sites.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 17:28:37 +0000",
+          "text": "CENTCOM denies reports of US Navy escort operations in Strait of Hormuz",
+          "sentiment": "neutral",
+          "source": "ME Monitor",
+          "link": "https://www.middleeastmonitor.com/20260526-centcom-denies-reports-of-us-navy-escort-operations-in-strait-of-hormuz/",
+          "snippet": "The US Central Command (CENTCOM) denied media reports Tuesday that the American Navy resumed escorting commercial vessels through the Strait of Hormuz, Anadolu reports. In a statement on US social media company X, CENTCOM rejected claims that the “Project Freedom” initiative had restarted, saying US forces are not assisting commercial shipping through the strategic waterway. Earlier Tuesday, the Wall Street Journal, citing US military officials, reported that the navy guided a Greek supertanker carrying 2 million barrels of crude oil through the strategic waterway off the coast of Oman. The vessel had been stranded in the region since early March and is now bound for India to deliver its cargo, according to the US military officials cited in the report. […]",
+          "ai_risk": 5
+        },
+        {
+          "date": "Tue, 26 May 2026 15:02:53 +0300",
+          "text": "Trump's Iran deal: Netanyahu's 2018 dream is the world's 2026 nightmare",
+          "sentiment": "negative",
+          "source": "Haaretz - ME",
+          "link": "https://www.haaretz.com/israel-news/2026-05-26/ty-article-magazine/.premium/trumps-iran-deal-netanyahus-2018-dream-is-the-worlds-2026-nightmare/0000019e-635d-d38b-a3df-7bdd153e0000",
+          "snippet": "Will anyone – Netanyahu, Trump, the Republican Party, AIPAC – apologize, or even just do some soul-searching, for fighting down the 2015 Iran plan negotiated by Obama?",
+          "ai_risk": 7
+        },
+        {
+          "date": "Tue, 26 May 2026 14:41:46 +0000",
+          "text": "U.S. launches attacks on Iran as negotiations over a peace deal drag out",
+          "sentiment": "negative",
+          "source": "The Forward",
+          "link": "https://forward.com/fast-forward/827206/u-s-launches-attacks-on-iran-as-negotiations-over-a-peace-deal-drag-out/",
+          "snippet": "( JTA ) — The United States announced it had launched defensive strikes on Monday in Southern Iran, targeting Iranian missile sites and boats it believed were placing mines. The move threatens to derail an already fragile ceasefire between the United States, Iran and Israel aimed at giving the U.S. and Iran space to hammer out a deal to end the hostilities. It also comes as U.S. President Donald Trump told several Muslim allies participating in consultations over a deal that they should normalize relations with Israel in exchange for the U.S. inking the agreement. U.S. Central Command Spokesperson Navy Capt. Tim Hawkin said in a statement issued Monday that strike targets “included missile launch sites and Iranian boats attempting to emplace mines.” He added that U.S. forces “conducted self-defense strikes … to protect our troops from threats posed by Iranian forces,” and that CENTCOM “continues to defend our forces while using restraint during the ongoing ceasefire.” The attacks were conducted in the port city of Bandar Abbas around the strait of Hormuz, according to Iran’s Islamic Revolutionary Guard Corps, as cited by CNN. The strikes came just 24 hours after President Donald Tr",
+          "ai_risk": 9
+        },
+        {
+          "date": "Tue, 26 May 2026 14:41:30 +0000",
+          "text": "Iran demands release of $12 billion in frozen assets in potential deal with US",
+          "sentiment": "neutral",
+          "source": "ME Monitor",
+          "link": "https://www.middleeastmonitor.com/20260526-iran-demands-release-of-12-billion-in-frozen-assets-in-potential-deal-with-us/",
+          "snippet": "Iran demands the release of $12 billion in frozen assets in a potential deal with the US and insists that another $12 billion “should be transferred within 60 days” of signing the agreement, the semi-official Tasnim news agency reported Tuesday. Iran’s top negotiator and parliament speaker Mohammed Bagher Qalibaf visited Qatar on Monday for talks aimed at “securing access to $12 billion in the first phase, as well as removing obstacles,” Tasnim said, citing a source familiar with the matter. “Given past experiences regarding the release of Iranian funds in South Korea and Qatar, emphasis was placed on carefully monitoring the implementation process to avoid repeating previous issues,” the source said. READ: Middle East nations ‘will no longer be shield’ for […]",
+          "ai_risk": 6
+        },
+        {
+          "date": "Tue, 26 May 2026 14:27:49 +0000",
+          "text": "Middle East nations ‘will no longer be shield’ for US bases, Iran’s supreme leader says",
+          "sentiment": "negative",
+          "source": "ME Monitor",
+          "link": "https://www.middleeastmonitor.com/20260526-middle-east-nations-will-no-longer-be-shield-for-us-bases-irans-supreme-leader-says/",
+          "snippet": "Iran’s Supreme Leader Mojtaba Khamenei said Tuesday that the nations of the Middle East “will no longer be a shield for American bases” and that Washington will no longer have a “safe haven” in the region, Anadolu reports. Khamenei’s remarks came in a statement issued to mark the climax of the Islamic Hajj pilgrimage, according to the state-run IRNA news agency. He called on Muslim nations and other countries of the region “to pursue shared interests” for shaping a new regional and global order. “I sincerely invite all Islamic countries and governments to friendship and cooperation for the common good,” he added. The call comes amid Pakistan-led mediation efforts to put an end to the US-Israeli war on Iran that started […]",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 13:57:30 +0000",
+          "text": "Trump’s Iran Proposal Has Echoes of Half-Finished Gaza Deal",
+          "sentiment": "neutral",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/26/world/middleeast/trump-middle-east-peace-deals.html",
+          "snippet": "President Trump’s proposal to end the war with Iran would delay tackling the most contentious issues — a tactic that has had mixed results in Gaza.",
+          "ai_risk": 6
+        },
+        {
+          "date": "Tue, 26 May 2026 10:36:58 +0000",
+          "text": "U.S. Carries Out Renewed Strikes in Southern Iran",
+          "sentiment": "negative",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/25/world/middleeast/us-iran-strikes.html",
+          "snippet": "Military officials said that the strikes targeted missile sites near a major Iranian port that threatened U.S. ships and planes.",
+          "ai_risk": 9
+        },
+        {
+          "date": "Tue, 26 May 2026 09:38:03 +0300",
+          "text": "Report: U.S. restarts escorting ships crossing Strait of Hormuz",
+          "sentiment": "negative",
+          "source": "Haaretz - ME",
+          "link": "https://www.haaretz.com/middle-east-news/iran/2026-05-26/ty-article/rubio-says-hormuz-strait-will-open-one-way-or-another-after-u-s-strikes-iran/0000019e-62b3-da86-af9f-f2f7faf60000",
+          "snippet": "U.S. military officials who spoke with the Wall Street Journal said naval forces had guided a Greek tanker through the waterway. A similar initiative was backtracked earlier this month. Earlier, U.S. strikes targeted mine-laying boats and missile launchers in southern Iran",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 09:02:00 +0000",
+          "text": "Oil prices tumble as Trump signals imminent Iran deal",
+          "sentiment": "positive",
+          "source": "Al Bawaba",
+          "link": "https://www.albawaba.com/business/oil-prices-tumble-trump-signals-imminent-1628645",
+          "snippet": "ALBAWABA- Global oil prices fell sharply on May 25–26, 2026, after U.S. President Donald Trump signaled that a comprehensive agreement with Iran could be announced soon, easing concerns over supply disruptions in the Strait of Hormuz...",
+          "ai_risk": 3
+        },
+        {
+          "date": "Tue, 26 May 2026 08:17:55 +0000",
+          "text": " Iran downs MQ-9 after US strikes on Iranian naval boats and missile sites",
+          "sentiment": "negative",
+          "source": "Al Bawaba",
+          "link": "https://www.albawaba.com/news/iran-downs-mq-9-after-us-strikes-iranian-1628642",
+          "snippet": "ALBAWABA- Tensions escalated in the Strait of Hormuz after Iran and the United States exchanged accusations of ceasefire violations, raising fresh concerns over the stability of the fragile truce reached earlier this year following direct hostilities involving Iran, the United States, and Israel...",
+          "ai_risk": 9
+        },
+        {
+          "date": "Sun, 01 Mar 2026 22:02:22 +0000",
+          "text": "Hormuz and the Globalization of the War",
+          "sentiment": "negative",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/hormuz-and-the-globalization-of-the-war/",
+          "snippet": "The war between Israel and the United States against Iran began much like the summer 2025 conflict: a campaign of airstrikes and targeted killings directed at Iran, met by Tehran’s missile response, though this time against a larger set of states. הפוסט Hormuz and the Globalization of the War הופיע לראשונה ב- Mitvim .",
+          "ai_risk": 9
+        },
+        {
+          "date": "Sun, 01 Mar 2026 17:43:15 +0000",
+          "text": "Mitvim Experts’ Commentary on the second Israel-Iran War",
+          "sentiment": "negative",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/mitvim-experts-commentary-on-the-second-israel-iran-war/",
+          "snippet": "On February 28, against the backdrop of rounds of talks about a renewed nuclear agreement, Israel and the United States launched a surprise war against Iran. The following are responses from Mitvim Institute experts regarding the second Israel–Iran War after its first week. הפוסט Mitvim Experts’ Commentary on the second Israel-Iran War הופיע לראשונה ב- Mitvim .",
+          "ai_risk": 9
+        },
+        {
+          "date": "Mon, 02 Mar 2026 19:23:48 +0000",
+          "text": "Israel–Iran energy infrastructure war signals a dangerous new escalation",
+          "sentiment": "negative",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/israel-iran-energy-infrastructure-war-signals-a-dangerous-new-escalation/",
+          "snippet": "Strikes on refineries and gas facilities signal a new phase in the Israel–Iran war with systemic risks beyond the battlefield. הפוסט Israel–Iran energy infrastructure war signals a dangerous new escalation הופיע לראשונה ב- Mitvim .",
+          "ai_risk": 9
+        },
+        {
+          "date": "Mon, 02 Mar 2026 08:48:06 +0000",
+          "text": "What does victory for Israel, US look like in Iran?",
+          "sentiment": "neutral",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/what-does-victory-for-israel-us-look-like-in-iran/",
+          "snippet": "Is the goal to weaken Iran’s regime or overthrow it? The answer could determine when and how the war ends. הפוסט What does victory for Israel, US look like in Iran? הופיע לראשונה ב- Mitvim .",
+          "ai_risk": 8
+        },
+        {
+          "date": "Fri, 24 Apr 2026 14:16:34 +0000",
+          "text": "“Make Iran Ungovernable” – Tracking Efforts To Destroy Iran’s Police Infrastructure",
+          "sentiment": "negative",
+          "source": "bellingcat",
+          "link": "https://www.bellingcat.com/news/2026/04/24/make-iran-ungovernable-tracking-efforts-to-destroy-irans-police-infrastructure/",
+          "snippet": "Bellingcat has identified at least 80 police stations or infrastructure related to law enforcement agencies and the Basij paramilitary group that has been damaged or destroyed in the first three weeks of the United States and Israel’s war against Iran. Experts told Bellingcat that both countries aim to degrade the Iranian regime’s “repressive capacity”. Combined, the US and Israel have conducted thousands of strikes during the course of the 2026 war in Iran. Targets range from Islamic Revolutionary Guard Corps (IRGC) sites, Navy vessels to Iranian weapons manufacturers. In early March, a Bellingcat analysis using satellite imagery and available photos and videos identified police stations as another apparent target, with at least 15 damaged or destroyed in the capital, Tehran. We also identified multiple strikes against police infrastructure in the country’s north and west; these areas were targeted by the Israel Defence Forces according to a map released by the IDF on March 31. “We are providing the brave people of Iran with the conditions to take their destiny into their own hands,” declared the Israeli Ministry of Foreign Affairs official X account, along with a photo of a destr",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-27T04:44:45+00:00",
+          "text": "Iran Threatens Retaliation After U.S. Strikes Near Hormuz as Deal Talks Continue",
+          "sentiment": "negative",
+          "source": "JFeed",
+          "link": "https://www.jfeed.com/news/tfohwf",
+          "snippet": "Tensions between the United States and Iran surged again Tuesday after U.S. forces carried out strikes in southern Iran near the Strait of Hormuz, even as diplomatic efforts continued to secure a broader agreement to end the conflict. U.S. officials said the strikes targeted Iranian missile sites and boats allegedly attempting to place mines near the strategic waterway. Washington described the operation as defensive, while Iran condemned the attack as a violation of the fragile ceasefire and warned that it would respond. Secretary of State Marco Rubio said the strait of Hormuz “has to be open, one way or the other,” while talks continue over a possible arrangement that would reopen shipping lanes and extend the ceasefire. Iran’s Foreign Ministry accused the United States of acting in “bad faith,” but Tehran has not withdrawn from the negotiations. According to reports, talks mediated by Qatar and Pakistan are focused on reopening Hormuz, releasing frozen Iranian funds, and creating a temporary negotiation window for broader issues, including sanctions and Iran’s nuclear program. The proposed framework reportedly includes a halt to hostilities, reopening the strait, financial relie",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T23:17:21+00:00",
+          "text": "Iran-linked group reportedly hacked Los Angeles metro transit system in March",
+          "sentiment": "negative",
+          "source": "JNS",
+          "link": "https://www.jns.org/news/u-s-news/iran-linked-group-reportedly-hacked-los-angeles-metro-transit-system-in-march",
+          "snippet": "The Israeli firm Gambit Security said on Tuesday that a group tied to the Iranian regime carried out a cyber attack against the Los Angeles County Metropolitan Transportation Authority in March. The Los Angeles Times reported in early April that a spokesman for the authority had confirmed the hack and said that it had “proactively limited employee access to many internal administrative computer systems after the agency’s security team discovered unauthorized activity.” “Throughout this time, metro’s essential rail and bus service has continued to run uninterrupted, as have our vital transit safety and security systems,” the Los Angeles County Metropolitan Transportation Authority spokesman told the paper. (JNS sought comment from the authority.) Gambit Security released a report , in which it stated that Ababil of Minab claimed responsibility and claimed to have data hacked from the authority’s systems. The group’s attack was part of a broader operation targeting organizations in the United States, Israel, Saudi Arabia and Turkey, per the Israeli firm. “Our investigation found that Ababil of Minab is unlikely to be a new, standalone hacktivist crew as they claim,” Gambit Security s",
+          "ai_risk": 6
+        },
+        {
+          "date": "2026-05-26T22:31:03+00:00",
+          "text": "Iran says US violated ceasefire with strikes near Hormuz",
+          "sentiment": "negative",
+          "source": "France24",
+          "link": "https://www.france24.com/en/middle-east/20260526-iran-says-us-violated-ceasefire-with-strikes-near-hormuz-war",
+          "snippet": "Iran accused the United States on Tuesday of breaching a fragile ceasefire with strikes near the Strait of Hormuz, threatening efforts to end nearly seven weeks of conflict. Washington said the attacks were defensive, targeting missile sites and vessels allegedly laying mines.",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T21:23:24+00:00",
+          "text": "Fifteen Years to Live: Iran's Hidden Supreme Leader Declares Expiration Date for Israel",
+          "sentiment": "negative",
+          "source": "JFeed",
+          "link": "https://www.jfeed.com/middleeast/iran-supreme-leader-israel-threats",
+          "snippet": "The newly elevated Supreme Leader of Iran, Mojtaba Khamenei, has issued his first major strategic declaration since assuming absolute power, unleashing a series of severe threats targeting the sovereign existence of Israel and the foundational security of United States deployments across the Middle East. The aggressive messages, which were broadcast universally over Iranian state television networks and distributed via an official Telegram account designated for the 2026 Hajj pilgrimage, arrive at an incredibly delicate geopolitical moment. The fiery rhetoric reasserts the fundamentalist regime's absolute hostility toward its primary international adversaries, even as diplomatic intermediaries attempt to finalize a comprehensive treaty to bring a permanent end to the recent war. Khamenei explicitly stated during the official transmission that Israel will not live to see another fifteen years, drastically shortening a notorious timeline previously articulated by his deceased father. The newly installed cleric affirmed that the traditional, foundational slogans of the Islamic Republic remain entirely unaltered, emphasizing that the state infrastructure is still fundamentally guided b",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T20:41:51+00:00",
+          "text": "Middle East crisis: Iran’s foreign ministry says US broke ceasefire with overnight strikes – as it happened",
+          "sentiment": "negative",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/world/live/2026/may/26/iran-war-live-updates-us-attacks-iran-missile-sites-self-defence-during-peace-talks",
+          "snippet": "<p>This live blog is now closed. For the latest, read our full report:</p><ul><li><p><a href=\"https://www.theguardian.com/world/2026/may/26/iran-peace-deal-talks-us-bombing-ceasefire-strait-hormuz\">Iran remains in peace talks despite first US strikes since ceasefire</a></p></li></ul><p>Iranian supreme leader <strong>Mojtaba Khamenei</strong> said on his Telegram channel that Gulf powers will no longer be a shield for US bases and the US will no longer have a safe haven in the region, as <strong>Tehran</strong> and <strong>Washington</strong> discuss a framework to end their three-month-old war, Reuters reports.</p><p>The post follows overnight attacks on Iran by the US, testing the ceasefire agreed in April. The strikes came as Iran’s top negotiator and its foreign minister were in Qatar for talks with Qatar’s prime minister over the potential deal to end the war.</p> <a href=\"https://www.theguardian.com/world/live/2026/may/26/iran-war-live-updates-us-attacks-iran-missile-sites-self-defence-during-peace-talks\">Continue reading...</a>",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T20:28:19+00:00",
+          "text": "הלחץ עושה את שלו: טראמפ משנה כיוון מול איראן",
+          "sentiment": "neutral",
+          "source": "Maariv",
+          "link": "https://www.maariv.co.il/news/world/article-1325922",
+          "snippet": "<img height='80' width='100' align='right' src='https://images.maariv.co.il/image/upload/f_auto,fl_lossy/c_fill,g_faces:center,h_438,w_778/1101548' /><br/>איראן מנסה להגיע להסכם עם ארה\"ב שיקל על המשבר הכלכלי וישחרר כספים מוקפאים, בלי לתת לטראמפ הישג ברור בגרעין. במקביל, נמשכים חילופי האש והמאמצים להציל את המו\"מ<br/>",
+          "ai_risk": 6
+        },
+        {
+          "date": "2026-05-26T16:36:39-0400",
+          "text": "Tanker reports external explosion off Oman coast, crew safe, UKMTO says",
+          "sentiment": "neutral",
+          "source": "Al Monitor",
+          "link": "https://www.al-monitor.com/originals/2026/05/tanker-reports-external-explosion-oman-coast-crew-safe-ukmto-says",
+          "snippet": "<p>DUBAI/OSLO, May 26 (Reuters) - United Kingdom Maritime Trade Operations said on Tuesday that a tanker had reported an external explosion on the vessel's port side, close to the waterline, 60 nautical miles off Oman's capital Muscat.</p><p>UKMTO said the vessel, identified as the Olympic Life, and its crew were safe, although the tanker reported some bunker fuel had been discharged into the sea. It said the cause of the incident was unknown.</p>",
+          "ai_risk": 6
+        },
+        {
+          "date": "2026-05-26T15:22:33+00:00",
+          "text": "'How to shoot down an F-18': Videos show Iran militia members training to use anti-aircraft missiles",
+          "sentiment": "negative",
+          "source": "France24",
+          "link": "https://www.france24.com/en/middle-east/20260526-iran-manpads-basij-training-us-israeli-aircraft",
+          "snippet": "Iran’s military forces are preparing for a potential new round of US-Israeli attacks by deploying more man-portable air defence systems, or MANPADS, drawing on lessons from the recent war and the downing of multiple US and Israeli aircraft. FRANCE 24 obtained documents and videos revealing mass training by the Revolutionary Guards for members of the Basij, the IRGC’s paramilitary force, on how to fire MANPADS.",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T15:15:29+00:00",
+          "text": "Iran condemns US strikes as 'gross violation' of ceasefire",
+          "sentiment": "negative",
+          "source": "BBC ME",
+          "link": "https://www.bbc.com/news/articles/c4g44yl7q70o?at_medium=RSS&amp;at_campaign=rss",
+          "snippet": "The attacks took place while Iranian and Qatari negotiators were in Doha for peace talks.",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T15:04:45+00:00",
+          "text": "US launches new strikes on Iran, targeting missile sites and boats",
+          "sentiment": "negative",
+          "source": "BBC ME",
+          "link": "https://www.bbc.com/news/articles/cvgzzn4y1n8o?at_medium=RSS&amp;at_campaign=rss",
+          "snippet": "US Central Command says the strikes were taken in \"self-defence\", while Iran reports it downed a US drone that entered its airspace.",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T12:59:19+00:00",
+          "text": "US anxious to come to deal with Iran asTehran seeks release of frozen assets",
+          "sentiment": "negative",
+          "source": "France24",
+          "link": "https://www.france24.com/en/us-anxious-to-come-to-deal-with-iran-astehran-seeks-release-of-frozen-assets",
+          "snippet": "The US struck targets in Iran, the first since the start of the ceasefire and amid fragile talks between Tehran and Washington. The strikes come as the US is becoming anxious to come to a deal and end the war, as a growing number of Americans oppose the war ahead of the midterm elections. Iran has accused the US of violating the ceasefire and asked for the unfreezing of Iranian funds as part of the deal. FRANCE 24's Philip Turle tells us about where the talks stand now.",
+          "ai_risk": 7
+        },
+        {
+          "date": "2026-05-26T12:00:50+00:00",
+          "text": "Israel has 'drawn near final stages of their cursed demise,' Khamenei says in latest statement",
+          "sentiment": "negative",
+          "source": "JPost",
+          "link": "https://www.jpost.com/middle-east/iran-news/article-897323",
+          "snippet": "<img align='right' src='https://images.jpost.com/image/upload/f_auto,fl_lossy/q_auto/c_fill,g_faces:center,h_3508,w_5261/722692' alt='An Iranian man holds a poster of Supreme Leader Ayatollah Mojtaba Khamenei as locals gather for an anti-Israel and anti-US ceremony in Tehran, May 24, 2026; illustrative. (photo credit: Atta Kenare/AFP via Getty Images)' title='An Iranian man holds a poster of Supreme Leader Ayatollah Mojtaba Khamenei as locals gather for an anti-Israel and anti-US ceremony in Tehran, May 24, 2026; illustrative. (photo credit: Atta Kenare/AFP via Getty Images)' /><br />Khamenei threatened US bases across the Middle East, claimed Israel was nearing its demise, and praised Hezbollah’s operations against Israel.<br />",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T04:13:41+00:00",
+          "text": "Tehran expresses ‘resolute support’ for Hezbollah – as it happened",
+          "sentiment": "negative",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/world/live/2026/may/25/iran-war-news-middle-east-crisis-oil-price-us-tehran-peace-talks-deal-strait-hormuz",
+          "snippet": "<p>This blog is now closed – our live coverage of the Middle East crisis <a href=\"https://www.theguardian.com/world/live/2026/may/26/iran-war-live-updates-us-attacks-iran-missile-sites-self-defence-during-peace-talks\">continues here</a></p><p>Ebrahim Rezaei, the spokesperson of the Iranian parliament’s national security and foreign policy commission, has said that time is working against the US and warned that Iran does not respond well to threats.</p><p><a href=\"https://x.com/EbrahimRezaei14/status/2058789365589938281\">In a post on X</a>, he wrote:</p><p><em>During the military war, our tactic was an eye for an eye; in the diplomatic war, it is action against action. Do not believe the bluff of the failed president; time is against the Americans. </em></p><p><em>If they want an agreement, they should negotiate; if they want $6 gas, they should stand firm and bluff until the grass grows under their feet. Iran does not bow to force or threats.</em></p> <a href=\"https://www.theguardian.com/world/live/2026/may/25/iran-war-news-middle-east-crisis-oil-price-us-tehran-peace-talks-deal-strait-hormuz\">Continue reading...</a>",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-25T23:26:26+00:00",
+          "text": "Iran denies deal with US is imminent despite some progress",
+          "sentiment": "negative",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/world/2026/may/25/iran-denies-deal-us-imminent-israel-oman-strait-of-hormuz",
+          "snippet": "<p>Tehran says ‘contradictory statements’ from US and Israeli interference hindering negotiations</p><ul><li><p><a href=\"https://www.theguardian.com/world/live/2026/may/26/iran-war-live-updates-us-attacks-iran-missile-sites-self-defence-during-peace-talks\">Middle East crisis – live updates</a></p></li></ul><p>Iran has poured cold water on suggestions that a deal with the US is imminent, pointing to the confusion in US positions and Israeli interference as key factors in why a complete agreement is proving difficult to secure.</p><p>Speaking at the weekly foreign ministry press briefing, Esmail Baghaei, the spokesperson for Iran’s negotiating team, also said future management of the strait of Hormuz was a matter for Oman and Iran to reach agreement on, and that it was not tolls that were being proposed but “fees for navigational services”.</p> <a href=\"https://www.theguardian.com/world/2026/may/25/iran-denies-deal-us-imminent-israel-oman-strait-of-hormuz\">Continue reading...</a>",
+          "ai_risk": 7
+        },
+        {
+          "date": "2026-05-25T22:05:29+00:00",
+          "text": "Deal with US not imminent, Iran says",
+          "sentiment": "neutral",
+          "source": "BBC ME",
+          "link": "https://www.bbc.com/news/articles/cglpp2yk336o?at_medium=RSS&amp;at_campaign=rss",
+          "snippet": "The US secretary of state earlier said that an agreement could possibly come on Monday.",
+          "ai_risk": 6
+        },
+        {
+          "date": "2026-05-25T18:50:49+00:00",
+          "text": "‘If Iran gets a bomb it will be Bibi’s’: Trump’s deal outline sparks alarm in Israel",
+          "sentiment": "negative",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/world/2026/may/25/iran-bomb-trump-deal-sparks-alarm-israel-netanyahu",
+          "snippet": "<p>Netanyahu’s joint war with the US began with talk of regime change in Tehran but may leave him with few strategic gains</p><ul><li><p><a href=\"https://www.theguardian.com/world/live/2026/may/26/iran-war-live-updates-us-attacks-iran-missile-sites-self-defence-during-peace-talks\">Middle East live – latest updates</a> </p></li></ul><p>When Donald Trump launched a pre-emptive war on Iran with Israel in February, many in the country hailed the campaign as the crowning triumph of Benjamin Netanyahu’s political and diplomatic career.</p><p>Three months on the regime is still in power in Tehran, Trump is <a href=\"https://www.theguardian.com/world/2026/may/25/iran-denies-deal-us-imminent-israel-oman-strait-of-hormuz\">chasing a deal</a> that will reopen the strait of Hormuz to oil tankers, and the reported terms have provoked alarm, dismay and anger in Israel.</p> <a href=\"https://www.theguardian.com/world/2026/may/25/iran-bomb-trump-deal-sparks-alarm-israel-netanyahu\">Continue reading...</a>",
+          "ai_risk": 8
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "lebanon",
+      "icon": "🇱🇧",
+      "name": "Lebanon & Hezbollah",
+      "phases": [
+        "Active Fighting",
+        "De-escalation",
+        "Ceasefire",
+        "Withdrawal",
+        "Stable"
+      ],
+      "phaseIndex": 0,
+      "direction": "stalling",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "32"
+      },
+      "summary": "US official: Collapse of Lebanon-Israel talks serves Hezbollah",
+      "events": [
+        {
+          "date": "Wed, 27 May 2026 07:51:00 +0300",
+          "text": "US official: Collapse of Lebanon-Israel talks serves Hezbollah",
+          "sentiment": "negative",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427663",
+          "snippet": "US reportedly asks Israel to avoid strikes in Beirut as official says collapse of Israel-Lebanon talks serves terror group.",
+          "ai_risk": 7
+        },
+        {
+          "date": "Wed, 27 May 2026 04:25:40 +0000",
+          "text": "Israel ‘intensifies’ attacks in Lebanon killing at least 31 people",
+          "sentiment": "negative",
+          "source": "Al Jazeera",
+          "link": "https://www.aljazeera.com/video/newsfeed/2026/5/27/israel-intensifies-attacks-in-lebanon-killing-at-least-31-people?traffic_source=rss",
+          "snippet": "At least 31 people have been killed in Israeli attacks across southern Lebanon.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Wed, 27 May 2026 02:02:31 +0300",
+          "text": "Just one more war – that's all",
+          "sentiment": "negative",
+          "source": "Haaretz",
+          "link": "https://www.haaretz.com/opinion/2026-05-27/ty-article-opinion/.premium/just-one-more-war-thats-all/0000019e-654d-d3a6-addf-e7cdeadf0000",
+          "snippet": "What if Trump concludes that there is no chance of a cease-fire agreement with Iran and gives Israel the green light to 'Open the gates of hell. Bomb Beirut and the Beqaa all you want. Destroy Lebanese civilization'",
+          "ai_risk": 9
+        },
+        {
+          "date": "Wed, 27 May 2026 01:35:04 +0300",
+          "text": "Hezbollah openly threatens to topple Lebanese gov't and restart civil war as Israel expands strikes",
+          "sentiment": "negative",
+          "source": "Haaretz - Domestic",
+          "link": "https://www.haaretz.com/middle-east-news/lebanonnews/2026-05-27/ty-article/.premium/hezbollah-threatens-to-topple-lebanese-govt-as-israel-expands-strikes/0000019e-65eb-d1b9-a9bf-fdef4ff70000",
+          "snippet": "The U.S. has slightly loosened the reins on Israel in Lebanon in return for Israel's compliance with a U.S.-Iran cease-fire, while still banning attacks on Beirut. Now, Hezbollah leadership is threatening to topple the Lebanese government by force and restart the country's civil war",
+          "ai_risk": 9
+        },
+        {
+          "date": "Wed, 27 May 2026 00:30:53 +0300",
+          "text": "Home Front Command to send pre-alerts for rockets, missiles launched from Lebanon",
+          "sentiment": "neutral",
+          "source": "Haaretz - Domestic",
+          "link": "https://www.haaretz.com/israel-news/israel-security/2026-05-27/ty-article/.premium/home-front-command-to-send-pre-alerts-for-rockets-launched-from-lebanon/0000019e-65b1-d1b9-a9bf-fdbdaf000000",
+          "snippet": "Advance warnings, distributed through the Home Front Command app and emergency platforms when 'operational conditions allow,' will give residents between a few seconds and two minutes to prepare before sirens sound",
+          "ai_risk": 6
+        },
+        {
+          "date": "Wed, 27 May 2026 00:00:00 +0000",
+          "text": "Iran war live: Israel kills 31 in Lebanon; Tehran blasts US truce violation",
+          "sentiment": "negative",
+          "source": "Al Jazeera",
+          "link": "https://www.aljazeera.com/news/liveblog/2026/5/27/iran-war-live-israel-kills-31-in-lebanon-tehran-blasts-us-truce-violation?traffic_source=rss",
+          "snippet": "Lebanon's Health Ministry reports that Israeli attacks have killed 3,213 people and injured 9,737 since March 2.",
+          "ai_risk": 9
+        },
+        {
+          "date": "Wed, 20 May 2026 12:00:00 +0000",
+          "text": "Flak jackets and final goodbyes: Lebanon’s first responders under fire",
+          "sentiment": "negative",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167556",
+          "snippet": "Before heading to strike sites in war-torn Lebanon, rescue workers and paramedics often say goodbye to one another – a ritual captured in widely shared videos reflecting the growing dangers faced by aid workers since hostilities between Hezbollah and Israel erupted on 2 March.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 23:26:46 +0000",
+          "text": "North targeted overnight by Hezbollah rocket fire; Lebanon says 31 killed Tuesday in Israeli strikes",
+          "sentiment": "negative",
+          "source": "Times of Israel",
+          "link": "https://www.timesofisrael.com/liveblog-may-27-2026/",
+          "snippet": "Citing the weather, Trump says cabinet meeting to be held at White House instead of Camp David * UN condemns drone strike on UAE nuclear plant, doesn’t assign blame for attack The post North targeted overnight by Hezbollah rocket fire; Lebanon says 31 killed Tuesday in Israeli strikes appeared first on The Times of Israel .",
+          "ai_risk": 9
+        },
+        {
+          "date": "Tue, 26 May 2026 18:48:32 +0300",
+          "text": "Israel deepens Lebanon ground offensive as Netanyahu vows escalation",
+          "sentiment": "negative",
+          "source": "Haaretz - ME",
+          "link": "https://www.haaretz.com/middle-east-news/lebanonnews/2026-05-26/ty-article/israel-expands-lebanon-ground-offensive-beyond-self-declared-buffer-zone/0000019e-64b5-da7d-a1bf-fcb5d8970000",
+          "snippet": "Lebanon's Health Ministry said 28 people were killed in Israeli strikes over the past day, as hospitals reported continuing recovery operations across the south and Beqaa Valley. The IDF said it was acting against 'a growing pattern of explosive drone attacks,' as cross-border fire continued",
+          "ai_risk": 9
+        },
+        {
+          "date": "Tue, 26 May 2026 18:16:43 +0000",
+          "text": "Netanyahu says Israel expanding ground offensive in Lebanon despite ceasefire",
+          "sentiment": "negative",
+          "source": "ME Monitor",
+          "link": "https://www.middleeastmonitor.com/20260526-netanyahu-says-israel-expanding-ground-offensive-in-lebanon-despite-ceasefire/",
+          "snippet": "Israeli Prime Minister Benjamin Netanyahu said Tuesday that Israel is expanding its military offensive in Lebanon with “large forces on the ground,” despite a US-announced ceasefire that remains in effect until early July, Anadolu reports. Netanyahu made the remarks at the start of a meeting of Israel’s Security Cabinet, according to a statement from his office. “We are deepening our operations in Lebanon, and the Israeli army is operating with large ground forces and controlling strategic areas,” Netanyahu said, without specifying the locations. He also claimed the army was “fortifying the security belt” to protect northern Israeli towns. The Israeli army has continued to violate the ceasefire that took effect on April 17 and was later extended by the United […]",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 16:09:01 +0000",
+          "text": "Weekly Report (19–26 May): IDF Airstrikes in Lebanon",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/weekly-report-19-26-may-idf-airstrikes-in-lebanon/",
+          "snippet": "During the past week, the IDF conducted 328 waves of airstrikes in Lebanon — a significant increase compared to the previous week (12–19 May), during which 187 waves of airstrikes were carried out. This figure reflects a notable acceleration in the IDF’s aerial operational tempo and an expansion in the scope of strikes across Lebanon. In addition, the average daily rate during the past week stood at 47 waves of airstrikes per day. During the week (early morning of 22 May), an unusual airstrike was carried out against two militants who approached approximately 400 meters from the border fence near the Israeli communities of Dovev and Bar’am. Both militants were eliminated. At this stage, it remains unclear whether they were Hezbollah operatives (Radwan Force or others) or Palestinian militants operating independently or as Hezbollah proxies. Most of the strikes this week — 317 waves of strikes — were conducted in southern Lebanon, both south and north of the Litani River: •196 waves of strikes south of the Litani •121 waves of strikes north of the Litani In addition, 11 waves of strikes were carried out in the Beqaa region, including one strike in northern Beqaa, where an undergroun",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 15:55:06 +0000",
+          "text": "Israel Steps Up Lebanon Offensive as U.S. Pushes for Iran Peace Deal",
+          "sentiment": "negative",
+          "source": "NYT ME",
+          "link": "https://www.nytimes.com/2026/05/26/world/middleeast/israel-strikes-escalation-lebanon.html",
+          "snippet": "Hezbollah, the Iran-backed militant group, has also kept up rocket and drone attacks on Israeli troops, as the escalation threatens to complicate diplomatic efforts.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 12:00:00 +0000",
+          "text": "Middle East update: Airstrikes and evacuation orders in Lebanon, aid restrictions in Gaza",
+          "sentiment": "negative",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167590",
+          "snippet": "Intensified Israeli airstrikes overnight in Lebanon forced people to again flee their homes, while humanitarians in the Gaza Strip report continued restrictions in bringing aid into the enclave, the United Nations said on Tuesday.",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 09:23:14 +0000",
+          "text": "The New U.S. Sanctions: The Penetration of the Pro-Iranian Axis into Lebanese Institutions",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/the-new-u-s-sanctions-the-penetration-of-the-pro-iranian-axis-into-lebanese-institutions/",
+          "snippet": "Dr. Zoe Levornik and Tal Beeri On May 21, the U.S. Department of the Treasury imposed sanctions on nine individuals from Hezbollah and the Amal Movement, a senior officer in the Lebanese Army, a senior official in the General Directorate of General Security (GSGD), and an Iranian diplomat (see details below). According to the U.S. Treasury statement , these individuals operate from within state institutions — including parliament, the army, and the security apparatuses — and assist Hezbollah in maintaining its status as an independent military and political force backed by Iran. In doing so, they undermine Lebanese sovereignty and the state’s ability to exercise full control over its institutions. These sanctions mark an expansion of the direct campaign against the political, security, and economic network of influence that Hezbollah has built for itself in Lebanon over the years. Below are details regarding the individuals sanctioned : Mohammad Fneish – head of H ezbollah’s Executive Council, which is responsible for operating all of Hezbollah’s civilian institutions across all areas of life. These institutions effectively constitute Hezbollah’s civilian “state,” enabling its mili",
+          "ai_risk": 7
+        },
+        {
+          "date": "Tue, 26 May 2026 09:02:51 +0000",
+          "text": "The human shield tactic in one picture",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/the-human-shield-tactic-in-one-picture/",
+          "snippet": "In an image taken from a video that was mistakenly posted on TikTok by a Hezbollah supporter on May 23 and later deleted, members of the Al-Risala Association — the aid and rescue apparatus affiliated with the Amal Movement — are seen extinguishing a fire in a building that was allegedly presented as a “civilian” target recently attacked by Israel at an unknown location. The image shows a multi-barrel rocket launcher . Based on its visual characteristics, we assess that it may correspond to one of two types of heavy rockets: Khaibar-1 — a 302 mm rocket with a range of approximately 100–200 km, depending on the weight of the warhead, which ranges between 125–175 kg. Fadi-2 — a 302 mm rocket based on the Khaibar-1, with a range of approximately 100 km and a warhead weighing about 170 kg. Either way, this is a heavy weapon system capable of threatening deep into northern Israel . The placement of such a launcher inside a “civilian” building turns the site into a clear military infrastructure — not a civilian target. This is Hezbollah’s modus operandi: concealing military capabilities inside civilian spaces, and then using rescue and medical apparatuses to create a narrative of civilia",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 26 May 2026 05:45:42 +0000",
+          "text": "Opinion: The Strategic Drone, or Why Hezbollah Has Intensified Its Attacks in Recent Days",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/opinion-the-strategic-drone-or-why-hezbollah-has-intensified-its-attacks-in-recent-days/",
+          "snippet": "The Israeli Air Force eliminated Nasrallah in September 2024. Along with him, the equations died as well. Hezbollah fires at civilians for a variety of reasons, and not necessarily because civilians were killed in Lebanon. Hezbollah does not target only military objectives (we already understood that in October 2023), and it is not always possible to identify a clear cause-and-effect relationship in Hezbollah’s patterns of fire. So why has Hezbollah intensified its launches in recent days, including launches against civilian targets in Israel? The answer, as usual, lies along the axis between Washington and Tehran. In recent days, American pressure to reach a deal with Iran has increased. But the gaps between the sides remain unchanged. Both sides are making it clear that they will not compromise on the nuclear issue, and no one knows how this will end. To put pressure on the Americans, the Iranians, as usual, are activating their proxies to solve their problems — both in the internal Lebanese arena and in the struggle with Israel. To explain: Naeem Qassem’s statement calling on people to take to the streets and bring down the Lebanese government amounts to giving legitimacy to a c",
+          "ai_risk": 8
+        },
+        {
+          "date": "Tue, 03 Mar 2026 10:14:14 +0000",
+          "text": "Time to strike a political blow against Hezbollah after Khamenei’s death",
+          "sentiment": "negative",
+          "source": "Mitvim",
+          "link": "https://mitvim.org.il/en/time-to-strike-a-political-blow-against-hezbollah-after-khameneis-death/",
+          "snippet": "Circumstances have created an unprecedented situation in which Israel is capable of conducting a campaign against a sworn enemy while the Lebanese state joins it. הפוסט Time to strike a political blow against Hezbollah after Khamenei’s death הופיע לראשונה ב- Mitvim .",
+          "ai_risk": 8
+        },
+        {
+          "date": "Thu, 14 May 2026 09:39:28 +0000",
+          "text": "Satellite Imagery Shows Ongoing Demolitions Across Southern Lebanon",
+          "sentiment": "negative",
+          "source": "bellingcat",
+          "link": "https://www.bellingcat.com/news/2026/05/14/satellite-imagery-shows-ongoing-demolitions-across-southern-lebanon/",
+          "snippet": "The fragile ceasefire agreed between Israel and Hezbollah last month is holding. But satellite imagery shows that at least 46 of 54 towns and villages within the Israel Defense Forces (IDF) “Yellow Line” in southern Lebanon have been heavily damaged or, in some cases, entirely flattened . Much of the destruction and demolition has taken place in recent weeks. Bellingcat’s satellite imagery analysis examined towns and villages identified on OpenStreetMap , a community-driven map database. Medium resolution PlanetScope satellite imagery covering each of the locations was provided by Planet Labs, a US company that recently restricted some of its imagery in the Middle East. Bellingcat is sharing the annotated PlanetScope imagery for the dates of March 2 and May 8, 2026, showing the scale of damage that has occurred during roughly the first two months of the US-Israeli war against Iran. The towns and villages detailed in the map are colour coded. Red shows locations that have suffered varying degrees of damage or destruction, while yellow shows locations that were damaged prior to the US-Israeli war with Iran. White shows locations that have not been significantly damaged at time of pub",
+          "ai_risk": 8
+        },
+        {
+          "date": "Sun, 24 May 2026 06:58:54 +0000",
+          "text": "Hezbollah’s Efforts to Rehabilitate its Financial Infrastructure",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/hezbollahs-efforts-to-rehabilitate-its-financial-infrastructure/",
+          "snippet": "Since the previous ceasefire in November 2024, Al-Qard Al-Hassan has struggled to meet its obligations, particularly regarding compensation payments to war victims within Hezbollah’s Shiite support base. This has been reflected in contradictory announcements by the bank regarding a return to normal operations on the one hand, while freezing payments and experiencing disruptions in services on the other. Similar to previous rounds of fighting, during the latest escalation, which began on March 2, the IDF targeted branches of the bank in an attempt to disrupt its operations and damage Hezbollah’s ability to recover economically. Despite this, at the beginning of May the bank announced the resumption of some services, including loan payments, cash withdrawals, and gold retrieval, and published a list of branches in Beirut’s Dahieh district that had resumed operations. The move reflects Hezbollah’s effort to project stability in its financial system to the Shiite public, especially during a period of increasing military and economic pressure. At the same time, during the past week, the debate in Lebanon over the bank’s legal status resurfaced after calls were made to revoke the license",
+          "ai_risk": 7
+        },
+        {
+          "date": "Mon, 25 May 2026 10:21:50 +0000",
+          "text": "Weekly Summary: Hezbollah Attacks Against Israel (May 17–24, 2026)",
+          "sentiment": "negative",
+          "source": "Alma",
+          "link": "https://israel-alma.org/weekly-summary-hezbollah-attacks-against-israel-may-17-24-2026/",
+          "snippet": "During the past week, Hezbollah carried out 161 attack waves against Israel and against IDF forces operating in southern Lebanon. Out of the total weekly attacks: • 121 attacks targeted IDF forces operating in southern Lebanon. • 40 attacks targeted Israeli territory, primarily border-adjacent communities and towns. This week saw a continued increase in attacks directed at Israeli territory , particularly against northern communities near the border. Most of the attacks against Israel were carried out using explosive drones . During the week, t hree IDF soldiers were killed as a result of Hezbollah explosive drone attacks . Drones have become the organization’s primary means of warfare during the current period. Breakdown by weapon type during the week: • 105 attacks using drones (primarily) and UAVs • 47 attacks using rockets and missiles •In addition, a limited number of attacks were carried out using anti-tank missiles, anti-aircraft fire, small arms, and other means. Since the beginning of the “ceasefire” (April 17) and through May 24, 2026, Hezbollah has carried out 545 attack waves. Of these: • 437 attacks ( 80.2% ) targeted IDF forces operating in southern Lebanon. • 108 att",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-27T05:09:37+00:00",
+          "text": "US-Israel-Iran War News Live Updates: Israel, Hezbollah clash near strategic Lebanese river after overnight strikes - The Times of India",
+          "sentiment": "negative",
+          "source": "Google News Israel",
+          "link": "https://news.google.com/rss/articles/CBMi5gJBVV95cUxOWlBhQ3l4VVRtemwzU2hma0tLeWpUd3FmcEtmay1iYmZVNU9pUmprTjQ4cHM5NkVlWk5udWFneGxaeERSOWJPSzZYX0RIOHFBSjJVNzNZNGt4S3hRQk9fVHRTOEZuQWZkaGRuWTB2bkdZR29Lc3lDOW9wY0lLcHRqeDlNZTc5ZERjd3h6d2phc3JkdkcwR1lvdUJPaWxyX1dmN2lmOWs5cS1rdXIybzFnTFJZM2tWN3ByLUZPem5IcUYzNktxYU5uek1vSlF4ZG1zeG92ME95ZlFPS3hsSjNnMlg2bkxsb1BzUVc1TnhRbzVBa3NkMXRjRnZXak16OUJmcS1jS2ZrZVlWLUJlMFA2eHhGaUI2VG1wNmotN2hBMFJ3MUFnMDJ0SGw1X01GQWx2US13bWN4dmppQjJJS2pnTWI0d3dzQ1l6Yk1SYmhmVmg2T0pIcW9xdmFHUGh2NzVrUFhfZXpR0gHrAkFVX3lxTE5QTU91WTg4aVFXSnhrMVpFTHpXWEFUZ2xkdWdMRWtla0FRdjlmeXloNjJuMlJPd21wZ2o2Q2VWaVc3NHA3Mnl0ZzJsTldhcGUwUzdQSTYweHRveHJKc3gxVTViQnBCSE55d0xPemVDSzV5YmR1T2pBN2ZZTkFHaEhlNEJfMm9PbmI0YWpjVy01bEYyUlQtMXRHd253N290QktwckRqUVAtM3RrdWdkTDBnZUo3YjdaZjE1dHpweFY5RWdVM2dGRmpwVXpGN19KM1VNS05rZ0RUTWFlLU92amdyMzZSYlB1a1plem9Lakc4aTVuY2JhcUdOUmlvUURaQWx2Qk5pQWF5d3NPZ3pSdV8tRkFhR1BFbGJxenAzNVB1dDVWTzI1SGlqYnBzcTRZTFJCVjZ4alhBZUpNV2VlRW5ndW1zY1RYOHBiTEZjUHk4TFd6b0Z6OFdqaHlGcGhFamxDN0pPSklIMFZJdw?oc=5",
+          "snippet": "<a href=\"https://news.google.com/rss/articles/CBMi5gJBVV95cUxOWlBhQ3l4VVRtemwzU2hma0tLeWpUd3FmcEtmay1iYmZVNU9pUmprTjQ4cHM5NkVlWk5udWFneGxaeERSOWJPSzZYX0RIOHFBSjJVNzNZNGt4S3hRQk9fVHRTOEZuQWZkaGRuWTB2bkdZR29Lc3lDOW9wY0lLcHRqeDlNZTc5ZERjd3h6d2phc3JkdkcwR1lvdUJPaWxyX1dmN2lmOWs5cS1rdXIybzFnTFJZM2tWN3ByLUZPem5IcUYzNktxYU5uek1vSlF4ZG1zeG92ME95ZlFPS3hsSjNnMlg2bkxsb1BzUVc1TnhRbzVBa3NkMXRjRnZXak16OUJmcS1jS2ZrZVlWLUJlMFA2eHhGaUI2VG1wNmotN2hBMFJ3MUFnMDJ0SGw1X01GQWx2US13bWN4dmppQjJJS2pnTWI0d3dzQ1l6Yk1SYmhmVmg2T0pIcW9xdmFHUGh2NzVrUFhfZXpR0gHrAkFVX3lxTE5QTU91WTg4aVFXSnhrMVpFTHpXWEFUZ2xkdWdMRWtla0FRdjlmeXloNjJuMlJPd21wZ2o2Q2VWaVc3NHA3Mnl0ZzJsTldhcGUwUzdQSTYweHRveHJKc3gxVTViQnBCSE55d0xPemVDSzV5YmR1T2pBN2ZZTkFHaEhlNEJfMm9PbmI0YWpjVy01bEYyUlQtMXRHd253N290QktwckRqUVAtM3RrdWdkTDBnZUo3YjdaZjE1dHpweFY5RWdVM2dGRmpwVXpGN19KM1VNS05rZ0RUTWFlLU92amdyMzZSYlB1a1plem9Lakc4aTVuY2JhcUdOUmlvUURaQWx2Qk5pQWF5d3NPZ3pSdV8tRkFhR1BFbGJxenAzNVB1dDVWTzI1SGlqYnBzcTRZTFJCVjZ4alhBZUpNV2VlRW5ndW1zY1RYOHBiTEZjUHk4TFd6b0Z6OFdqaHlGcGhFamxDN0pPSklIMFZJdw?oc=5\" target=\"_blank\">US-Israel-Iran War News Live Updates: Israel, Hezbollah clash near strategic Lebanese river after overnight strikes</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The ",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-27T05:00:19+00:00",
+          "text": "Iran war live: Israel kills 31 in Lebanon; Tehran blasts US truce violation - Al Jazeera",
+          "sentiment": "negative",
+          "source": "Google News Israel",
+          "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxNcG83M3dvUlJjanhXeGVlZ3ZGbG5iM3JfVG5wUDMyZUVGWXlJanhJSGxvQkdsQmxxRlBtSkpQY21vRW90MFNHNHNUSV9DdnNnVE9DNWpyMzl0UGZGMXdoLXpaSEVCanVIR3VZTVdUY3poaHpHLU5mVEgxQzBzVVpDX3gxRkg1dEN2aFRrazJBVEVZVFNSZ2tWRDdmZE1Rc0cxaUY2YzlReU1pWV9CY2xMWDctbHFWeTFwcHBTc2g3SXTSAcYBQVVfeXFMTkhVbktCc082cVgzLXZjRWpxRmFnSDFwWVBSczdTRUlTSEs5NXJ3Nmp3ZWZRTjM4LW9UVVJ5YldTN3cwTnBiQ3Z2YURtT2R4SnB1VUMwWDROLXcxX2Qyd3gxNmR5LUp2ZWFySlkzQlRVSlpkREJzZnJNalpoeHVITVZsa3g0SGkwZGR3MW1GOEY5NFlSMkp0OTVUZ01taV9sWW1YX2tEV2ZIQzJqSjdiZVh4MVNYbUc3WnU4N2FPaVhsb2xmdHhB?oc=5",
+          "snippet": "<a href=\"https://news.google.com/rss/articles/CBMiwAFBVV95cUxNcG83M3dvUlJjanhXeGVlZ3ZGbG5iM3JfVG5wUDMyZUVGWXlJanhJSGxvQkdsQmxxRlBtSkpQY21vRW90MFNHNHNUSV9DdnNnVE9DNWpyMzl0UGZGMXdoLXpaSEVCanVIR3VZTVdUY3poaHpHLU5mVEgxQzBzVVpDX3gxRkg1dEN2aFRrazJBVEVZVFNSZ2tWRDdmZE1Rc0cxaUY2YzlReU1pWV9CY2xMWDctbHFWeTFwcHBTc2g3SXTSAcYBQVVfeXFMTkhVbktCc082cVgzLXZjRWpxRmFnSDFwWVBSczdTRUlTSEs5NXJ3Nmp3ZWZRTjM4LW9UVVJ5YldTN3cwTnBiQ3Z2YURtT2R4SnB1VUMwWDROLXcxX2Qyd3gxNmR5LUp2ZWFySlkzQlRVSlpkREJzZnJNalpoeHVITVZsa3g0SGkwZGR3MW1GOEY5NFlSMkp0OTVUZ01taV9sWW1YX2tEV2ZIQzJqSjdiZVh4MVNYbUc3WnU4N2FPaVhsb2xmdHhB?oc=5\" target=\"_blank\">Iran war live: Israel kills 31 in Lebanon; Tehran blasts US truce violation</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Al Jazeera</font>",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-27T04:07:27+00:00",
+          "text": "Dozens killed in Lebanon as Israel intensifies strikes",
+          "sentiment": "negative",
+          "source": "BBC ME",
+          "link": "https://www.bbc.com/news/articles/cx211rgngp0o?at_medium=RSS&amp;at_campaign=rss",
+          "snippet": "Israel says it struck 100 Hezbollah infrastructure sites and fighters in Lebanon, after PM Benjamin Netanyahu vows to \"crush\" the Iran-backed group.",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-27T04:07:27+00:00",
+          "text": "Dozens killed in Lebanon as Israel intensifies strikes - BBC",
+          "sentiment": "negative",
+          "source": "Google News Israel",
+          "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9jVjBtRTVwMTh2clFFMGNtcDByVWxEUTJ5RG9lZnNDSUdNeWRDRFFjVHR6b2tVaUVNRWxTTk5oUWk1U0VDMUQ2cHVFdnZkRmxlRm82cjBoblBEUQ?oc=5",
+          "snippet": "<ol><li><a href=\"https://news.google.com/rss/articles/CBMiWkFVX3lxTE9jVjBtRTVwMTh2clFFMGNtcDByVWxEUTJ5RG9lZnNDSUdNeWRDRFFjVHR6b2tVaUVNRWxTTk5oUWk1U0VDMUQ2cHVFdnZkRmxlRm82cjBoblBEUQ?oc=5\" target=\"_blank\">Dozens killed in Lebanon as Israel intensifies strikes</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">BBC</font></li><li><a href=\"https://news.google.com/rss/articles/CBMiiwFBVV95cUxNa09vN0dNb0dla1JIWTREV3ZXaEhqbzRfdTUyb2lzUGM4TjJhRHZFTkhCNXFHZG14NHZEMGVybk1uOFhIMFRBRUl3YzNhbUxKY0VYVGVqSmlNZXpPTkthbVpzQzlVSGRIQ1ZTZDdhS3NXM0UxbVBuX0N4UWdzdkZEeXVtTnBIYTM5RFQ4?oc=5\" target=\"_blank\">Opinion | Lebanon, Where Cease-Fires Pave the Way to War</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The New York Times</font></li><li><a href=\"https://news.google.com/rss/articles/CBMiYEFVX3lxTE00a1lkaFdCdF9IeHhLSHdUQWJjYzVBU0VJczJvTTdyWHhJSnpUakpKOFlKbHNEQXdYby1ldFlRaFpCcE5ZS0xZOVVuZjlkRGtaTTZLOHVwTTNoSnNZN21HY9IBZkFVX3lxTE9vYUJjU1RQZXctRGtiRlZwakdnZlBxRlZqVGVZOTNlZ0tGTWJZNVV0d3RhcjgyQXdHZzMwY015a2NSNktXVFMwYmE3eUY3RHUzVHNDNUV1MkxWTG9JM1otU1MzRHdOQQ?oc=5\" target=\"_blank\">Lebanon reports 31 killed Tuesday in Israeli strikes on Hezbollah targets</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The Times of Israel</font></li></ol>",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-27T02:56:09+00:00",
+          "text": "Israeli strikes kill 31 in southern Lebanon as Netanyahu expands ground campaign",
+          "sentiment": "negative",
+          "source": "France24",
+          "link": "https://www.france24.com/en/middle-east/20260527-israeli-strikes-kill-31-southern-lebanon-netanyahu-expands-ground-campaign",
+          "snippet": "Israeli strikes in southern Lebanon killed 31 people and wounded 40 on Tuesday, Lebanon’s health ministry said, including at least four children and three women, as Israel said it was intensifying operations despite a truce with Hezbollah. Hezbollah said it confronted Israeli troops entering the southern town of Zawtar al-Sharqiyah.",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T18:00:21-0400",
+          "text": "Israeli strikes kill 31 in south Lebanon as Israel expands ground operations",
+          "sentiment": "negative",
+          "source": "Al Monitor",
+          "link": "https://www.al-monitor.com/originals/2026/05/israeli-strikes-kill-31-south-lebanon-israel-expands-ground-operations",
+          "snippet": "<p>Israeli strikes on southern Lebanon killed 31 people on Tuesday, the Lebanese health ministry said, as Israel said it was intensifying attacks despite a truce in its war with Hezbollah.</p><p>The Iran-backed group meanwhile said it faced Israeli troops entering the southern town of Zawtar al-Sharqiyah, as the Israeli military said it was expanding its ground operations.</p><p>In a statement, the health ministry said 31 people, including at least four children and three women, were killed in attacks and 40 wounded.</p>",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T17:08:34+00:00",
+          "text": "IDF to invade deeper into Lebanon, begin operating beyond Yellow Line to deter Hezbollah drones",
+          "sentiment": "negative",
+          "source": "JPost",
+          "link": "https://www.jpost.com/israel-news/defense-news/article-897362",
+          "snippet": "<img align='right' src='https://images.jpost.com/image/upload/f_auto,fl_lossy/q_auto/c_fill,g_faces:center,h_1066,w_1600/718614' alt='IDF soldiers operating in southern Lebanon, published April 29, 2026. (photo credit: IDF SPOKESPERSON'S UNIT)' title='IDF soldiers operating in southern Lebanon, published April 29, 2026. (photo credit: IDF SPOKESPERSON'S UNIT)' /><br />All of this occurs as the world expects the Trump administration to soon reach a ceasefire with Iran, which will likely impose a fuller ceasefire on the IDF versus Hezbollah.<br />",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T16:19:56-0400",
+          "text": "Israel strikes near Lebanon’s Qaraoun dam as war intensifies: What to know",
+          "sentiment": "negative",
+          "source": "Al Monitor",
+          "link": "https://www.al-monitor.com/originals/2026/05/israel-strikes-near-lebanons-qaraoun-dam-war-intensifies-what-know",
+          "snippet": "The strikes near the large water reservoir follow pressure on Israeli Prime Minister Benjamin Netanyahu to up attacks on Hezbollah in response to rocket fire and a rising death toll in Lebanon.",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T15:30:30+00:00",
+          "text": "Israel issues fresh evacuation orders in south Lebanon despite ceasefire",
+          "sentiment": "negative",
+          "source": "France24",
+          "link": "https://www.france24.com/en/video/20260526-israel-issues-fresh-evacuation-orders-in-south-lebanon-despite-ceasefire",
+          "snippet": "Israel has issued an evacuation order for residents in the southern Lebanese town of Nabatiyeh, warning of fresh strikes against Hezbollah, despite a ceasefire. It comes after Israeli Prime Minister Benjamin Netanyahu promised to intensify attacks on Lebanon, following the killing of another Israeli soldier by a fibre optic drone sent by Hezbollah.",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T10:48:55+00:00",
+          "text": "Netanyahu says Israel will intensify strikes against Hezbollah",
+          "sentiment": "negative",
+          "source": "BBC ME",
+          "link": "https://www.bbc.com/news/articles/cewppdk1187o?at_medium=RSS&amp;at_campaign=rss",
+          "snippet": "The Israeli military hits targets in eastern Lebanon after the prime minister announces further strikes.",
+          "ai_risk": 9
+        },
+        {
+          "date": "2026-05-26T10:40:50+00:00",
+          "text": "Iran war updates: Israel moves deeper in Lebanon; Iran peace talks strained - Al Jazeera",
+          "sentiment": "negative",
+          "source": "Google News Israel",
+          "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPX200Zzhvc01oMWR1S3hFVnRJc2J6SU9CLS14aG1lMjY1U290ZHk4Qk94Ty1NZjd0U1FCVldpRlp5ZnM0cVlXa2R0ZWxZeV94eWp1Mkx2VlRGTkNiYWdqaFBKT1lrSXNJQTU1VjBUWXVMUndKd2hPZHIxaXdMVHFDY1pVVUZ5UkpHemR5RG5MeG9Zdjk2eWFZaFBFSnNFUWxXTW9JQ1c5Z01SVDIydE9wLWJMTmw1S083em9aWnUxRdIBxAFBVV95cUxOT1lnSWQ5SG1ld25mc3pTUTBNelpxWFYwQ0xfRDF6Wk82SHRGVWZBeGlpQmJ6dFhaVF80QTBlbmxqUnNtZkdUYjkzbHgteU1pdXBkT0MxU3d4MzhXR19kNVNMMThtNkJHNkdYN0dXUzFVUHBFdEk4OHE2QWVRbmwzS0FGZ2hYVlRVSWl3Nk5VN1R3NU43LTlTb2xSUEg3LXItSDRpYzhPRDBneXROVlJKRmJsUlJKZTU1MGxjYTM2dE9RQzRY?oc=5",
+          "snippet": "<a href=\"https://news.google.com/rss/articles/CBMivwFBVV95cUxPX200Zzhvc01oMWR1S3hFVnRJc2J6SU9CLS14aG1lMjY1U290ZHk4Qk94Ty1NZjd0U1FCVldpRlp5ZnM0cVlXa2R0ZWxZeV94eWp1Mkx2VlRGTkNiYWdqaFBKT1lrSXNJQTU1VjBUWXVMUndKd2hPZHIxaXdMVHFDY1pVVUZ5UkpHemR5RG5MeG9Zdjk2eWFZaFBFSnNFUWxXTW9JQ1c5Z01SVDIydE9wLWJMTmw1S083em9aWnUxRdIBxAFBVV95cUxOT1lnSWQ5SG1ld25mc3pTUTBNelpxWFYwQ0xfRDF6Wk82SHRGVWZBeGlpQmJ6dFhaVF80QTBlbmxqUnNtZkdUYjkzbHgteU1pdXBkT0MxU3d4MzhXR19kNVNMMThtNkJHNkdYN0dXUzFVUHBFdEk4OHE2QWVRbmwzS0FGZ2hYVlRVSWl3Nk5VN1R3NU43LTlTb2xSUEg3LXItSDRpYzhPRDBneXROVlJKRmJsUlJKZTU1MGxjYTM2dE9RQzRY?oc=5\" target=\"_blank\">Iran war updates: Israel moves deeper in Lebanon; Iran peace talks strained</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Al Jazeera</font>",
+          "ai_risk": 8
+        },
+        {
+          "date": "2026-05-26T00:01:52+00:00",
+          "text": "Israel escalates strikes in Lebanon as Netanyahu vows to ‘crush’ Hezbollah",
+          "sentiment": "negative",
+          "source": "Guardian",
+          "link": "https://www.theguardian.com/world/2026/may/26/israel-escalates-strikes-in-lebanon-as-netanyahu-vows-to-crush-hezbollah",
+          "snippet": "<p>Hezbollah and Israel launch attacks amid increasingly imperilled ceasefire and stalling talks between US and Iran</p><ul><li><p><a href=\"https://www.theguardian.com/world/live/2026/may/26/iran-war-live-updates-us-attacks-iran-missile-sites-self-defence-during-peace-talks\">Middle East crisis: live updates</a></p></li></ul><p>The Israeli army has intensified strikes in southern Lebanon, as prime minister Benjamin Netanyahu said he had ordered the military to escalate its offensive in an effort to “crush” Hezbollah in a further erosion of an already fragmented ceasefire.</p><p>In turn, Hezbollah said it staged several attacks on Monday on three barracks and a military post in northern Israel “in response to the violation of the ceasefire” by Israel.</p> <a href=\"https://www.theguardian.com/world/2026/may/26/israel-escalates-strikes-in-lebanon-as-netanyahu-vows-to-crush-hezbollah\">Continue reading...</a>",
+          "ai_risk": 9
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "west-bank",
+      "icon": "🔥",
+      "name": "West Bank & Settlements",
+      "phases": [
+        "Escalation",
+        "Violence Spike",
+        "Mediation",
+        "Calming",
+        "Frozen Conflict"
+      ],
+      "phaseIndex": 0,
+      "direction": "stalling",
+      "keyMetric": {
+        "label": "Events (7d)",
+        "value": "3"
+      },
+      "summary": "Ben-Gvir joins Border Police in upper Galilee, clashes with residents: 'We're the bosses'",
+      "events": [
+        {
+          "date": "Wed, 27 May 2026 07:48:03 +0300",
+          "text": "Ben-Gvir joins Border Police in upper Galilee, clashes with residents: 'We're the bosses'",
+          "sentiment": "negative",
+          "source": "Arutz Sheva",
+          "link": "https://www.israelnationalnews.com/news/427664",
+          "snippet": "National Security Minister Itamar Ben-Gvir toured anti-racketeering operations in Tuba-Zangariyye amid heated exchanges with residents.",
+          "ai_risk": 6
+        },
+        {
+          "date": "Wed, 20 May 2026 12:00:00 +0000",
+          "text": "Guterres condemns Israeli move to militarise seized compound in occupied East Jerusalem",
+          "sentiment": "negative",
+          "source": "UN News",
+          "link": "https://news.un.org/feed/view/en/story/2026/05/1167560",
+          "snippet": "UN Secretary-General António Guterres on Wednesday strongly condemned Israel’s decision to establish military facilities at a seized UNRWA compound in occupied East Jerusalem, calling the move “wholly unacceptable”.",
+          "ai_risk": 6
+        },
+        {
+          "date": "Friday, May 8, 2026 - 18:45",
+          "text": "Briefing to UN Security Council on the Situation in the West Bank",
+          "sentiment": "negative",
+          "source": "Crisis Group",
+          "link": "https://www.crisisgroup.org/spc/middle-east-north-africa/israelpalestine/briefing-un-security-council-situation-west-bank",
+          "snippet": "<p><span style=\"background-color:#ffffff;color:#222222;font-family:Arial,sans-serif;font-size:11pt;font-style:normal;font-variant:normal;font-weight:400;text-decoration:none;vertical-align:baseline;white-space:pre-wrap;\">Max Rodenbeck, Crisis Group’s Project Director for Israel-Palestine, spoke to the UN Security Council about what is happening in the West Bank – including Israel's accelerating de facto annexation, rising Israeli settler violence and mounting economic pressure – and why the world must pay attention.</span></p>",
+          "ai_risk": 7
+        }
+      ],
+      "confidence": "medium"
     }
   ],
   "activeSolutions": [
-    "diaspora-antisemitism",
-    "gulf-regional-politics",
-    "ceasefire",
-    "diplomacy",
-    "west-bank",
-    "iran-domestic-affairs",
     "iran",
-    "gaza-crisis"
+    "lebanon",
+    "west-bank",
+    "governance",
+    "iran-domestic-affairs",
+    "diplomacy",
+    "gaza-crisis",
+    "regional"
   ],
   "overallMomentum": {
     "direction": "stalling",
     "label": "Net Negative",
-    "summary": "0 advancing, 1 stable, 16 stalling (8 active). 221 ME articles from 29 feeds."
+    "summary": "2 advancing, 0 stable, 12 stalling (8 active). 216 ME articles from 29 feeds."
   },
-  "lastUpdated": "2026-05-26T22:08:24.305942+00:00",
+  "lastUpdated": "2026-05-27T05:16:08.917872+00:00",
   "source": "ai-analyzer-prod",
-  "feedCount": 221,
+  "feedCount": 216,
   "aiVersion": "1.0.0"
 }

@@ -146,11 +146,6 @@ SOLUTIONS = {
         "phases": ["Blockade", "Aid Inflow", "Recovery", "Rebuilding", "Stabilized"],
         "description": "Gaza humanitarian crisis, displacement, medicine/food blockade, aid delivery, disease, civilian suffering",
     },
-    "infrastructure": {
-        "icon": "\U0001f4a7", "name": "Infrastructure & Recovery",
-        "phases": ["Destroyed", "Emergency Repairs", "Partial", "Reconstruction", "Full Recovery"],
-        "description": "Infrastructure reconstruction, power/water/hospitals rebuilding, recovery efforts",
-    },
     "human-rights": {
         "icon": "⚖️", "name": "Human Rights & Intl Law",
         "phases": ["Allegations", "Investigations", "Sanctions", "Accountability", "Reform"],
@@ -170,6 +165,21 @@ SOLUTIONS = {
         "icon": "🌍", "name": "Regional Relations",
         "phases": ["Tensions", "Diplomatic Push", "Accord", "Integration", "Cooperation"],
         "description": "Regional diplomacy, Arab states positions, Jordan, Egypt, Syria, Türkiye, Morocco, UAE, China influence",
+    },
+    "gulf-regional-politics": {
+        "icon": "🌍", "name": "Gulf & Regional Politics",
+        "phases": ["Tensions", "Diplomatic Push", "Accord", "Integration", "Cooperation"],
+        "description": "Gulf state politics, UAE, Saudi Arabia, Oman, Qatar regional affairs and geopolitics",
+    },
+    "diaspora-antisemitism": {
+        "icon": "🕍", "name": "Diaspora & Antisemitism",
+        "phases": ["Allegations", "Investigations", "Public Debate", "Policy Action", "Resolution"],
+        "description": "Antisemitism, anti-Israel sentiment, diaspora Jewish community issues, campus protests, hate incidents abroad",
+    },
+    "iran-domestic-affairs": {
+        "icon": "🇮🇷", "name": "Iran Domestic Affairs",
+        "phases": ["Crisis", "Unrest", "Transition", "Stabilization", "Resolution"],
+        "description": "Iran domestic politics, internal affairs, protests, leadership, economy, internet restrictions",
     },
 }
 
@@ -613,13 +623,16 @@ KEYWORD_MAP = {
     "domestic-politics": ["netanyahu", "herzog", "knesset", "coalition", "arab parties", "liberal center", "death penalty"],
     "west-bank": ["west bank", "settler", "east jerusalem", "occupied"],
     "regional": ["jordan", "egypt", "syria", "türkiye", "turkey", "turkiye", "morocco", "uae", "qatar", "china", "arab"],
+    "gulf-regional-politics": ["gulf states", "uae", "saudi arabia", "oman", "qatar", "kuwait", "bahrein", "arabian gulf", "persian gulf", "gulf war"],
+    "diaspora-antisemitism": ["antisemitism", "anti-semitism", "jewish", "diaspora", "anti-israel", "adl", "campus protest", "holocaust denial"],
+    "iran-domestic-affairs": ["iran internet", "iran protest", "iran economy", "iran president", "iran parliament", "iran domestic"],
 }
 
 # Priority order — checked first wins on tie
 KEYWORD_PRIORITY = [
     "ceasefire", "lebanon", "gaza-crisis", "west-bank",
-    "iran", "infrastructure", "human-rights", "domestic-politics",
-    "diplomacy", "governance", "regional",
+    "iran", "iran-domestic-affairs", "infrastructure", "human-rights", "domestic-politics",
+    "diplomacy", "governance", "gulf-regional-politics", "diaspora-antisemitism", "regional",
 ]
 
 POSITIVE_WORDS = ["agreed", "signed", "resumed", "reopened", "released", "deal", "progress", "restored"]
