@@ -254,9 +254,12 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
         # Map '/' or directory paths to index.html
         if path == '/':
             path = '/index.html'
-        # Serve solutions.json as /data.json so the local app reads latest analysis
-        if path == '/data.json' and SOLUTIONS_JSON.exists():
-            fpath = SOLUTIONS_JSON
+        # Serve data.json if it exists (set by deploy/test or sync), fallback to solutions.json
+        if path == '/data.json':
+            if LIVE_DATA_JSON.exists():
+                fpath = LIVE_DATA_JSON
+            elif SOLUTIONS_JSON.exists():
+                fpath = SOLUTIONS_JSON
         else:
             fpath = APP_DIR / path.removeprefix('/')
         if fpath.is_dir():
@@ -459,8 +462,8 @@ class DevHandler(http.server.BaseHTTPRequestHandler):
 def deploy_categories(target, selected_ids=None):
     """Deploy solutions.json to test or live environment.
 
-    target: 'test' -> copies solutions.json to test-data.json (local dev)
-    target: 'live' -> copies to data.json + wrangler pages deploy
+    target: 'test' -> copies solutions.json to data.json (local dev, no Cloudflare)
+    target: 'live' -> copies to data.json + wrangler pages deploy to Cloudflare
     selected_ids: unused now (deploy uses latest analysis output)
     """
     import shutil
@@ -471,22 +474,18 @@ def deploy_categories(target, selected_ids=None):
     data = json.loads(SOLUTIONS_JSON.read_text(encoding="utf-8"))
     count = len(data.get("solutions", []))
 
+    # Always sync to data.json so the dev server serves the latest data
+    LIVE_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"  [Deploy] Wrote {count} solutions to {LIVE_DATA_JSON}")
+
     if target == "test":
-        # Copy to test-data.json for dev server
-        test_file = APP_DIR / "test-data.json"
-        test_file.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"  [Deploy] Wrote {count} solutions to {test_file} (test)")
+        # Local only — no Cloudflare upload
         return {"ok": True, "deployed": count, "target": "test"}
 
     elif target == "live":
-        # Copy to data.json
-        LIVE_DATA_JSON.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"  [Deploy] Wrote {count} solutions to {LIVE_DATA_JSON}")
-
         # Deploy to Cloudflare Pages via wrangler
         print("  [Deploy] Uploading to Cloudflare Pages...")
         project_root = str(SOLUTIONS_JSON.parent.parent)
-        # Use shell=True for Windows (npx not in PATH) / cross-platform
         cmd = "npx wrangler pages deploy app --project-name=peace-meter --skip-caching --commit-dirty=true"
         result = subprocess.run(
             cmd, shell=True,
@@ -500,7 +499,6 @@ def deploy_categories(target, selected_ids=None):
         except Exception:
             pass
         if result.returncode == 0:
-            # Extract deployment URL from output
             for line in result.stdout.split("\n"):
                 if "Deploying" in line or ".pages.dev" in line:
                     print(f"  [Deploy] {line.strip()}")
