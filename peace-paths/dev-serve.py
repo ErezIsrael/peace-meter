@@ -72,25 +72,42 @@ def run_analysis(mode="--fast"):
     global analysis_status
     env = os.environ.copy()
     env.setdefault("LLAMA_CPP_URL", "http://192.168.2.121:8080")
+    env["PYTHONUNBUFFERED"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
     cmd = [sys.executable, str(SCRIPT), mode]
     log_lines = []
     try:
         print(f"\n  [Analysis] Starting: {' '.join(cmd)}")
-        proc = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(
+            cmd, env=env,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            bufsize=0,
+            creationflags=subprocess.CREATE_NO_WINDOW
+        )
         analysis_status = {"running": True, "pid": proc.pid, "started": str(datetime.now()), "log": "", "proc": proc}
         # Hard timeout: 30 minutes — kill if analysis hangs
         TIMEOUT = 30 * 60
         deadline = time.time() + TIMEOUT
         # Read raw bytes and decode as UTF-8 to avoid surrogate issues
-        for raw_line in iter(proc.stdout.readline, b""):
+        buf = b""
+        while True:
             if time.time() > deadline:
                 print(f"\n  [Analysis] TIMEOUT after {TIMEOUT}s, killing PID {proc.pid}")
                 proc.kill()
                 break
-            text = raw_line.decode("utf-8", errors="replace").rstrip()
-            log_lines.append(text)
-            print(f"  [Analysis] {text}")
-            analysis_status["log"] = "\n".join(log_lines)
+            ch = proc.stdout.read(1)
+            if not ch:
+                # EOF — process exited
+                break
+            buf += ch
+            # Process complete lines (handle \r\n on Windows)
+            while b"\n" in buf:
+                line, buf = buf.split(b"\n", 1)
+                text = line.decode("utf-8", errors="replace").rstrip()
+                if text:
+                    log_lines.append(text)
+                    print(f"  [Analysis] {text}")
+                    analysis_status["log"] = "\n".join(log_lines)
         proc.stdout.close()
         proc.wait()
         analysis_status["running"] = False
