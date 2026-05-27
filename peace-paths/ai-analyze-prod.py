@@ -751,7 +751,7 @@ def build_output(articles, classifications, cat_map):
                 "direction": direction,
                 "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
                 "summary": events[0]["text"],
-                "events": events,
+                "events": events[1:],  # exclude summary event to avoid duplicate
                 "confidence": "high" if len(events) > 5 else "medium" if len(events) > 2 else "low",
                 "core": cat.get("core", False),
             })
@@ -767,7 +767,7 @@ def build_output(articles, classifications, cat_map):
                 "direction": direction,
                 "keyMetric": {"label": "Events (7d)", "value": str(len(events))},
                 "summary": events[0]["text"],
-                "events": events,
+                "events": events[1:],  # exclude summary event to avoid duplicate
                 "confidence": "low",
                 "core": False,
             })
@@ -897,13 +897,14 @@ def _merge_with_existing(data, existing):
         if new_sol["id"] not in existing_ids:
             existing["solutions"].append(new_sol)
 
-    # Recompute for all solutions — compute on ALL events, store all
+    # Recompute for all solutions — compute on ALL events, exclude summary from stored events
     for sol in existing["solutions"]:
         sol["events"].sort(key=lambda e: e["date"], reverse=True)
         sol["phaseIndex"] = compute_phase(sol["events"])
         sol["direction"] = compute_direction(sol["events"])
         sol["keyMetric"] = {"label": "Events (7d)", "value": str(len(sol["events"]))}
         sol["summary"] = sol["events"][0]["text"] if sol["events"] else ""
+        sol["events"] = sol["events"][1:]  # exclude summary event to avoid duplicate
         sol["confidence"] = "high" if len(sol["events"]) >= 5 else "medium" if len(sol["events"]) >= 3 else "low"
 
     # Recompute momentum
@@ -1106,20 +1107,12 @@ def main():
             inject_category(cat_map, sid, sol["name"] if sol else sid, f"{sid} news and updates")
             print(f"  \u2795 Auto-added missing category: {sid}")
         # Re-read categories.json to preserve categories not used this run,
-        # then merge new ones into it
-        existing = load_categories()
+        # then merge new ones into the existing cat_map dict
+        existing_map, _, _, _ = load_categories()  # dict {id: category_obj}
         for cid, cdata in cat_map.items():
-            if cid not in existing:
-                existing[cid] = {
-                    "id": cid,
-                    "icon": cdata.get("icon", "\U0001f4cc"),
-                    "name": cdata["name"],
-                    "description": cdata.get("description", f"{cid} news and updates"),
-                    "phases": cdata.get("phases", ["Emerged", "Developing", "Gaining Traction", "Maturing", "Resolved"]),
-                    "keywords": cdata.get("keywords", []),
-                    "core": False,
-                }
-        save_categories(existing)
+            if cid not in existing_map:
+                existing_map[cid] = cdata
+        save_categories(existing_map)
 
     # 7. Upload to Cloudflare
     if args.deploy:
