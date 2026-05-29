@@ -455,13 +455,13 @@ function applyTranslations() {
     ? {
         '#': ['Privacy Policy', 'Terms of Service', 'Accessibility'], // privacy, terms, accessibility
         'https://github.com/ErezIsrael/peace-meter/issues': '🐛 Report a Bug',
-        './peace-room/index.html': '🕊 Peace Room',
+        'https://peace-paths.pages.dev': '🕊 Peace Room',
         'https://ko-fi.com/erezse': '☕ Buy Me Coffee',
       }
     : {
         '#': ['מדיניות פרטיות', 'תנאי שימוש', 'נגישות'],
         'https://github.com/ErezIsrael/peace-meter/issues': '🐛 דווח על באג',
-        './peace-room/index.html': '🕊 חדר השלום',
+        'https://peace-paths.pages.dev': '🕊 חדר השלום',
         'https://ko-fi.com/erezse': '☕ קנו לי קפה',
       };
   const links = document.querySelectorAll('.footer-links a.footer-link');
