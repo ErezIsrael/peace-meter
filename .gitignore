@@ -32,3 +32,6 @@ Thumbs.db
 
 # Root docs not part of deployment
 README.md
+
+# Peace Room moved to its own repo
+peace-paths/
